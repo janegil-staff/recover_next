@@ -1,0 +1,27 @@
+<svg width="100%" viewBox="0 0 1400 910" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Base -->
+  <rect width="1400" height="900" fill="#f0f4f8" style="fill:rgb(240, 244, 248);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- HUGE main blob top-left — dominates upper third -->
+  <ellipse cx="0" cy="0" rx="780" ry="680" fill="#c5dff0" opacity="0.9" style="fill:rgb(197, 223, 240);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.9;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Second large blob top-left, slightly offset -->
+  <ellipse cx="320" cy="-80" rx="560" ry="480" fill="#b0d2e8" opacity="0.7" style="fill:rgb(176, 210, 232);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.7;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Big blob top-right -->
+  <ellipse cx="1400" cy="0" rx="620" ry="540" fill="#b8d8ed" opacity="0.8" style="fill:rgb(184, 216, 237);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.8;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Connecting blob center-top -->
+  <ellipse cx="700" cy="-120" rx="500" ry="400" fill="#cce4f4" opacity="0.6" style="fill:rgb(204, 228, 244);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.6;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Soft arm reaching down-left from main blob -->
+  <ellipse cx="80" cy="440" rx="380" ry="300" fill="#c0ddf0" opacity="0.5" style="fill:rgb(192, 221, 240);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.5;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Soft arm reaching down-right -->
+  <ellipse cx="1320" cy="420" rx="340" ry="280" fill="#b8d8ec" opacity="0.45" style="fill:rgb(184, 216, 236);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.45;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Small organic accent mid-left to break hard edge -->
+  <ellipse cx="440" cy="320" rx="200" ry="160" fill="#d0e8f6" opacity="0.4" style="fill:rgb(208, 232, 246);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.4;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+</svg>
