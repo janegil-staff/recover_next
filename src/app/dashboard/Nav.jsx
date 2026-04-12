@@ -4,20 +4,20 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useDashboardT } from "./LangContext";
 
-const A = "#4a7ab5", AD = "#2d4a6e", BO = "#d0dcea", MU = "#7a9ab8", SU = "#ffffff";
+const A="#4a7ab5",AD="#2d4a6e",BO="#d0dcea",MU="#7a9ab8",SU="#ffffff";
 
 export default function Nav({ patient }) {
   const pathname = usePathname();
   const router   = useRouter();
   const t        = useDashboardT();
 
-  // Tab labels — use existing translation keys, fall back to English
   const TABS = [
-    { label: t.calendar      ?? "📅 Calendar",       href: "/dashboard" },
-    { label: t.monthSummary  ?? "📊 Summary",        href: "/dashboard/summary" },
-    { label: "🧠 " + (t.questionnaires ?? "Questionnaires"), href: "/dashboard/questionnaires" },
-    { label: "💊 " + (t.medicationsTitle ?? "Medications"),  href: "/dashboard/medications" },
-    { label: "📈 " + (t.graphs ?? "Graphs"),         href: "/dashboard/graphs" },
+    { label: "📅 " + (t.calendar       ?? "Calendar"),        href: "/dashboard" },
+    { label: "📊 " + (t.monthSummary   ?? "Summary"),         href: "/dashboard/summary" },
+    { label: "📋 " + (t.history        ?? "Log"),             href: "/dashboard/log" },
+    { label: "🧠 " + (t.questionnaires ?? "Questionnaires"),  href: "/dashboard/questionnaires" },
+    { label: "💊 " + (t.medicationsTitle?? "Medications"),    href: "/dashboard/medications" },
+    { label: "📈 " + (t.graphs         ?? "Graphs"),          href: "/dashboard/graphs" },
   ];
 
   const logout = () => {
