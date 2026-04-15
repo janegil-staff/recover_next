@@ -6,8 +6,8 @@ import Nav from "./Nav";
 import { DashboardLangProvider } from "./LangContext";
 
 export default function DashboardLayout({ children }) {
-  const router = useRouter();
-  const [patient, setPatient] = useState(null); // always null on SSR
+  const router  = useRouter();
+  const [patient, setPatient] = useState(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("patientData");
@@ -17,12 +17,12 @@ export default function DashboardLayout({ children }) {
 
   return (
     <DashboardLangProvider>
-      <div style={{ minHeight: "100vh", background: "#eef2f7", fontFamily: "'DM Sans',system-ui,sans-serif" }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');*{box-sizing:border-box;margin:0;padding:0}button{font-family:inherit}`}</style>
+      <div style={{ minHeight: "100vh", background: "#eef2f7" }}>
         <Nav patient={patient} />
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 16px" }}>
+        {/* dashboard-content class gets padding-bottom:72px on mobile via Nav's <style> */}
+        <main className="dashboard-content" style={{ padding: "20px 20px" }}>
           {children}
-        </div>
+        </main>
       </div>
     </DashboardLangProvider>
   );

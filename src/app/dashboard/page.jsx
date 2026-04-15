@@ -104,6 +104,23 @@ export default function CalendarPage() {
     const m={};(data.records??[]).forEach(r=>{m[fmtDate(r.date??r.createdAt)]=r;});return m;
   },[data]);
 
+  // Filter records to the currently viewed month
+  const monthRecs=useMemo(()=>{
+    if(!data)return[];
+    const prefix=`${month.y}-${pad(month.m+1)}`;
+    return(data.records??[]).filter(r=>{
+      const ds=fmtDate(r.date??r.createdAt);
+      return ds.startsWith(prefix);
+    });
+  },[data,month]);
+
+  // Substance counts for the current month only
+  const monthSubCounts=useMemo(()=>{
+    const c={};
+    monthRecs.forEach(r=>(r.substances??[]).forEach(s=>{c[s]=(c[s]??0)+1;}));
+    return Object.entries(c).sort((a,b)=>b[1]-a[1]);
+  },[monthRecs]);
+
   if(!data)return<div style={{padding:40,textAlign:"center",color:MU}}>{t.loading??"Loading…"}</div>;
 
   const{y,m}=month;
@@ -113,8 +130,9 @@ export default function CalendarPage() {
 
   return(
     <div>
-      <style>{`.cal-grid{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}@media(max-width:660px){.cal-grid{grid-template-columns:1fr}}`}</style>
+      <style>{`.cal-grid{display:grid;grid-template-columns:340px;gap:16px;align-items:start;justify-content:center}@media(max-width:400px){.cal-grid{grid-template-columns:1fr}}`}</style>
       <div className="cal-grid">
+        {/* Calendar */}
         <div style={{background:SU,borderRadius:14,border:`1px solid ${BO}`,boxShadow:"0 2px 10px rgba(74,122,181,0.07)",overflow:"hidden"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px 8px"}}>
             <button onClick={()=>setMonth(p=>{const d=new Date(p.y,p.m-1);return{y:d.getFullYear(),m:d.getMonth()};})} style={{background:"none",border:`1px solid ${BO}`,borderRadius:6,width:26,height:26,cursor:"pointer",color:MU,fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>‹</button>
@@ -149,35 +167,38 @@ export default function CalendarPage() {
               </div>
             ))}
           </div>
-        </div>
 
-        <div>
-          <div style={{fontSize:11,fontWeight:700,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:10}}>{t.recentEntries??"Recent entries"}</div>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {[...(data.records??[])].sort((a,b)=>(b.date??b.createdAt).localeCompare(a.date??a.createdAt)).slice(0,15).map((r,i)=>{
-              const ds=fmtDate(r.date??r.createdAt);
-              return(
-                <div key={i} onClick={()=>setModalDate(ds)} style={{background:SU,borderRadius:10,border:`1px solid ${BO}`,padding:"10px 12px",display:"flex",alignItems:"center",gap:10,cursor:"pointer",boxShadow:"0 1px 4px rgba(74,122,181,0.05)"}}>
-                  <div style={{width:30,height:30,borderRadius:8,background:cravingBg(r.cravings),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:13}}>
-                    {r.mood>=4?"😄":r.mood>=3?"🙂":r.mood<=2?"😕":"😐"}
-                  </div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:11,fontWeight:700,color:AD,marginBottom:2}}>{ds}</div>
-                    <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                      {(r.substances??[]).map(s=><span key={s} style={{fontSize:9,color:sc(s),fontWeight:600,textTransform:"capitalize"}}>{s}</span>)}
-                      {!(r.substances??[]).length&&<span style={{fontSize:9,color:MU}}>{t.noSubstancesLogged??"No substances logged"}</span>}
-                    </div>
-                  </div>
-                  <div style={{display:"flex",gap:10,flexShrink:0}}>
-                    {r.mood!=null&&<div style={{textAlign:"center"}}><div style={{fontSize:12,fontWeight:700,color:AD}}>{r.mood}</div><div style={{fontSize:8,color:MU}}>{(t.mood??"MOOD").toUpperCase()}</div></div>}
-                    {r.cravings!=null&&<div style={{textAlign:"center"}}><div style={{fontSize:12,fontWeight:700,color:AD}}>{r.cravings}</div><div style={{fontSize:8,color:MU}}>{(t.cravings??"CRAV").slice(0,4).toUpperCase()}</div></div>}
-                  </div>
-                </div>
-              );
-            })}
+          {/* Monthly substances — inside calendar card */}
+          <div style={{borderTop:`1px solid ${BO}`,padding:"10px 14px"}}>
+            <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>
+              {t.substancesThisMonth??"Substances"} — {months[m]}
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {monthSubCounts.length === 0
+                ? <span style={{fontSize:12,color:MU}}>{t.noSubstances??"No substances logged this month"}</span>
+                : (() => {
+                    const max = monthSubCounts[0][1];
+                    return monthSubCounts.map(([s,n])=>(
+                      <div key={s}>
+                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <div style={{width:8,height:8,borderRadius:"50%",background:sc(s),flexShrink:0}}/>
+                            <span style={{fontSize:13,color:TX,textTransform:"capitalize",fontWeight:500}}>{s}</span>
+                          </div>
+                          <span style={{fontSize:12,fontWeight:700,color:sc(s)}}>{n} {t.days??"days"}</span>
+                        </div>
+                        <div style={{height:5,background:BG,borderRadius:3,overflow:"hidden"}}>
+                          <div style={{width:`${(n/max)*100}%`,height:"100%",background:sc(s),borderRadius:3,transition:"width .4s ease"}}/>
+                        </div>
+                      </div>
+                    ));
+                  })()
+              }
+            </div>
           </div>
         </div>
       </div>
+
       {modalDate&&recMap[modalDate]&&<DayModal date={modalDate} rec={recMap[modalDate]} onClose={()=>setModalDate(null)} t={t}/>}
     </div>
   );
