@@ -11,6 +11,187 @@ function fmtDate(d){const dt=new Date(d);return`${dt.getFullYear()}-${pad(dt.get
 function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
 function firstDow(y,m){return(new Date(y,m,1).getDay()+6)%7;}
 function cravingBg(n){if(n==null)return"transparent";if(n<=1)return"#a8d5a2";if(n<=2)return"#f5c97a";if(n<=3)return"#f4a07a";return"#e87070";}
+function scoreTotal(o){if(!o)return null;return Object.values(o).reduce((a,b)=>typeof b==="number"&&Number.isFinite(b)?a+b:a,0);}
+// Get question value — supports both named keys ("feelingNervous") and numeric index keys ("0","1"...)
+function qVal(rec, key, index) {
+  if (rec[key] != null) return rec[key];
+  if (rec[String(index)] != null) return rec[String(index)];
+  return 0;
+}
+
+const QC=[
+  {key:"latestGad7",     label:"GAD-7",               max:21, color:"#7C3AED", fn:s=>s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":"Severe"},
+  {key:"latestPhq9",     label:"PHQ-9",               max:27, color:"#DC2626", fn:s=>s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":s<=19?"Mod-severe":"Severe"},
+  {key:"latestAudit",    label:"AUDIT",               max:40, color:"#D97706", fn:s=>s<=7?"Low risk":s<=15?"Hazardous":s<=19?"Harmful":"Likely dep."},
+  {key:"latestDast10",   label:"DAST-10",             max:10, color:"#059669", fn:s=>s===0?"No problem":s<=2?"Low":s<=5?"Moderate":s<=8?"Substantial":"Severe"},
+  {key:"latestCage",     label:"CAGE",                max:4,  color:"#0284C7", fn:s=>s<=1?"Unlikely":s<=2?"Possible":"Likely dep."},
+  {key:"latestReadiness",label:"Readiness to change", max:30, color:"#0891B2", fn:s=>s<=10?"Not ready":s<=20?"Considering":"Ready"},
+];
+
+
+const Q_DETAILS = {
+  latestGad7: {
+    label: "GAD-7 · Anxiety",
+    max: 21,
+    color: "#7C3AED",
+    sev: s => s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":"Severe",
+    questions: [
+      { key:"feelingNervous",    label:"Feeling nervous, anxious or on edge" },
+      { key:"noWorryingControl", label:"Not being able to stop or control worrying" },
+      { key:"worrying",          label:"Worrying too much about different things" },
+      { key:"troubleRelaxing",   label:"Trouble relaxing" },
+      { key:"restless",          label:"Being so restless that it is hard to sit still" },
+      { key:"easilyAnnoyed",     label:"Becoming easily annoyed or irritable" },
+      { key:"afraid",            label:"Feeling afraid as if something awful might happen" },
+    ],
+  },
+  latestPhq9: {
+    label: "PHQ-9 · Depression",
+    max: 27,
+    color: "#DC2626",
+    sev: s => s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":s<=19?"Mod-severe":"Severe",
+    questions: [
+      { key:"noPleasureDoingThings",  label:"Little interest or pleasure in doing things" },
+      { key:"depressed",              label:"Feeling down, depressed, or hopeless" },
+      { key:"stayingAsleep",          label:"Trouble falling or staying asleep, or sleeping too much" },
+      { key:"noEnergy",               label:"Feeling tired or having little energy" },
+      { key:"noAppetite",             label:"Poor appetite or overeating" },
+      { key:"selfPity",               label:"Feeling bad about yourself — or that you are a failure" },
+      { key:"troubleConcentration",   label:"Trouble concentrating on things" },
+      { key:"slowMovingSpeeking",     label:"Moving or speaking so slowly that other people could have noticed" },
+      { key:"suicidal",               label:"Thoughts that you would be better off dead or of hurting yourself" },
+    ],
+  },
+  latestAudit: {
+    label: "AUDIT · Alcohol Use",
+    max: 40,
+    color: "#D97706",
+    sev: s => s<=7?"Low risk":s<=15?"Hazardous":s<=19?"Harmful":"Likely dependent",
+    questions: [
+      { key:"frequency",         label:"How often do you have a drink containing alcohol?" },
+      { key:"typicalAmount",     label:"How many units on a typical day when drinking?" },
+      { key:"frequencyHeavy",    label:"How often do you have 6 or more units on one occasion?" },
+      { key:"unableToStop",      label:"How often have you found you were unable to stop drinking once started?" },
+      { key:"failedExpected",    label:"How often have you failed to do what was normally expected due to drinking?" },
+      { key:"morningDrink",      label:"How often have you needed a drink in the morning?" },
+      { key:"guilt",             label:"How often have you had a feeling of guilt after drinking?" },
+      { key:"memoryLoss",        label:"How often have you been unable to remember the night before due to drinking?" },
+      { key:"injured",           label:"Have you or someone else been injured as a result of your drinking?" },
+      { key:"concernedByOthers", label:"Has a relative, doctor or other person been concerned about your drinking?" },
+    ],
+  },
+  latestDast10: {
+    label: "DAST-10 · Drug Use",
+    max: 10,
+    color: "#059669",
+    sev: s => s===0?"No problem":s<=2?"Low":s<=5?"Moderate":s<=8?"Substantial":"Severe",
+    questions: [
+      { key:"usedDrugs",           label:"Have you used drugs other than those required for medical reasons?" },
+      { key:"abusedPrescription",  label:"Do you abuse more than one drug at a time?" },
+      { key:"unableToStop",        label:"Are you always able to stop using drugs when you want to?" },
+      { key:"blackouts",           label:"Have you had blackouts or flashbacks as a result of drug use?" },
+      { key:"guiltAboutDrugUse",   label:"Do you ever feel bad or guilty about your drug use?" },
+      { key:"spouseComplains",     label:"Does your spouse/partner or parents ever complain about your involvement with drugs?" },
+      { key:"neglectedFamily",     label:"Have you neglected your family due to use of drugs?" },
+      { key:"illegalActivities",   label:"Have you engaged in illegal activities in order to obtain drugs?" },
+      { key:"withdrawal",          label:"Have you ever experienced withdrawal symptoms when you stopped taking drugs?" },
+      { key:"medicalProblems",     label:"Have you had medical problems as a result of drug use?" },
+    ],
+  },
+  latestCage: {
+    label: "CAGE · Alcohol Screening",
+    max: 4,
+    color: "#0284C7",
+    sev: s => s<=1?"Unlikely":s<=2?"Possible":"Likely dependent",
+    questions: [
+      { key:"cutDown",    label:"Have you ever felt you should Cut down on your drinking?" },
+      { key:"annoyed",    label:"Have people Annoyed you by criticising your drinking?" },
+      { key:"guilty",     label:"Have you ever felt bad or Guilty about your drinking?" },
+      { key:"eyeOpener",  label:"Have you ever had a drink first thing in the morning (Eye opener)?" },
+    ],
+  },
+  latestReadiness: {
+    label: "Readiness to Change",
+    max: 30,
+    color: "#0891B2",
+    sev: s => s<=10?"Not ready":s<=20?"Considering":"Ready",
+    questions: [
+      { key:"q1",  label:"I don't think I drink too much." },
+      { key:"q2",  label:"I am trying to drink less than I used to." },
+      { key:"q3",  label:"I enjoy my drinking but sometimes I drink too much." },
+      { key:"q4",  label:"Sometimes I think I should cut down on my drinking." },
+      { key:"q5",  label:"It's a waste of time thinking about my drinking." },
+      { key:"q6",  label:"I have just recently changed my drinking habits." },
+      { key:"q7",  label:"Anyone can talk about wanting to do something about drinking — I am actually doing something about it." },
+      { key:"q8",  label:"I am at the stage where I should think about drinking less alcohol." },
+      { key:"q9",  label:"My drinking is a problem sometimes." },
+      { key:"q10", label:"There is no need for me to think about changing my drinking." },
+    ],
+  },
+};
+
+const SCORE_LABELS = ["Not at all","Several days","More than half the days","Nearly every day"];
+
+function QuestionnaireModal({ qKey, data, onClose }) {
+  const def = Q_DETAILS[qKey];
+  if (!def || !data[qKey]) return null;
+  const rec = data[qKey];
+  const total = scoreTotal(rec);
+  const sev = def.sev(total);
+  const pct = Math.min(100, (total / def.max) * 100);
+
+  return (
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(15,30,50,0.6)",backdropFilter:"blur(5px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:SU,borderRadius:20,width:"100%",maxWidth:500,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 28px 70px rgba(45,74,110,0.3)",border:`1px solid ${BO}`}}>
+        {/* Header */}
+        <div style={{background:`linear-gradient(135deg,${def.color},${def.color}cc)`,borderRadius:"20px 20px 0 0",padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:1}}>
+          <div>
+            <div style={{color:"rgba(255,255,255,0.7)",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:2}}>Questionnaire</div>
+            <div style={{color:"#fff",fontSize:17,fontWeight:700}}>{def.label}</div>
+          </div>
+          <button onClick={onClose} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",color:"#fff",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>×</button>
+        </div>
+
+        <div style={{padding:18,display:"flex",flexDirection:"column",gap:14}}>
+          {/* Score summary */}
+          <div style={{background:def.color+"10",border:`1px solid ${def.color}30`,borderRadius:12,padding:"14px 16px",display:"flex",alignItems:"center",gap:16}}>
+            <div style={{flex:1}}>
+              <div style={{height:6,background:"#e8eef5",borderRadius:3,overflow:"hidden",marginBottom:6}}>
+                <div style={{width:`${pct}%`,height:"100%",background:def.color,borderRadius:3,transition:"width .4s ease"}}/>
+              </div>
+              <div style={{fontSize:11,color:def.color,fontWeight:700}}>{sev}</div>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0}}>
+              <div style={{fontSize:28,fontWeight:800,color:def.color,lineHeight:1}}>{total}</div>
+              <div style={{fontSize:10,color:MU,fontWeight:600}}>/ {def.max}</div>
+            </div>
+          </div>
+
+          {/* Questions */}
+          <div style={{display:"flex",flexDirection:"column",gap:2}}>
+            {def.questions.map(({key,label},qi)=>{
+              const val = qVal(rec, key, qi);
+              const scoreColor = val===0?"#4caf50":val===1?"#ff9800":val===2?"#ff5722":"#f44336";
+              return(
+                <div key={key} style={{display:"flex",alignItems:"center",gap:12,padding:"9px 0",borderBottom:`1px solid ${BG}`}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,color:TX,fontWeight:500,lineHeight:1.4}}>{label}</div>
+                    <div style={{fontSize:10,color:MU,marginTop:2}}>{SCORE_LABELS[val] ?? "—"}</div>
+                  </div>
+                  <div style={{width:26,height:26,borderRadius:"50%",background:scoreColor,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,flexShrink:0}}>{val}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {rec.date && (
+            <div style={{fontSize:10,color:MU,textAlign:"right"}}>Recorded: {rec.date}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Section({title,children}){return(<div><div style={{fontSize:10,fontWeight:700,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>{title}</div>{children}</div>);}
 function Pill({label,val,color}){return(<div style={{background:color+"18",border:`1px solid ${color}33`,borderRadius:10,padding:"8px 14px",textAlign:"center"}}><div style={{fontSize:16,fontWeight:700,color}}>{val}</div><div style={{fontSize:9,color:MU,fontWeight:600,marginTop:1}}>{label.toUpperCase()}</div></div>);}
@@ -88,10 +269,10 @@ export default function CalendarPage() {
 
   const [month,setMonth]=useState(()=>{const n=new Date();return{y:n.getFullYear(),m:n.getMonth()};});
   const [modalDate,setModalDate]=useState(null);
+  const [qModal,setQModal]=useState(null);
 
   const months = t.months ?? ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const weekdays = t.weekdays ?? ["M","T","W","T","F","S","S"];
-
   const cravingLegend = [
     ["#a8d5a2", t.scoreNone??"None"],
     ["#f5c97a", t.scoreLow??"Low"],
@@ -104,17 +285,12 @@ export default function CalendarPage() {
     const m={};(data.records??[]).forEach(r=>{m[fmtDate(r.date??r.createdAt)]=r;});return m;
   },[data]);
 
-  // Filter records to the currently viewed month
   const monthRecs=useMemo(()=>{
     if(!data)return[];
     const prefix=`${month.y}-${pad(month.m+1)}`;
-    return(data.records??[]).filter(r=>{
-      const ds=fmtDate(r.date??r.createdAt);
-      return ds.startsWith(prefix);
-    });
+    return(data.records??[]).filter(r=>fmtDate(r.date??r.createdAt).startsWith(prefix));
   },[data,month]);
 
-  // Substance counts for the current month only
   const monthSubCounts=useMemo(()=>{
     const c={};
     monthRecs.forEach(r=>(r.substances??[]).forEach(s=>{c[s]=(c[s]??0)+1;}));
@@ -130,18 +306,25 @@ export default function CalendarPage() {
 
   return(
     <div>
-      <style>{`.cal-grid{display:grid;grid-template-columns:340px;gap:16px;align-items:start;justify-content:center}@media(max-width:400px){.cal-grid{grid-template-columns:1fr}}`}</style>
+      <style>{`
+        .cal-grid{display:grid;grid-template-columns:340px 340px;gap:16px;align-items:stretch;justify-content:center}
+        @media(max-width:680px){.cal-grid{grid-template-columns:1fr}}
+      `}</style>
       <div className="cal-grid">
-        {/* Calendar */}
+
+        {/* ── Calendar card ── */}
         <div style={{background:SU,borderRadius:14,border:`1px solid ${BO}`,boxShadow:"0 2px 10px rgba(74,122,181,0.07)",overflow:"hidden"}}>
+          {/* Month nav */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px 8px"}}>
             <button onClick={()=>setMonth(p=>{const d=new Date(p.y,p.m-1);return{y:d.getFullYear(),m:d.getMonth()};})} style={{background:"none",border:`1px solid ${BO}`,borderRadius:6,width:26,height:26,cursor:"pointer",color:MU,fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>‹</button>
             <span style={{fontSize:11,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase"}}>{months[m]} {y}</span>
             <button onClick={()=>setMonth(p=>{const d=new Date(p.y,p.m+1);return{y:d.getFullYear(),m:d.getMonth()};})} style={{background:"none",border:`1px solid ${BO}`,borderRadius:6,width:26,height:26,cursor:"pointer",color:MU,fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>›</button>
           </div>
+          {/* Weekday headers */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",padding:"0 10px",gap:2}}>
             {weekdays.map((d,i)=><div key={i} style={{textAlign:"center",fontSize:9,fontWeight:700,color:MU,paddingBottom:3}}>{d}</div>)}
           </div>
+          {/* Day cells */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",padding:"0 10px 10px",gap:2}}>
             {Array.from({length:firstDay}).map((_,i)=><div key={`e${i}`}/>)}
             {Array.from({length:days}).map((_,i)=>{
@@ -152,13 +335,17 @@ export default function CalendarPage() {
               const subs=rec?.substances??[];
               return(
                 <div key={day} onClick={()=>rec&&setModalDate(ds)}
-                  style={{borderRadius:6,padding:"4px 1px",textAlign:"center",cursor:rec?"pointer":"default",minHeight:30,background:cravingBg(rec?.cravings),border:isToday?`2px solid ${A}`:`1px solid ${rec?"transparent":BO}`,transition:"all .1s"}}>
+                  style={{borderRadius:6,padding:"4px 1px",textAlign:"center",cursor:rec?"pointer":"default",minHeight:30,
+                    background:cravingBg(rec?.cravings),
+                    border:isToday?`2px solid ${A}`:`1px solid ${rec?"transparent":BO}`,
+                    transition:"all .1s"}}>
                   <div style={{fontSize:10,fontWeight:isToday?700:400,color:rec?TX:MU,lineHeight:1}}>{day}</div>
                   {subs.length>0&&<div style={{display:"flex",gap:1,justifyContent:"center",marginTop:2}}>{subs.slice(0,3).map((s,si)=><div key={si} style={{width:3,height:3,borderRadius:"50%",background:sc(s)}}/>)}</div>}
                 </div>
               );
             })}
           </div>
+          {/* Craving legend */}
           <div style={{borderTop:`1px solid ${BO}`,padding:"8px 14px",display:"flex",flexWrap:"wrap",gap:10}}>
             {cravingLegend.map(([c,l])=>(
               <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
@@ -167,17 +354,16 @@ export default function CalendarPage() {
               </div>
             ))}
           </div>
-
-          {/* Monthly substances — inside calendar card */}
+          {/* Monthly substances */}
           <div style={{borderTop:`1px solid ${BO}`,padding:"10px 14px"}}>
             <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>
               {t.substancesThisMonth??"Substances"} — {months[m]}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {monthSubCounts.length === 0
+              {monthSubCounts.length===0
                 ? <span style={{fontSize:12,color:MU}}>{t.noSubstances??"No substances logged this month"}</span>
-                : (() => {
-                    const max = monthSubCounts[0][1];
+                : (()=>{
+                    const max=monthSubCounts[0][1];
                     return monthSubCounts.map(([s,n])=>(
                       <div key={s}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
@@ -197,9 +383,46 @@ export default function CalendarPage() {
             </div>
           </div>
         </div>
-      </div>
 
+        {/* ── Questionnaires card ── */}
+        <div style={{background:SU,borderRadius:14,border:`1px solid ${BO}`,boxShadow:"0 2px 10px rgba(74,122,181,0.07)",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+          <div style={{padding:"12px 14px",borderBottom:`1px solid ${BO}`}}>
+            <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase"}}>
+              {t.questionnaires??"Questionnaires"}
+            </div>
+          </div>
+          <div style={{padding:"8px 14px 12px",display:"flex",flexDirection:"column"}}>
+            {QC.map((q,qi)=>{
+              const total=scoreTotal(data[q.key]);
+              return(
+                <div key={q.key} onClick={()=>data[q.key]&&setQModal(q.key)}
+                  style={{padding:"9px 0",borderBottom:qi<QC.length-1?`1px solid ${BG}`:"none",cursor:data[q.key]?"pointer":"default",borderRadius:6,transition:"background .1s"}}
+                  onMouseEnter={e=>{if(data[q.key])e.currentTarget.style.background=BG;}}
+                  onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:total!=null?4:0}}>
+                    <span style={{fontSize:12,color:TX,fontWeight:600}}>{q.label}</span>
+                    {total!=null
+                      ? <span style={{fontSize:11,color:q.color,fontWeight:700}}>{total}/{q.max}</span>
+                      : <span style={{fontSize:11,color:MU}}>—</span>
+                    }
+                  </div>
+                  {total!=null&&(
+                    <>
+                      <div style={{height:4,background:BG,borderRadius:2,overflow:"hidden",marginBottom:3}}>
+                        <div style={{width:`${Math.min(100,(total/q.max)*100)}%`,height:"100%",background:q.color,borderRadius:2}}/>
+                      </div>
+                      <div style={{fontSize:10,color:q.color,fontWeight:600}}>{q.fn(total)}</div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
       {modalDate&&recMap[modalDate]&&<DayModal date={modalDate} rec={recMap[modalDate]} onClose={()=>setModalDate(null)} t={t}/>}
+      {qModal&&<QuestionnaireModal qKey={qModal} data={data} onClose={()=>setQModal(null)}/>}
     </div>
   );
 }
