@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useDashboardT } from "./LangContext";
 
 const A="#4a7ab5",AD="#2d4a6e",AL="#dde8f4",BG="#eef2f7",SU="#ffffff",BO="#d0dcea",TX="#1a2c3d",MU="#7a9ab8";
-const SC={alcohol:"#7986cb",cannabis:"#66bb6a",cocaine:"#ef5350",opioids:"#ab47bc",amphetamines:"#ff7043",benzodiazepines:"#26a69a",tobacco:"#8d6e63",prescription:"#42a5f5",other:"#bdbdbd"};
+const SC={alcohol:"#7986cb",cannabis:"#66bb6a",cocaine:"#ef5350",opioids:"#ab47bc",amphetamines:"#ff7043",benzodiazepines:"#26a69a",tobacco:"#8d6e63",prescription:"#42a5f5",mdma:"#ec407a",ecstasy:"#ec407a",ghb:"#00acc1",acid:"#9c27b0",other:"#bdbdbd"};
 const sc=s=>SC[s]??"#bdbdbd";
 function pad(n){return String(n).padStart(2,"0");}
 function fmtDate(d){const dt=new Date(d);return`${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;}
@@ -382,10 +382,8 @@ export default function CalendarPage() {
     <div>
       <style>{`
         .cal-grid{display:grid;grid-template-columns:340px 340px;gap:16px;align-items:stretch;justify-content:center}
-        .cal-grid-3{display:grid;grid-template-columns:340px 340px;gap:16px;justify-content:center;margin-top:16px}
         @media(max-width:720px){
           .cal-grid{grid-template-columns:1fr}
-          .cal-grid-3{grid-template-columns:1fr}
         }
       `}</style>
 
@@ -479,8 +477,6 @@ export default function CalendarPage() {
             <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>
               {t.myMedications??"Medications"} — {months[m]}
             </div>
-
-            {/* Prescribed meds from profile */}
             {profileMeds.length>0&&(
               <div style={{marginBottom:10}}>
                 <div style={{fontSize:9,fontWeight:700,color:MU,letterSpacing:0.8,textTransform:"uppercase",marginBottom:6}}>
@@ -495,8 +491,6 @@ export default function CalendarPage() {
                 </div>
               </div>
             )}
-
-            {/* Logged meds this month */}
             <div>
               <div style={{fontSize:9,fontWeight:700,color:MU,letterSpacing:0.8,textTransform:"uppercase",marginBottom:6}}>
                 {t.takenThisMonth??"Taken this month"}
@@ -540,10 +534,7 @@ export default function CalendarPage() {
                   {monthRecs.length} <span style={{fontWeight:500,color:MU}}>{t.daysLogged??"days logged"}</span>
                 </span>
               </div>
-              <MonthlyTrendsCard
-                monthRecs={monthRecs}
-                t={t}
-              />
+              <MonthlyTrendsCard monthRecs={monthRecs} t={t}/>
             </div>
 
             {/* Divider */}
