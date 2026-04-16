@@ -8,15 +8,6 @@ import PdfExportModal from "./PdfExportModal";
 
 const A="#4a7ab5",AD="#2d4a6e",BO="#d0dcea",MU="#7a9ab8",SU="#ffffff";
 
-const ICONS = {
-  "/dashboard":                "📅",
-  "/dashboard/summary":        "📊",
-  "/dashboard/log":            "📋",
-  "/dashboard/questionnaires": "🧠",
-  "/dashboard/medications":    "💊",
-  "/dashboard/graphs":         "📈",
-};
-
 export default function Nav({ patient }) {
   const pathname  = usePathname();
   const router    = useRouter();
@@ -30,12 +21,9 @@ export default function Nav({ patient }) {
   }, []);
 
   const TABS = [
-    { icon: "📅", label: t.calendar        ?? "Calendar",       href: "/dashboard" },
-    { icon: "📊", label: t.monthSummary    ?? "Summary",        href: "/dashboard/summary" },
-    { icon: "📋", label: t.history         ?? "Log",            href: "/dashboard/log" },
-    { icon: "🧠", label: t.questionnaires  ?? "Questionnaires", href: "/dashboard/questionnaires" },
-    { icon: "💊", label: t.medicationsTitle ?? "Medications",   href: "/dashboard/medications" },
-    { icon: "📈", label: t.graphs          ?? "Graphs",         href: "/dashboard/graphs" },
+    { icon: "📅", label: t.calendar ?? "Calendar", href: "/dashboard" },
+    { icon: "📋", label: t.history  ?? "Log",      href: "/dashboard/log" },
+    { icon: "📈", label: t.graphs   ?? "Graphs",   href: "/dashboard/graphs" },
   ];
 
   const logout = () => {
@@ -115,7 +103,7 @@ export default function Nav({ patient }) {
         position:"fixed",bottom:0,left:0,right:0,zIndex:50,
         background:SU,borderTop:`1px solid ${BO}`,
         boxShadow:"0 -2px 12px rgba(74,122,181,0.10)",
-        display:"none", // overridden by media query
+        display:"none",
         alignItems:"stretch",
         paddingBottom:"env(safe-area-inset-bottom)",
       }}>
