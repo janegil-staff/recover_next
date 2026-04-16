@@ -10,9 +10,28 @@ function pad(n){return String(n).padStart(2,"0");}
 function fmtDate(d){const dt=new Date(d);return`${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;}
 function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
 function firstDow(y,m){return(new Date(y,m,1).getDay()+6)%7;}
-function cravingBg(n){if(n==null)return"transparent";if(n<=1)return"#a8d5a2";if(n<=2)return"#f5c97a";if(n<=3)return"#f4a07a";return"#e87070";}
+const FREQ_SCORE={none:0,once:1,few_times:2,daily:3,multiple_daily:4};
+
+function dayScore(rec){
+  if(!rec)return null;
+  const vals=[];
+  if(rec.cravings!=null)  vals.push(rec.cravings);
+  if(rec.mood!=null)      vals.push(6-rec.mood);
+  if(rec.wellbeing!=null) vals.push(6-rec.wellbeing);
+  if(rec.amount!=null)    vals.push(Math.min(5,(rec.amount/10)*5));
+  if(rec.frequency!=null&&FREQ_SCORE[rec.frequency]!=null) vals.push(FREQ_SCORE[rec.frequency]);
+  if(!vals.length)return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function dayBg(rec){
+  const s=dayScore(rec);
+  if(s==null)return"transparent";
+  if(s<=1.5)return"#a8d5a2";
+  if(s<=2.5)return"#f5c97a";
+  if(s<=3.5)return"#f4a07a";
+  return"#e87070";
+}
 function scoreTotal(o){if(!o)return null;return Object.values(o).reduce((a,b)=>typeof b==="number"&&Number.isFinite(b)?a+b:a,0);}
-// Get question value — supports both named keys ("feelingNervous") and numeric index keys ("0","1"...)
 function qVal(rec, key, index) {
   if (rec[key] != null) return rec[key];
   if (rec[String(index)] != null) return rec[String(index)];
@@ -27,7 +46,6 @@ const QC=[
   {key:"latestCage",     label:"CAGE",                max:4,  color:"#0284C7", fn:s=>s<=1?"Unlikely":s<=2?"Possible":"Likely dep."},
   {key:"latestReadiness",label:"Readiness to change", max:30, color:"#0891B2", fn:s=>s<=10?"Not ready":s<=20?"Considering":"Ready"},
 ];
-
 
 const Q_DETAILS = {
   latestGad7: {
@@ -132,6 +150,51 @@ const Q_DETAILS = {
 
 const SCORE_LABELS = ["Not at all","Several days","More than half the days","Nearly every day"];
 
+// ── Monthly Trends (no chart) ───────────────────────────────────────────────
+const TREND_SERIES = [
+  { key: "cravings",  label: "Cravings",  color: "#f4a07a", max: 5, icon: "🔥" },
+  { key: "mood",      label: "Mood",      color: "#4a7ab5", max: 5, icon: "😊" },
+  { key: "wellbeing", label: "Wellbeing", color: "#66bb6a", max: 5, icon: "💙" },
+];
+
+function MonthlyTrendsCard({ monthRecs, t }) {
+  const avgs = useMemo(() => {
+    const out = {};
+    TREND_SERIES.forEach(({ key }) => {
+      const vals = monthRecs.map(r => r[key]).filter(v => v != null);
+      out[key] = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+    });
+    return out;
+  }, [monthRecs]);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {TREND_SERIES.map(s => {
+        const avg = avgs[s.key];
+        const pct = avg != null ? (avg / s.max) * 100 : 0;
+        return (
+          <div key={s.key}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <span style={{ fontSize: 14 }}>{s.icon}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: TX }}>{t[s.key] ?? s.label}</span>
+              </div>
+              <span style={{ fontSize: 15, fontWeight: 800, color: avg != null ? s.color : MU }}>
+                {avg != null ? avg.toFixed(1) : "—"}
+                {avg != null && <span style={{ fontSize: 10, fontWeight: 500, color: MU }}> / {s.max}</span>}
+              </span>
+            </div>
+            <div style={{ height: 6, background: BG, borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ width: `${pct}%`, height: "100%", background: s.color, borderRadius: 3, transition: "width .4s ease" }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Questionnaire modal ─────────────────────────────────────────────────────
 function QuestionnaireModal({ qKey, data, onClose }) {
   const def = Q_DETAILS[qKey];
   if (!def || !data[qKey]) return null;
@@ -143,7 +206,6 @@ function QuestionnaireModal({ qKey, data, onClose }) {
   return (
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(15,30,50,0.6)",backdropFilter:"blur(5px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div onClick={e=>e.stopPropagation()} style={{background:SU,borderRadius:20,width:"100%",maxWidth:500,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 28px 70px rgba(45,74,110,0.3)",border:`1px solid ${BO}`}}>
-        {/* Header */}
         <div style={{background:`linear-gradient(135deg,${def.color},${def.color}cc)`,borderRadius:"20px 20px 0 0",padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:1}}>
           <div>
             <div style={{color:"rgba(255,255,255,0.7)",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:2}}>Questionnaire</div>
@@ -151,9 +213,7 @@ function QuestionnaireModal({ qKey, data, onClose }) {
           </div>
           <button onClick={onClose} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",color:"#fff",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>×</button>
         </div>
-
         <div style={{padding:18,display:"flex",flexDirection:"column",gap:14}}>
-          {/* Score summary */}
           <div style={{background:def.color+"10",border:`1px solid ${def.color}30`,borderRadius:12,padding:"14px 16px",display:"flex",alignItems:"center",gap:16}}>
             <div style={{flex:1}}>
               <div style={{height:6,background:"#e8eef5",borderRadius:3,overflow:"hidden",marginBottom:6}}>
@@ -166,8 +226,6 @@ function QuestionnaireModal({ qKey, data, onClose }) {
               <div style={{fontSize:10,color:MU,fontWeight:600}}>/ {def.max}</div>
             </div>
           </div>
-
-          {/* Questions */}
           <div style={{display:"flex",flexDirection:"column",gap:2}}>
             {def.questions.map(({key,label},qi)=>{
               const val = qVal(rec, key, qi);
@@ -183,7 +241,6 @@ function QuestionnaireModal({ qKey, data, onClose }) {
               );
             })}
           </div>
-
           {rec.date && (
             <div style={{fontSize:10,color:MU,textAlign:"right"}}>Recorded: {rec.date}</div>
           )}
@@ -274,10 +331,10 @@ export default function CalendarPage() {
   const months = t.months ?? ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const weekdays = t.weekdays ?? ["M","T","W","T","F","S","S"];
   const cravingLegend = [
-    ["#a8d5a2", t.scoreNone??"None"],
-    ["#f5c97a", t.scoreLow??"Low"],
-    ["#f4a07a", t.scoreModerate??"Moderate"],
-    ["#e87070", t.scoreHeavy??"High"],
+    ["#a8d5a2", t.scoreNone??"Low (1–1.5)"],
+    ["#f5c97a", t.scoreLow??"Moderate (1.5–2.5)"],
+    ["#f4a07a", t.scoreModerate??"High (2.5–3.5)"],
+    ["#e87070", t.scoreHeavy??"Very high (>3.5)"],
   ];
 
   const recMap=useMemo(()=>{
@@ -297,6 +354,23 @@ export default function CalendarPage() {
     return Object.entries(c).sort((a,b)=>b[1]-a[1]);
   },[monthRecs]);
 
+  // Medications logged this month (from daily entries)
+  const monthMedCounts=useMemo(()=>{
+    const c={};
+    monthRecs.forEach(r=>(r.medicationsTaken??[]).forEach(med=>{
+      const name=typeof med==="object"?(med.name??med.id??"Unknown"):String(med);
+      c[name]=(c[name]??0)+1;
+    }));
+    return Object.entries(c).sort((a,b)=>b[1]-a[1]);
+  },[monthRecs]);
+
+  // Profile medications (prescribed)
+  const profileMeds=useMemo(()=>{
+    return (data?.medicines??data?.medications??[]).map(m=>
+      typeof m==="object"?(m.name??m.id??String(m)):String(m)
+    ).filter(Boolean);
+  },[data]);
+
   if(!data)return<div style={{padding:40,textAlign:"center",color:MU}}>{t.loading??"Loading…"}</div>;
 
   const{y,m}=month;
@@ -308,8 +382,14 @@ export default function CalendarPage() {
     <div>
       <style>{`
         .cal-grid{display:grid;grid-template-columns:340px 340px;gap:16px;align-items:stretch;justify-content:center}
-        @media(max-width:680px){.cal-grid{grid-template-columns:1fr}}
+        .cal-grid-3{display:grid;grid-template-columns:340px 340px;gap:16px;justify-content:center;margin-top:16px}
+        @media(max-width:720px){
+          .cal-grid{grid-template-columns:1fr}
+          .cal-grid-3{grid-template-columns:1fr}
+        }
       `}</style>
+
+      {/* Row 1: Calendar + Questionnaires */}
       <div className="cal-grid">
 
         {/* ── Calendar card ── */}
@@ -332,28 +412,39 @@ export default function CalendarPage() {
               const ds=`${y}-${pad(m+1)}-${pad(day)}`;
               const rec=recMap[ds];
               const isToday=ds===todayStr;
-              const subs=rec?.substances??[];
+              const highCravings = rec?.cravings >= 4;
+              const tookMeds = (rec?.medicationsTaken?.length ?? 0) > 0;
+              const hasNote = !!rec?.note?.trim();
               return(
                 <div key={day} onClick={()=>rec&&setModalDate(ds)}
                   style={{borderRadius:6,padding:"4px 1px",textAlign:"center",cursor:rec?"pointer":"default",minHeight:30,
-                    background:cravingBg(rec?.cravings),
+                    background:dayBg(rec),
                     border:isToday?`2px solid ${A}`:`1px solid ${rec?"transparent":BO}`,
-                    transition:"all .1s"}}>
+                    transition:"all .1s",position:"relative"}}>
                   <div style={{fontSize:10,fontWeight:isToday?700:400,color:rec?TX:MU,lineHeight:1}}>{day}</div>
-                  {subs.length>0&&<div style={{display:"flex",gap:1,justifyContent:"center",marginTop:2}}>{subs.slice(0,3).map((s,si)=><div key={si} style={{width:3,height:3,borderRadius:"50%",background:sc(s)}}/>)}</div>}
+                  {tookMeds&&(
+                    <img
+                      src="/ico_medicine.png"
+                      alt="medication taken"
+                      style={{position:"absolute",top:-4,right:-4,width:13,height:13,objectFit:"contain"}}
+                    />
+                  )}
+                  {highCravings&&(
+                    <span style={{position:"absolute",bottom:-4,left:-4,fontSize:13,lineHeight:1}}>🔥</span>
+                  )}
+                  {hasNote&&(
+                    <svg viewBox="0 0 20 20" style={{position:"absolute",bottom:-4,right:-4,width:13,height:13}} fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="2" width="16" height="12" rx="3" fill="#4a7ab5"/>
+                      <path d="M5 16 L8 13 H2 Q2 16 5 16Z" fill="#4a7ab5"/>
+                      <rect x="5" y="5.5" width="10" height="1.5" rx="0.75" fill="white" opacity="0.9"/>
+                      <rect x="5" y="8.5" width="7" height="1.5" rx="0.75" fill="white" opacity="0.9"/>
+                    </svg>
+                  )}
                 </div>
               );
             })}
           </div>
-          {/* Craving legend */}
-          <div style={{borderTop:`1px solid ${BO}`,padding:"8px 14px",display:"flex",flexWrap:"wrap",gap:10}}>
-            {cravingLegend.map(([c,l])=>(
-              <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
-                <div style={{width:8,height:8,borderRadius:2,background:c}}/>
-                <span style={{fontSize:9,color:MU}}>{l} {t.cravings??"cravings"}</span>
-              </div>
-            ))}
-          </div>
+
           {/* Monthly substances */}
           <div style={{borderTop:`1px solid ${BO}`,padding:"10px 14px"}}>
             <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>
@@ -382,45 +473,127 @@ export default function CalendarPage() {
               }
             </div>
           </div>
-        </div>
 
-        {/* ── Questionnaires card ── */}
-        <div style={{background:SU,borderRadius:14,border:`1px solid ${BO}`,boxShadow:"0 2px 10px rgba(74,122,181,0.07)",overflow:"hidden",display:"flex",flexDirection:"column"}}>
-          <div style={{padding:"12px 14px",borderBottom:`1px solid ${BO}`}}>
-            <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase"}}>
-              {t.questionnaires??"Questionnaires"}
+          {/* Medications */}
+          <div style={{borderTop:`1px solid ${BO}`,padding:"10px 14px"}}>
+            <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>
+              {t.myMedications??"Medications"} — {months[m]}
+            </div>
+
+            {/* Prescribed meds from profile */}
+            {profileMeds.length>0&&(
+              <div style={{marginBottom:10}}>
+                <div style={{fontSize:9,fontWeight:700,color:MU,letterSpacing:0.8,textTransform:"uppercase",marginBottom:6}}>
+                  {t.prescribed??"Prescribed"}
+                </div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                  {profileMeds.map(name=>(
+                    <span key={name} style={{background:AL,color:AD,border:`1px solid ${BO}`,borderRadius:20,padding:"4px 10px",fontSize:11,fontWeight:600,textTransform:"capitalize"}}>
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Logged meds this month */}
+            <div>
+              <div style={{fontSize:9,fontWeight:700,color:MU,letterSpacing:0.8,textTransform:"uppercase",marginBottom:6}}>
+                {t.takenThisMonth??"Taken this month"}
+              </div>
+              {monthMedCounts.length===0
+                ? <span style={{fontSize:12,color:MU}}>{t.noMedsLogged??"No medications logged this month"}</span>
+                : (()=>{
+                    const max=monthMedCounts[0][1];
+                    return monthMedCounts.map(([name,n])=>(
+                      <div key={name} style={{marginBottom:8}}>
+                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <div style={{width:8,height:8,borderRadius:"50%",background:"#42a5f5",flexShrink:0}}/>
+                            <span style={{fontSize:13,color:TX,textTransform:"capitalize",fontWeight:500}}>{name}</span>
+                          </div>
+                          <span style={{fontSize:12,fontWeight:700,color:"#42a5f5"}}>{n} {t.days??"days"}</span>
+                        </div>
+                        <div style={{height:5,background:BG,borderRadius:3,overflow:"hidden"}}>
+                          <div style={{width:`${(n/max)*100}%`,height:"100%",background:"#42a5f5",borderRadius:3,transition:"width .4s ease"}}/>
+                        </div>
+                      </div>
+                    ));
+                  })()
+              }
             </div>
           </div>
-          <div style={{padding:"8px 14px 12px",display:"flex",flexDirection:"column"}}>
-            {QC.map((q,qi)=>{
-              const total=scoreTotal(data[q.key]);
-              return(
-                <div key={q.key} onClick={()=>data[q.key]&&setQModal(q.key)}
-                  style={{padding:"9px 0",borderBottom:qi<QC.length-1?`1px solid ${BG}`:"none",cursor:data[q.key]?"pointer":"default",borderRadius:6,transition:"background .1s"}}
-                  onMouseEnter={e=>{if(data[q.key])e.currentTarget.style.background=BG;}}
-                  onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:total!=null?4:0}}>
-                    <span style={{fontSize:12,color:TX,fontWeight:600}}>{q.label}</span>
-                    {total!=null
-                      ? <span style={{fontSize:11,color:q.color,fontWeight:700}}>{total}/{q.max}</span>
-                      : <span style={{fontSize:11,color:MU}}>—</span>
-                    }
-                  </div>
-                  {total!=null&&(
-                    <>
-                      <div style={{height:4,background:BG,borderRadius:2,overflow:"hidden",marginBottom:3}}>
-                        <div style={{width:`${Math.min(100,(total/q.max)*100)}%`,height:"100%",background:q.color,borderRadius:2}}/>
-                      </div>
-                      <div style={{fontSize:10,color:q.color,fontWeight:600}}>{q.fn(total)}</div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
         </div>
 
+        {/* ── Right column: combined Averages + Questionnaires card ── */}
+        <div style={{display:"flex",flexDirection:"column"}}>
+          <div style={{background:SU,borderRadius:14,border:`1px solid ${BO}`,boxShadow:"0 2px 10px rgba(74,122,181,0.07)",overflow:"hidden",flex:1}}>
+
+            {/* Monthly Averages section */}
+            <div style={{padding:"12px 14px 10px"}}>
+              <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>
+                {t.monthlyTrends??"Monthly Averages"} — {months[m]}
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12,padding:"6px 10px",background:AL,borderRadius:8}}>
+                <div style={{width:7,height:7,borderRadius:"50%",background:A,flexShrink:0}}/>
+                <span style={{fontSize:12,fontWeight:700,color:AD}}>
+                  {monthRecs.length} <span style={{fontWeight:500,color:MU}}>{t.daysLogged??"days logged"}</span>
+                </span>
+              </div>
+              <MonthlyTrendsCard
+                monthRecs={monthRecs}
+                t={t}
+              />
+            </div>
+
+            {/* Divider */}
+            <div style={{borderTop:`1px solid ${BO}`}}/>
+
+            {/* Questionnaires section */}
+            <div style={{padding:"12px 14px 4px"}}>
+              <div style={{fontSize:10,fontWeight:700,color:A,letterSpacing:1.2,textTransform:"uppercase",marginBottom:4}}>
+                {t.questionnaires??"Questionnaires"}
+              </div>
+            </div>
+            <div style={{padding:"0 14px 12px",display:"flex",flexDirection:"column"}}>
+              {QC.map((q,qi)=>{
+                const total=scoreTotal(data[q.key]);
+                return(
+                  <div key={q.key} onClick={()=>data[q.key]&&setQModal(q.key)}
+                    style={{padding:"9px 0",borderBottom:qi<QC.length-1?`1px solid ${BG}`:"none",cursor:data[q.key]?"pointer":"default",borderRadius:6,transition:"background .1s"}}
+                    onMouseEnter={e=>{if(data[q.key])e.currentTarget.style.background=BG;}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:total!=null?4:0}}>
+                      <span style={{fontSize:12,color:TX,fontWeight:600}}>{q.label}</span>
+                      {total!=null
+                        ? <span style={{fontSize:11,color:q.color,fontWeight:700}}>{total}/{q.max}</span>
+                        : <span style={{fontSize:11,color:MU}}>—</span>
+                      }
+                    </div>
+                    {total!=null&&(
+                      <>
+                        <div style={{display:"flex",alignItems:"center",gap:8}}>
+                          <div style={{flex:1,height:4,background:BG,borderRadius:2,overflow:"hidden"}}>
+                            <div style={{width:`${Math.min(100,(total/q.max)*100)}%`,height:"100%",background:q.color,borderRadius:2}}/>
+                          </div>
+                          <span style={{fontSize:10,color:q.color,fontWeight:700,flexShrink:0,cursor:"pointer",textDecoration:"underline",textDecorationStyle:"dotted"}}
+                            onClick={e=>{e.stopPropagation();data[q.key]&&setQModal(q.key);}}>
+                            read more
+                          </span>
+                        </div>
+                        <div style={{fontSize:10,color:q.color,fontWeight:600,marginTop:3}}>{q.fn(total)}</div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        </div>{/* end right column */}
+
       </div>
+
       {modalDate&&recMap[modalDate]&&<DayModal date={modalDate} rec={recMap[modalDate]} onClose={()=>setModalDate(null)} t={t}/>}
       {qModal&&<QuestionnaireModal qKey={qModal} data={data} onClose={()=>setQModal(null)}/>}
     </div>
