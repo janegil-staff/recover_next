@@ -381,7 +381,7 @@ export default function CalendarPage() {
   return(
     <div>
       <style>{`
-        .cal-grid{display:grid;grid-template-columns:340px 340px;gap:16px;align-items:stretch;justify-content:center}
+        .cal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch;max-width:900px;margin:0 auto}
         @media(max-width:720px){
           .cal-grid{grid-template-columns:1fr}
         }
