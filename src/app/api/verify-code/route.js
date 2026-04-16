@@ -1,7 +1,7 @@
 // src/app/api/verify-code/route.js
 import { NextResponse } from "next/server";
 
-const API = process.env.API_URL ?? "http://localhost:5050";
+const API = process.env.API_URL ?? "https://monkfish-app-qjb62.ondigitalocean.app";
 
 export async function POST(req) {
   const { code } = await req.json();

@@ -132,9 +132,8 @@ async function generatePDF({data,t,year,month,allTime,recs}){
   y=28;
 
   // Patient info + Weight/BMI side by side
-  const weights=allRecs.filter(r=>r.weight).map(r=>({d:fmtDate(r.date??r.createdAt),w:r.weight}));
-  const latestW=weights[weights.length-1];
-  const bmi=latestW&&data.height?(latestW.w/((data.height/100)**2)).toFixed(1):null;
+  const patientWeight = data.weight && data.weight > 0 ? data.weight : null;
+  const bmi = patientWeight && data.height ? (patientWeight / ((data.height / 100) ** 2)).toFixed(1) : null;
 
   // Draw the shared divider line + both column headers on same row
   checkPage(10);
@@ -167,8 +166,8 @@ async function generatePDF({data,t,year,month,allTime,recs}){
   // Right column — weight & BMI (same startY, same font sizes)
   let ry=startY;
   const wRows=[
-    [t.weight??"Weight", latestW?`${latestW.w} ${t.kg??"kg"}`:"—"],
-    [t.bmi??"BMI",    bmi??"—"],
+    [t.weight??"Weight", patientWeight?`${patientWeight} ${t.kg??"kg"}`:"—"],
+    [t.bmi??"BMI",       bmi??"—"],
     [t.heightLabel??"Height", data.height?`${data.height} cm`:"—"],
   ];
   wRows.forEach(([l,v],i)=>{
@@ -439,17 +438,17 @@ function OffscreenCharts({data,recs,t}){
   return(
     <div style={wrap}>
       {/* Mood line */}
-      <div id="pdf-chart-mood" style={{width:520,height:200,background:"#fff",padding:"8px"}}>
+      <div id="pdf-chart-mood" style={{width:Math.max(520, moodData.length*28),height:220,background:"#fff",padding:"8px"}}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={moodData} margin={{top:8,right:16,left:0,bottom:0}}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e8f0" vertical={false}/>
-            <XAxis dataKey="date" tick={{fontSize:10,fill:"#7a9ab8"}} tickLine={false} axisLine={false} interval={Math.max(0,Math.ceil(moodData.length/8)-1)}/>
+            <XAxis dataKey="date" tick={{fontSize:10,fill:"#7a9ab8"}} tickLine={false} axisLine={false} interval={Math.max(0,Math.ceil(moodData.length/10)-1)}/>
             <YAxis domain={[0,5]} ticks={[1,2,3,4,5]} tick={{fontSize:10,fill:"#7a9ab8"}} tickLine={false} axisLine={false}/>
             <Tooltip/><Legend wrapperStyle={{fontSize:11,paddingTop:4}}/>
             <ReferenceLine y={3} stroke="#d0dcea" strokeDasharray="4 4"/>
-            <Line type="monotone" dataKey="mood"      name={t.mood??"Mood"}      stroke="#4a7ab5" strokeWidth={2} dot={{r:2,fill:"#4a7ab5"}} connectNulls/>
-            <Line type="monotone" dataKey="cravings"  name={t.cravings??"Cravings"}  stroke="#f4a07a" strokeWidth={2} dot={{r:2,fill:"#f4a07a"}} connectNulls/>
-            <Line type="monotone" dataKey="wellbeing" name={t.wellbeing??"Wellbeing"} stroke="#66bb6a" strokeWidth={2} dot={{r:2,fill:"#66bb6a"}} connectNulls/>
+            <Line type="monotone" dataKey="mood"      name={t.mood??"Mood"}               stroke="#4a7ab5" strokeWidth={2} dot={{r:3,fill:"#4a7ab5",strokeWidth:0}} connectNulls/>
+            <Line type="monotone" dataKey="cravings"  name={t.cravings??"Cravings"}       stroke="#f4a07a" strokeWidth={2} dot={{r:3,fill:"#f4a07a",strokeWidth:0}} connectNulls/>
+            <Line type="monotone" dataKey="wellbeing" name={t.wellbeing??"Wellbeing"}     stroke="#66bb6a" strokeWidth={2} dot={{r:3,fill:"#66bb6a",strokeWidth:0}} connectNulls/>
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -517,14 +516,14 @@ function OffscreenCharts({data,recs,t}){
 
       {/* Weight line */}
       {weightData.length>1&&(
-        <div id="pdf-chart-weight" style={{width:520,height:180,background:"#fff",padding:"8px"}}>
+        <div id="pdf-chart-weight" style={{width:Math.max(520, weightData.length*28),height:180,background:"#fff",padding:"8px"}}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={weightData} margin={{top:8,right:16,left:0,bottom:0}}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e8f0" vertical={false}/>
-              <XAxis dataKey="date" tick={{fontSize:10,fill:"#7a9ab8"}} tickLine={false} axisLine={false} interval={Math.max(0,Math.ceil(weightData.length/6)-1)}/>
+              <XAxis dataKey="date" tick={{fontSize:10,fill:"#7a9ab8"}} tickLine={false} axisLine={false} interval={Math.max(0,Math.ceil(weightData.length/8)-1)}/>
               <YAxis tick={{fontSize:10,fill:"#7a9ab8"}} tickLine={false} axisLine={false} domain={[d=>Math.floor(d-2),d=>Math.ceil(d+2)]}/>
               <Tooltip/>
-              <Line type="monotone" dataKey="weight" name={`${t.weight??"Weight"} (${t.kg??"kg"})`} stroke="#2d4a6e" strokeWidth={2.5} dot={{r:3,fill:"#2d4a6e"}}/>
+              <Line type="monotone" dataKey="weight" name={`${t.weight??"Weight"} (${t.kg??"kg"})`} stroke="#2d4a6e" strokeWidth={2.5} dot={{r:3,fill:"#2d4a6e",strokeWidth:0}}/>
             </LineChart>
           </ResponsiveContainer>
         </div>
