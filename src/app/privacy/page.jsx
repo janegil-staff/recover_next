@@ -113,7 +113,7 @@ export default function PrivacyPage() {
           boxShadow: "0 2px 12px rgba(74,122,181,0.08)",
         }}>
           <p style={{ color: "#2d4a6e", fontSize: 15, lineHeight: 1.7, margin: 0 }}>
-            Recover is developed by <strong>Qup DA / KBB Medic AS</strong> (org. 912 372 022, Norway).
+            Recover is developed by <strong>Qup DA</strong> (org. 912 372 022, Norway).
             We are committed to protecting your privacy. This policy explains what data we collect,
             how we use it, and your rights. Your health data belongs to you.
           </p>
@@ -187,10 +187,10 @@ export default function PrivacyPage() {
             borderRadius: 30,
             display: "inline-block",
           }}>
-            post@kbbmedic.no
+            post@recover-online.com
           </a>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, margin: "16px 0 0" }}>
-            Qup DA / KBB Medic AS · Org. 912 372 022 · Norway
+            Qup DA · Org. 912 372 022 · Norway
           </p>
         </div>
 
