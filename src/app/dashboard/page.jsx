@@ -151,17 +151,24 @@ const Q_DETAILS = {
 const SCORE_LABELS = ["Not at all","Several days","More than half the days","Nearly every day"];
 
 // ── Monthly Trends (no chart) ───────────────────────────────────────────────
+const FREQ_VAL={none:0,once:1,few_times:2,daily:3,multiple_daily:4};
+
 const TREND_SERIES = [
-  { key: "cravings",  label: "Cravings",  color: "#f4a07a", max: 5, icon: "🔥" },
-  { key: "mood",      label: "Mood",      color: "#4a7ab5", max: 5, icon: "😊" },
-  { key: "wellbeing", label: "Wellbeing", color: "#66bb6a", max: 5, icon: "💙" },
+  { key: "cravings",  label: "Cravings",  color: "#f4a07a", max: 5,  icon: "🔥" },
+  { key: "mood",      label: "Mood",      color: "#4a7ab5", max: 5,  icon: "😊" },
+  { key: "wellbeing", label: "Wellbeing", color: "#66bb6a", max: 5,  icon: "💙" },
+  { key: "frequency", label: "Frequency", color: "#ab47bc", max: 4,  icon: "📅" },
+  { key: "amount",    label: "Amount",    color: "#ff7043", max: 10, icon: "💊" },
 ];
 
 function MonthlyTrendsCard({ monthRecs, t }) {
   const avgs = useMemo(() => {
     const out = {};
     TREND_SERIES.forEach(({ key }) => {
-      const vals = monthRecs.map(r => r[key]).filter(v => v != null);
+      const vals = monthRecs.map(r => {
+        if (key === "frequency") return FREQ_VAL[r.frequency] ?? null;
+        return r[key] ?? null;
+      }).filter(v => v != null);
       out[key] = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : null;
     });
     return out;
