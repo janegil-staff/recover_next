@@ -187,7 +187,7 @@ export default function PrivacyPage() {
             borderRadius: 30,
             display: "inline-block",
           }}>
-            post@recover-online.com
+            jan.egil.staff@qupda.com
           </a>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, margin: "16px 0 0" }}>
             Qup DA · Org. 912 372 022 · Norway

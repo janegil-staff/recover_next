@@ -169,7 +169,7 @@ export default function DeleteAccountPage() {
             <br />
             Email:{" "}
             <a href="mailto:support@qupda.com" style={styles.link}>
-              support@qupda.com
+              jan.egil.staff@qupda.com
             </a>
             <br />
             Org. nr: 912 372 022 · Norway
