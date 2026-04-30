@@ -296,7 +296,7 @@ export default function GraphsPage(){
       {substanceData.length>0 && allSubs.length>0 && (
         <Card title={t.substancesByWeek??"Substance Use"} subtitle={`${t.days??"days"} / week`}>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={substanceData} margin={{top:4,right:10,left:-20,bottom:0}}>
+            <BarChart data={substanceData} margin={{top:8,right:10,left:0,bottom:8}}>
               <CartesianGrid strokeDasharray="3 3" stroke={BO} vertical={false}/>
               <XAxis dataKey="week" tick={{fontSize:10,fill:MU}} tickLine={false} axisLine={false}/>
               <YAxis tick={{fontSize:10,fill:MU}} tickLine={false} axisLine={false} allowDecimals={false}/>
