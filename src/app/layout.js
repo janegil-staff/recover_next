@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "../context/LangContext";
+import { ThemeProvider } from "../context/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Qup Recover",
-  description: "Helpful tool to recover from drug abuse",
+  title: "Recover",
+  description: "Track your recovery, your data, your way.",
 };
 
 export default function RootLayout({ children }) {
@@ -23,8 +24,25 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var t = localStorage.getItem('recover-theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (t === 'dark' || (!t && prefersDark)) {
+                  document.documentElement.classList.add('dark');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
-        <LangProvider>{children}</LangProvider>
+        <ThemeProvider>
+          <LangProvider>{children}</LangProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

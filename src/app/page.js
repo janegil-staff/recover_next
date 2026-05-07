@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/context/ThemeContext";
 
 const T = {
   en: {
@@ -185,6 +187,10 @@ function detectLang() {
 
 export default function LandingPage() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const phoneSrc = (n) => (isDark ? `/phone${n}-dark.png` : `/phone${n}.png`);
+
   const [lang, setLang] = useState("en");
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -230,7 +236,19 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen text-[#2d4a6e] overflow-x-hidden">
+    <div className="min-h-screen text-[var(--accent-strong)] overflow-x-hidden">
+      {/* Theme toggle in top-right corner */}
+      <div
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+          zIndex: 50,
+        }}
+      >
+        <ThemeToggle />
+      </div>
+
       {/* ── Page content ── */}
       <div className="relative z-10 max-w-6xl mx-auto px-5 pt-10 pb-20 md:px-7 md:pt-12">
         <div className="flex flex-col gap-5 mb-10 md:flex-row md:items-start md:gap-12 md:mb-12">
@@ -246,17 +264,17 @@ export default function LandingPage() {
                 className="rounded-2xl shadow-lg object-cover flex-shrink-0"
               />
               <div>
-                <div className="text-3xl md:text-4xl font-black text-[#2d4a6e] leading-none">
+                <div className="text-3xl md:text-4xl font-black text-[var(--accent-strong)] leading-none">
                   {t.headline}
                 </div>
-                <div className="text-[11px] font-bold tracking-widest text-[#7AABDB] uppercase mt-1">
+                <div className="text-[11px] font-bold tracking-widest text-[var(--accent-light)] uppercase mt-1">
                   {t.subtitle}
                 </div>
               </div>
             </div>
 
             {/* Description */}
-            <p className="text-sm md:text-[15px] leading-relaxed text-[#3a5272] font-medium">
+            <p className="text-sm md:text-[15px] leading-relaxed text-[var(--text)] font-medium">
               {t.description}
             </p>
 
@@ -267,8 +285,8 @@ export default function LandingPage() {
                 style={{ zIndex: 1, marginRight: "8px" }}
               >
                 <Image
-                  src="/phone1.png"
-                  alt="Recover home"
+                  src={phoneSrc(1)}
+                  alt="Recover diary"
                   width={160}
                   height={320}
                   className="w-[140px] h-auto rounded-[28px] border-[4px] border-black shadow-xl block"
@@ -279,8 +297,8 @@ export default function LandingPage() {
                 style={{ zIndex: 3, marginTop: "24px" }}
               >
                 <Image
-                  src="/phone3.png"
-                  alt="Recover diary"
+                  src={phoneSrc(2)}
+                  alt="Recover home"
                   width={160}
                   height={320}
                   className="w-[160px] h-auto rounded-[28px] border-[4px] border-black shadow-2xl block"
@@ -291,8 +309,8 @@ export default function LandingPage() {
                 style={{ zIndex: 1, marginLeft: "8px" }}
               >
                 <Image
-                  src="/phone2.png"
-                  alt="Recover progress"
+                  src={phoneSrc(3)}
+                  alt="Recover login"
                   width={160}
                   height={320}
                   className="w-[140px] h-auto rounded-[28px] border-[4px] border-black shadow-xl block"
@@ -308,7 +326,7 @@ export default function LandingPage() {
               <select
                 value={lang}
                 onChange={(e) => changeLang(e.target.value)}
-                className="w-full appearance-none bg-white border-2 border-[#dde8f4] rounded-xl px-4 py-3 text-sm font-semibold text-[#2d4a6e] cursor-pointer outline-none focus:border-[#4a7ab5] focus:ring-4 focus:ring-[#4a7ab5]/10 transition-all pr-10"
+                className="w-full appearance-none bg-[var(--card)] border-2 border-[var(--card-border)] rounded-xl px-4 py-3 text-sm font-semibold text-[var(--accent-strong)] cursor-pointer outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all pr-10"
               >
                 {LANGS.map(({ code: lc, flag, label }) => (
                   <option key={lc} value={lc}>
@@ -316,7 +334,7 @@ export default function LandingPage() {
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b8aaa]">
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
                 <svg
                   width="16"
                   height="16"
@@ -332,9 +350,9 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl overflow-hidden shadow-xl ring-1 ring-[#7AABDB]/20">
+            <div className="bg-[var(--card)] rounded-3xl overflow-hidden shadow-xl ring-1 ring-[var(--accent-light)]/20">
               {/* Card hero image */}
-              <div className="relative bg-gradient-to-r from-[#2d4a6e] via-[#4a7ab5] to-[#7AABDB]">
+              <div className="relative bg-gradient-to-r from-[var(--accent-strong)] via-[var(--accent)] to-[var(--accent-light)]">
                 <Image
                   src="/welcome.png"
                   alt="Doctor and patient"
@@ -353,12 +371,12 @@ export default function LandingPage() {
 
               {/* Card body */}
               <div className="p-6">
-                <h2 className="text-xs font-black tracking-[2px] text-[#2d4a6e] uppercase text-center mb-5">
+                <h2 className="text-xs font-black tracking-[2px] text-[var(--accent-strong)] uppercase text-center mb-5">
                   {t.importTitle}
                 </h2>
                 <label
                   htmlFor="share-code"
-                  className="block text-[11px] font-bold tracking-[1.5px] text-[#6b8aaa] uppercase mb-2"
+                  className="block text-[11px] font-bold tracking-[1.5px] text-[var(--text-muted)] uppercase mb-2"
                 >
                   {t.importLabel}
                 </label>
@@ -374,14 +392,16 @@ export default function LandingPage() {
                   onKeyDown={(e) => e.key === "Enter" && handleStart()}
                   maxLength={12}
                   autoComplete="off"
-                  className="w-full border-2 border-[#dde8f4] rounded-xl px-4 py-3 text-[15px] text-[#2d4a6e] bg-[#f0f4f8] outline-none mb-3 tracking-wide placeholder:text-[#b0c4d8] placeholder:tracking-normal focus:border-[#4a7ab5] focus:ring-4 focus:ring-[#4a7ab5]/10 transition-all"
+                  className="w-full border-2 border-[var(--card-border)] rounded-xl px-4 py-3 text-[15px] text-[var(--accent-strong)] bg-[var(--bg)] outline-none mb-3 tracking-wide placeholder:text-[var(--text-subtle)] placeholder:tracking-normal focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all"
                 />
                 {error && (
-                  <p className="text-xs text-red-500 mb-2 -mt-1">{error}</p>
+                  <p className="text-xs text-[var(--danger)] mb-2 -mt-1">
+                    {error}
+                  </p>
                 )}
                 <button
                   onClick={handleStart}
-                  className="w-full bg-gradient-to-br from-[#4a7ab5] to-[#2d4a6e] text-white rounded-xl py-4 text-sm font-black tracking-[2px] uppercase shadow-lg hover:opacity-90 hover:-translate-y-px active:translate-y-0 transition-all"
+                  className="w-full bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-white rounded-xl py-4 text-sm font-black tracking-[2px] uppercase shadow-lg hover:opacity-90 hover:-translate-y-px active:translate-y-0 transition-all"
                 >
                   {loading ? "…" : t.importBtn}
                 </button>
@@ -396,8 +416,8 @@ export default function LandingPage() {
           <div className="flex md:hidden items-end justify-center">
             <div className="relative" style={{ zIndex: 1, marginRight: "6px" }}>
               <Image
-                src="/phone1.png"
-                alt="Recover home"
+                src={phoneSrc(1)}
+                alt="Recover diary"
                 width={130}
                 height={260}
                 className="w-[110px] h-auto rounded-[24px] border-[4px] border-black shadow-xl block"
@@ -405,8 +425,8 @@ export default function LandingPage() {
             </div>
             <div className="relative" style={{ zIndex: 3, marginTop: "20px" }}>
               <Image
-                src="/phone2.png"
-                alt="Recover diary"
+                src={phoneSrc(2)}
+                alt="Recover home"
                 width={130}
                 height={260}
                 className="w-[125px] h-auto rounded-[24px] border-[4px] border-black shadow-2xl block"
@@ -414,8 +434,8 @@ export default function LandingPage() {
             </div>
             <div className="relative" style={{ zIndex: 1, marginLeft: "6px" }}>
               <Image
-                src="/phone3.png"
-                alt="Recover progress"
+                src={phoneSrc(3)}
+                alt="Recover login"
                 width={130}
                 height={260}
                 className="w-[110px] h-auto rounded-[24px] border-[4px] border-black shadow-xl block"
@@ -425,7 +445,7 @@ export default function LandingPage() {
 
           {/* Store badges */}
           <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-[#6b8aaa] leading-relaxed">
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed">
               {t.available}
               <br />
               {t.download}
@@ -433,7 +453,7 @@ export default function LandingPage() {
             <div className="flex gap-3 flex-wrap justify-center">
               <a
                 href="https://apps.apple.com/app/id6762452909"
-                className="flex items-center gap-2 bg-[#2d4a6e] text-white px-4 py-2.5 rounded-xl text-[13px] font-semibold hover:bg-[#4a7ab5] hover:-translate-y-0.5 transition-all no-underline whitespace-nowrap"
+                className="flex items-center gap-2 bg-[var(--accent-strong)] text-white px-4 py-2.5 rounded-xl text-[13px] font-semibold hover:bg-[var(--accent)] hover:-translate-y-0.5 transition-all no-underline whitespace-nowrap"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
@@ -443,7 +463,7 @@ export default function LandingPage() {
 
               <a
                 href="https://play.google.com/store/apps/details?id=com.qupda.recover"
-                className="flex items-center gap-2 bg-[#2d4a6e] text-white px-4 py-2.5 rounded-xl text-[13px] font-semibold hover:bg-[#4a7ab5] hover:-translate-y-0.5 transition-all no-underline whitespace-nowrap"
+                className="flex items-center gap-2 bg-[var(--accent-strong)] text-white px-4 py-2.5 rounded-xl text-[13px] font-semibold hover:bg-[var(--accent)] hover:-translate-y-0.5 transition-all no-underline whitespace-nowrap"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                   <path d="M3.18 23.76c.34.19.73.21 1.1.04l12.2-6.87-2.5-2.5-10.8 9.33zm-1.37-20.7A1.75 1.75 0 0 0 1.5 4.5v15c0 .47.18.9.31 1.24L13.9 8.65 1.81 3.06zm20.12 8.62L19.4 9.5l-2.77 2.76 2.77 2.77 2.55-1.44a1.75 1.75 0 0 0 0-3.01zM4.28.2C3.9.02 3.5.05 3.18.24L14.08 11.1 16.6 8.6 4.28.2z" />
@@ -470,11 +490,11 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-10 text-center py-5 px-6 text-xs text-[#6b8aaa] border-t border-[#4a7ab5]/10">
+      <footer className="relative z-10 text-center py-5 px-6 text-xs text-[var(--text-muted)] border-t border-[var(--accent)]/10">
         Copyright 2026 – KBB Medic AS (org: 912 372 022) &nbsp;·&nbsp;
         <a
           href="mailto:post@kbbmedic.no"
-          className="text-[#4a7ab5] no-underline hover:underline"
+          className="text-[var(--accent)] no-underline hover:underline"
         >
           post@kbbmedic.no
         </a>

@@ -1,34 +1,152 @@
 @import "tailwindcss";
 
-
-body {
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  background-image: url("/background.svg") !important;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-}
-
+/* ─── Theme tokens ─────────────────────────────────────────── */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --card-elevated: #ffffff;
+  --card-border: #d5e2ee;
+
+  /* Text */
+  --text: #1a3a5c;
+  --text-muted: #6b85a3;
+  --text-subtle: #8a9bb0;
+
+  /* Accent — steel blue (Recover/Coachly shared palette) */
+  --accent: #4a7ab5;
+  --accent-strong: #2d4a6e;
+  --accent-soft: #e8f0f9;
+  --accent-light: #7aabdb;
+
+  /* Semantic */
+  --ok: #22c55e;
+  --ok-soft: rgba(34, 197, 94, 0.15);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245, 158, 11, 0.15);
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.15);
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(74, 122, 181, 0.08);
+  --shadow-elevated: 0 8px 32px rgba(74, 122, 181, 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root.dark {
+  /* Surfaces */
+  --bg: #0f1620;
+  --card: #1a2332;
+  --card-elevated: #232f42;
+  --card-border: rgba(255, 255, 255, 0.08);
+
+  /* Text */
+  --text: #e8eef7;
+  --text-muted: #8da3c0;
+  --text-subtle: #5d738f;
+
+  /* Accent */
+  --accent: #6b95d1;
+  --accent-strong: #8ab0e0;
+  --accent-soft: rgba(107, 149, 209, 0.15);
+  --accent-light: #a4c4e6;
+
+  /* Semantic */
+  --ok: #5cc88a;
+  --ok-soft: rgba(92, 200, 138, 0.18);
+  --warn: #f0b94a;
+  --warn-soft: rgba(240, 185, 74, 0.18);
+  --danger: #e86868;
+  --danger-soft: rgba(232, 104, 104, 0.18);
+
+  /* Shadows */
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── Base layout ──────────────────────────────────────────── */
+
+html,
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: color 0.2s ease;
+}
+
+/* ─── Background images ─────────────────────────────────────
+   Backgrounds go on <html> (topmost element, hardest to override),
+   then body and main are forced transparent so the image shows
+   through any wrapper.
+   ─────────────────────────────────────────────────────────── */
+
+html {
+  background:
+    url("/background.svg") center / cover no-repeat fixed,
+    var(--bg);
+}
+
+html.dark {
+  background:
+    url("/background-dark.svg") center / cover no-repeat fixed,
+    var(--bg);
+}
+
+body,
+main {
+  background: transparent !important;
+}
+
+/* ─── Helpers ──────────────────────────────────────────────── */
+
+.hover-bg-soft {
+  transition: background 0.15s ease;
+}
+.hover-bg-soft:hover {
+  background: var(--accent-soft);
+}
+
+/* Subtle scrollbar in dark mode */
+html.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+html.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 6px;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-subtle);
+}
+
+/* Selection color */
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+html.dark ::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
   }
 }
-
