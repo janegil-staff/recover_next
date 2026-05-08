@@ -4,10 +4,27 @@ import { useState, useMemo, useEffect } from "react";
 import { useDashboardT } from "../LangContext";
 import { useTheme } from "@/context/ThemeContext";
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  PieChart, Pie, Cell,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ReferenceLine,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  PieChart,
+  Pie,
+  Cell,
+  Area,
+  AreaChart,
 } from "recharts";
 
 // Card-level colors use CSS variables for non-SVG content
@@ -68,31 +85,6 @@ function fmtDate(d) {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
 }
 
-// Score → color, matches mobile app's SCORE_COLORS palette
-const SCORE_COLORS = {
-  0: "#22C55E", // green   — best
-  1: "#7AABDB", // blue
-  2: "#FBBF24", // yellow
-  3: "#FB923C", // orange
-  4: "#EF4444", // red
-  5: "#991B1B", // dark red — worst
-};
-const FREQ_SCORE = { none: 0, once: 1, few_times: 2, daily: 3, multiple_daily: 4 };
-
-// Same logic as mobile's avgScore — clamped 0–5
-function dayScore(rec) {
-  if (!rec) return null;
-  const vals = [];
-  if (rec.cravings != null) vals.push(rec.cravings);
-  if (rec.mood != null) vals.push(6 - rec.mood);
-  if (rec.wellbeing != null) vals.push(6 - rec.wellbeing);
-  if (rec.amount != null) vals.push(Math.min(5, (rec.amount / 10) * 5));
-  if (rec.frequency != null && FREQ_SCORE[rec.frequency] != null)
-    vals.push(FREQ_SCORE[rec.frequency]);
-  if (!vals.length) return null;
-  return Math.min(5, Math.round(vals.reduce((a, b) => a + b, 0) / vals.length));
-}
-
 function Card({ title, subtitle, children, style }) {
   return (
     <div
@@ -107,9 +99,13 @@ function Card({ title, subtitle, children, style }) {
       }}
     >
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: AD_VAR }}>{title}</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: AD_VAR }}>
+          {title}
+        </div>
         {subtitle && (
-          <div style={{ fontSize: 11, color: MU_VAR, marginTop: 2 }}>{subtitle}</div>
+          <div style={{ fontSize: 11, color: MU_VAR, marginTop: 2 }}>
+            {subtitle}
+          </div>
         )}
       </div>
       {children}
@@ -129,14 +125,40 @@ const CustomTooltip = ({ active, payload, label, c }) => {
         boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
       }}
     >
-      <div style={{ fontSize: 11, fontWeight: 700, color: c.accentStrong, marginBottom: 6 }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: c.accentStrong,
+          marginBottom: 6,
+        }}
+      >
         {label}
       </div>
       {payload.map((p, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color }} />
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 3,
+          }}
+        >
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: p.color,
+            }}
+          />
           <span style={{ fontSize: 11, color: c.text }}>{p.name}:</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: c.accentStrong }}>{p.value}</span>
+          <span
+            style={{ fontSize: 11, fontWeight: 700, color: c.accentStrong }}
+          >
+            {p.value}
+          </span>
         </div>
       ))}
     </div>
@@ -151,17 +173,35 @@ function QRadarChart({ qScores, c }) {
 
   if (data.length < 3)
     return (
-      <div style={{ textAlign: "center", color: MU_VAR, fontSize: 12, padding: 20 }}>
+      <div
+        style={{
+          textAlign: "center",
+          color: MU_VAR,
+          fontSize: 12,
+          padding: 20,
+        }}
+      >
         Not enough questionnaire data
       </div>
     );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <RadarChart data={data} margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
+      <RadarChart
+        data={data}
+        margin={{ top: 10, right: 30, left: 30, bottom: 10 }}
+      >
         <PolarGrid stroke={c.grid} />
-        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: c.muted, fontWeight: 600 }} />
-        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 9, fill: c.muted }} tickCount={4} />
+        <PolarAngleAxis
+          dataKey="subject"
+          tick={{ fontSize: 11, fill: c.muted, fontWeight: 600 }}
+        />
+        <PolarRadiusAxis
+          angle={90}
+          domain={[0, 100]}
+          tick={{ fontSize: 9, fill: c.muted }}
+          tickCount={4}
+        />
         <Radar
           name="Score"
           dataKey="value"
@@ -205,19 +245,50 @@ function SubstanceRadarChart({ records, c }) {
 
   if (data.length < 3)
     return (
-      <div style={{ textAlign: "center", color: MU_VAR, fontSize: 12, padding: 20 }}>
+      <div
+        style={{
+          textAlign: "center",
+          color: MU_VAR,
+          fontSize: 12,
+          padding: 20,
+        }}
+      >
         Need at least 3 substances for radar
       </div>
     );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <RadarChart data={data} margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
+      <RadarChart
+        data={data}
+        margin={{ top: 10, right: 30, left: 30, bottom: 10 }}
+      >
         <PolarGrid stroke={c.grid} />
-        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: c.muted, fontWeight: 600 }} />
-        <PolarRadiusAxis angle={90} tick={{ fontSize: 9, fill: c.muted }} tickCount={4} />
-        <Radar name="Days used" dataKey="days" stroke="#ec407a" fill="#ec407a" fillOpacity={0.2} strokeWidth={2} />
-        <Radar name="Avg amount" dataKey="avgAmount" stroke={c.accent} fill={c.accent} fillOpacity={0.2} strokeWidth={2} />
+        <PolarAngleAxis
+          dataKey="subject"
+          tick={{ fontSize: 11, fill: c.muted, fontWeight: 600 }}
+        />
+        <PolarRadiusAxis
+          angle={90}
+          tick={{ fontSize: 9, fill: c.muted }}
+          tickCount={4}
+        />
+        <Radar
+          name="Days used"
+          dataKey="days"
+          stroke="#ec407a"
+          fill="#ec407a"
+          fillOpacity={0.2}
+          strokeWidth={2}
+        />
+        <Radar
+          name="Avg amount"
+          dataKey="avgAmount"
+          stroke={c.accent}
+          fill={c.accent}
+          fillOpacity={0.2}
+          strokeWidth={2}
+        />
         <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8, color: c.text }} />
         <Tooltip
           contentStyle={{
@@ -239,7 +310,9 @@ function WellbeingRadarChart({ records, c }) {
 
   const avg = (key) => {
     const vals = records.map((r) => r[key]).filter((v) => v != null);
-    return vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : 0;
+    return vals.length
+      ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10
+      : 0;
   };
 
   const avgMood = avg("mood");
@@ -252,17 +325,36 @@ function WellbeingRadarChart({ records, c }) {
   const data = [
     { subject: "Mood", value: avgMood, fullMark: 5 },
     { subject: "Wellbeing", value: avgWellbeing, fullMark: 5 },
-    { subject: "Low cravings", value: Math.max(0, 5 - avgCravings), fullMark: 5 },
-    { subject: "Low amount", value: Math.max(0, 5 - (avgAmount / 10) * 5), fullMark: 5 },
+    {
+      subject: "Low cravings",
+      value: Math.max(0, 5 - avgCravings),
+      fullMark: 5,
+    },
+    {
+      subject: "Low amount",
+      value: Math.max(0, 5 - (avgAmount / 10) * 5),
+      fullMark: 5,
+    },
     { subject: "Sober days", value: sobrietyPct, fullMark: 5 },
   ];
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <RadarChart data={data} margin={{ top: 10, right: 40, left: 40, bottom: 10 }}>
+      <RadarChart
+        data={data}
+        margin={{ top: 10, right: 40, left: 40, bottom: 10 }}
+      >
         <PolarGrid stroke={c.grid} />
-        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: c.muted, fontWeight: 600 }} />
-        <PolarRadiusAxis angle={90} domain={[0, 5]} tick={{ fontSize: 9, fill: c.muted }} tickCount={4} />
+        <PolarAngleAxis
+          dataKey="subject"
+          tick={{ fontSize: 11, fill: c.muted, fontWeight: 600 }}
+        />
+        <PolarRadiusAxis
+          angle={90}
+          domain={[0, 5]}
+          tick={{ fontSize: 9, fill: c.muted }}
+          tickCount={4}
+        />
         <Radar
           name="Patient profile"
           dataKey="value"
@@ -287,166 +379,389 @@ function WellbeingRadarChart({ records, c }) {
   );
 }
 
-// ── Sober streak heatmap ───────────────────────────────────────────────────
-// GitHub-contributions style. One cell per day in the range. Color uses
-// SCORE_COLORS (mobile palette). Days without records are neutral gray.
-function SoberStreakHeatmap({ records, range, c }) {
-  const recMap = useMemo(() => {
-    const m = {};
-    records.forEach((r) => {
-      m[fmtDate(r.date ?? r.createdAt)] = r;
-    });
-    return m;
+// ── Substance amount over time ─────────────────────────────────────────────
+// Replaces the old MoodDistribution. Tracks how much was consumed each day —
+// reduction shows up as a downward trend even before full sobriety. Sober
+// days are 0. Headline stats: total amount, avg per use day, peak day.
+function SubstanceAmountTrend({ records, c, t }) {
+  const data = useMemo(() => {
+    return records.map((r) => ({
+      date: shortDate(r.date ?? r.createdAt),
+      amount: Number(r.amount) || 0,
+      sober: (r.substances ?? []).length === 0,
+    }));
   }, [records]);
 
-  // Build the grid of dates from oldest in range → today, oldest first
-  const days = useMemo(() => {
-    const out = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const start = new Date(today);
-    start.setDate(start.getDate() - (range - 1));
-    for (let i = 0; i < range; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      out.push(d);
-    }
-    return out;
-  }, [range]);
-
-  // Streak metrics
   const stats = useMemo(() => {
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let running = 0;
-    let soberCount = 0;
-    let usedCount = 0;
-    let runningCurrent = 0;
-
-    days.forEach((d, i) => {
-      const rec = recMap[fmtDate(d)];
-      const subs = rec?.substances ?? [];
-      const isSober = rec && subs.length === 0;
-      const isUsed = rec && subs.length > 0;
-      if (isSober) soberCount++;
-      if (isUsed) usedCount++;
-
-      // Longest streak — count any sober day; reset on use; missing days break the streak
-      if (isSober) {
-        running++;
-        longestStreak = Math.max(longestStreak, running);
-      } else {
-        running = 0;
-      }
-
-      // Current streak — counted from end of range backward in second pass
-      if (i === days.length - 1) {
-        // start counting backward
-        for (let j = days.length - 1; j >= 0; j--) {
-          const r = recMap[fmtDate(days[j])];
-          const ss = r?.substances ?? [];
-          if (r && ss.length === 0) {
-            runningCurrent++;
-          } else {
-            break;
-          }
-        }
-        currentStreak = runningCurrent;
-      }
+    const useDays = data.filter((d) => !d.sober);
+    const totalAmount = useDays.reduce((s, d) => s + d.amount, 0);
+    const avgUseDay = useDays.length
+      ? Math.round((totalAmount / useDays.length) * 10) / 10
+      : 0;
+    const peak = data.reduce((max, d) => (d.amount > max.amount ? d : max), {
+      date: null,
+      amount: 0,
     });
+    return { totalAmount, avgUseDay, peak, useDayCount: useDays.length };
+  }, [data]);
 
-    return { currentStreak, longestStreak, soberCount, usedCount, totalDays: days.length };
-  }, [days, recMap]);
-
-  // Cell sizing — aim for ~7 columns when range=7, otherwise wider grid
-  const cols = range <= 14 ? range : range <= 31 ? 7 : range <= 90 ? 13 : 14;
-  const rows = Math.ceil(days.length / cols);
-
-  // Reorganize days into a column-major grid so newest is bottom-right
-  const grid = [];
-  for (let col = 0; col < cols; col++) {
-    grid.push([]);
-    for (let row = 0; row < rows; row++) {
-      const idx = col * rows + row;
-      grid[col].push(idx < days.length ? days[idx] : null);
-    }
+  if (data.length === 0 || stats.totalAmount === 0) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          color: MU_VAR,
+          fontSize: 12,
+          padding: 20,
+        }}
+      >
+        {t.noUseInRange ?? "No substance use logged in this period"}
+      </div>
+    );
   }
-
-  const cellSize = 14;
-  const cellGap = 3;
 
   return (
     <div>
-      {/* Stats row */}
-      <div style={{ display: "flex", gap: 14, marginBottom: 14, flexWrap: "wrap" }}>
-        <Stat label="Current sober streak" value={`${stats.currentStreak}d`} accent={c.accent} muted={c.muted} text={c.text} />
-        <Stat label="Longest in range"     value={`${stats.longestStreak}d`} accent="#22C55E" muted={c.muted} text={c.text} />
-        <Stat label="Sober days"            value={`${stats.soberCount}/${stats.totalDays}`} accent="#22C55E" muted={c.muted} text={c.text} />
-        <Stat label="Use days"              value={`${stats.usedCount}/${stats.totalDays}`}  accent="#EF4444" muted={c.muted} text={c.text} />
-      </div>
-
-      {/* Heatmap grid */}
-      <div style={{ display: "flex", gap: cellGap, alignItems: "flex-start" }}>
-        {grid.map((column, ci) => (
-          <div key={ci} style={{ display: "flex", flexDirection: "column", gap: cellGap }}>
-            {column.map((d, ri) => {
-              if (!d) return <div key={ri} style={{ width: cellSize, height: cellSize }} />;
-              const rec = recMap[fmtDate(d)];
-              const score = dayScore(rec);
-              const bg = rec == null ? c.grid : score == null ? c.grid : SCORE_COLORS[score];
-              const tooltip = rec
-                ? `${fmtDate(d)} · ${rec.substances?.length ? rec.substances.join(", ") : "Sober"}${score != null ? ` · score ${score}` : ""}`
-                : `${fmtDate(d)} · No log`;
-              return (
-                <div
-                  key={ri}
-                  title={tooltip}
-                  style={{
-                    width: cellSize,
-                    height: cellSize,
-                    background: bg,
-                    borderRadius: 3,
-                    border: rec == null ? `1px dashed ${c.border}` : "none",
-                    cursor: "default",
-                  }}
-                />
-              );
-            })}
+      {/* Headline stats */}
+      <div
+        style={{ display: "flex", gap: 14, marginBottom: 16, flexWrap: "wrap" }}
+      >
+        <div style={{ flex: "1 1 auto", minWidth: 100 }}>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: c.accentStrong,
+              lineHeight: 1,
+            }}
+          >
+            {stats.totalAmount}
           </div>
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, fontSize: 10, color: c.muted, flexWrap: "wrap" }}>
-        <span style={{ fontWeight: 600 }}>Severity:</span>
-        {[0, 1, 2, 3, 4, 5].map((s) => (
-          <div key={s} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: SCORE_COLORS[s] }} />
-            <span>{s === 0 ? "best" : s === 5 ? "worst" : s}</span>
+          <div
+            style={{
+              fontSize: 9,
+              color: c.muted,
+              fontWeight: 700,
+              letterSpacing: 0.5,
+              textTransform: "uppercase",
+              marginTop: 4,
+            }}
+          >
+            {t.totalAmount ?? "Total amount"}
           </div>
-        ))}
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <div style={{ width: 10, height: 10, borderRadius: 2, background: "transparent", border: `1px dashed ${c.border}` }} />
-          <span>no log</span>
         </div>
+        <div style={{ flex: "1 1 auto", minWidth: 100 }}>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: c.accent,
+              lineHeight: 1,
+            }}
+          >
+            {stats.avgUseDay}
+          </div>
+          <div
+            style={{
+              fontSize: 9,
+              color: c.muted,
+              fontWeight: 700,
+              letterSpacing: 0.5,
+              textTransform: "uppercase",
+              marginTop: 4,
+            }}
+          >
+            {t.avgPerUseDay ?? "Avg / use day"}
+          </div>
+        </div>
+        {stats.peak.amount > 0 && (
+          <div style={{ flex: "1 1 auto", minWidth: 100 }}>
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: "#EF4444",
+                lineHeight: 1,
+              }}
+            >
+              {stats.peak.amount}
+            </div>
+            <div
+              style={{
+                fontSize: 9,
+                color: c.muted,
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                textTransform: "uppercase",
+                marginTop: 4,
+              }}
+            >
+              {t.peakDay ?? "Peak"} · {stats.peak.date}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Area chart with filled gradient */}
+      <ResponsiveContainer width="100%" height={200}>
+        <AreaChart
+          data={data}
+          margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="amountGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ec407a" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="#ec407a" stopOpacity={0.05} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={c.grid}
+            vertical={false}
+          />
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 10, fill: c.muted }}
+            tickLine={false}
+            axisLine={false}
+            interval={Math.ceil(data.length / 8)}
+          />
+          <YAxis
+            tick={{ fontSize: 10, fill: c.muted }}
+            tickLine={false}
+            axisLine={false}
+            allowDecimals={false}
+          />
+          <Tooltip
+            contentStyle={{
+              fontSize: 11,
+              borderRadius: 8,
+              border: `1px solid ${c.border}`,
+              background: c.surface,
+              color: c.text,
+            }}
+            formatter={(v, name, props) => {
+              const isSober = props?.payload?.sober;
+              if (isSober) return [t.sober ?? "Sober", ""];
+              return [v, t.amount ?? "Amount"];
+            }}
+          />
+          <Area
+            type="monotone"
+            dataKey="amount"
+            stroke="#ec407a"
+            strokeWidth={2}
+            fill="url(#amountGradient)"
+            dot={{ r: 2, fill: "#ec407a", strokeWidth: 0 }}
+            activeDot={{ r: 5 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }
 
-function Stat({ label, value, accent, muted, text }) {
-  return (
-    <div style={{ flex: "1 1 auto", minWidth: 100 }}>
-      <div style={{ fontSize: 18, fontWeight: 800, color: accent, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 9, color: muted, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 4 }}>
-        {label}
+// ── Day-of-week pattern ────────────────────────────────────────────────────
+// Replaces the weekly stacked bar chart. For each weekday (Mon–Sun), shows
+// what % of logged days had substance use. Answers: "is Friday harder than
+// Tuesday?" — a question none of the other charts can answer because they
+// collapse the time dimension.
+function DayOfWeekPattern({ records, c, t }) {
+  const data = useMemo(() => {
+    const weekdayLabels = t.weekdays ?? [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun",
+    ];
+    const buckets = weekdayLabels.map((label) => ({
+      day: label,
+      logged: 0,
+      used: 0,
+      pct: 0,
+    }));
+
+    records.forEach((r) => {
+      const d = new Date(r.date ?? r.createdAt);
+      const idx = (d.getDay() + 6) % 7;
+      const bucket = buckets[idx];
+      bucket.logged++;
+      if ((r.substances ?? []).length > 0) bucket.used++;
+    });
+
+    buckets.forEach((b) => {
+      b.pct = b.logged ? Math.round((b.used / b.logged) * 100) : 0;
+    });
+
+    return buckets;
+  }, [records, t]);
+
+  const totalLogged = data.reduce((s, d) => s + d.logged, 0);
+
+  const ranked = useMemo(() => {
+    const withData = data.filter((d) => d.logged > 0);
+    if (withData.length === 0) return { hardest: null, easiest: null };
+    const sorted = [...withData].sort((a, b) => b.pct - a.pct);
+    return {
+      hardest: sorted[0],
+      easiest: sorted[sorted.length - 1],
+    };
+  }, [data]);
+
+  const barColor = (pct) => {
+    if (pct === 0) return "#22C55E";
+    if (pct < 25) return "#7AABDB";
+    if (pct < 50) return "#FBBF24";
+    if (pct < 75) return "#FB923C";
+    return "#EF4444";
+  };
+
+  if (totalLogged === 0) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          color: MU_VAR,
+          fontSize: 12,
+          padding: 20,
+        }}
+      >
+        {t.noData ?? "No data in range"}
       </div>
+    );
+  }
+
+  return (
+    <div>
+      {ranked.hardest && ranked.hardest.pct > 0 && (
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            marginBottom: 14,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ flex: "1 1 auto", minWidth: 120 }}>
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 800,
+                color: barColor(ranked.hardest.pct),
+                lineHeight: 1.1,
+              }}
+            >
+              {ranked.hardest.day} · {ranked.hardest.pct}%
+            </div>
+            <div
+              style={{
+                fontSize: 9,
+                color: c.muted,
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                textTransform: "uppercase",
+                marginTop: 4,
+              }}
+            >
+              {t.hardestDay ?? "Hardest day"}
+            </div>
+          </div>
+          {ranked.easiest && ranked.easiest !== ranked.hardest && (
+            <div style={{ flex: "1 1 auto", minWidth: 120 }}>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: barColor(ranked.easiest.pct),
+                  lineHeight: 1.1,
+                }}
+              >
+                {ranked.easiest.day} · {ranked.easiest.pct}%
+              </div>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: c.muted,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  textTransform: "uppercase",
+                  marginTop: 4,
+                }}
+              >
+                {t.easiestDay ?? "Easiest day"}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart
+          data={data}
+          margin={{ top: 12, right: 8, left: -20, bottom: 0 }}
+        >
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={c.grid}
+            vertical={false}
+          />
+          <XAxis
+            dataKey="day"
+            tick={{ fontSize: 11, fill: c.muted, fontWeight: 600 }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: 10, fill: c.muted }}
+            tickLine={false}
+            axisLine={false}
+            domain={[0, 100]}
+            ticks={[0, 25, 50, 75, 100]}
+            tickFormatter={(v) => `${v}%`}
+          />
+          <Tooltip
+            contentStyle={{
+              fontSize: 11,
+              borderRadius: 8,
+              border: `1px solid ${c.border}`,
+              background: c.surface,
+              color: c.text,
+            }}
+            formatter={(v, name, props) => {
+              const p = props?.payload;
+              if (!p) return [`${v}%`, name];
+              const detail = `${p.used}/${p.logged} ${t.days ?? "days"} · ${v}%`;
+              return [detail, t.useRate ?? "Use rate"];
+            }}
+            labelFormatter={(label) => label}
+            cursor={{ fill: c.grid, opacity: 0.3 }}
+          />
+          <Bar
+            dataKey="pct"
+            radius={[4, 4, 0, 0]}
+            maxBarSize={40}
+            label={{
+              position: "top",
+              fill: c.text,
+              fontSize: 10,
+              fontWeight: 700,
+              formatter: (v) => (v > 0 ? `${v}%` : ""),
+            }}
+          >
+            {data.map((entry, i) => (
+              <Cell key={i} fill={barColor(entry.pct)} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
 
 // ── Side effects frequency bar ────────────────────────────────────────────
-// Horizontal bars, sorted by count descending. Color is warning-orange.
 function SideEffectsBar({ records, c }) {
   const data = useMemo(() => {
     const counts = {};
@@ -465,7 +780,14 @@ function SideEffectsBar({ records, c }) {
 
   if (data.length === 0) {
     return (
-      <div style={{ textAlign: "center", color: MU_VAR, fontSize: 12, padding: 20 }}>
+      <div
+        style={{
+          textAlign: "center",
+          color: MU_VAR,
+          fontSize: 12,
+          padding: 20,
+        }}
+      >
         No side effects logged in this period
       </div>
     );
@@ -480,7 +802,11 @@ function SideEffectsBar({ records, c }) {
         layout="vertical"
         margin={{ top: 4, right: 24, left: 0, bottom: 0 }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke={c.grid} horizontal={false} />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke={c.grid}
+          horizontal={false}
+        />
         <XAxis
           type="number"
           tick={{ fontSize: 10, fill: c.muted }}
@@ -511,7 +837,12 @@ function SideEffectsBar({ records, c }) {
           fill="#f4a07a"
           radius={[0, 4, 4, 0]}
           maxBarSize={20}
-          label={{ position: "right", fill: c.text, fontSize: 10, fontWeight: 700 }}
+          label={{
+            position: "right",
+            fill: c.text,
+            fontSize: 10,
+            fontWeight: 700,
+          }}
         />
       </BarChart>
     </ResponsiveContainer>
@@ -519,9 +850,6 @@ function SideEffectsBar({ records, c }) {
 }
 
 // ── Substance mix donut ────────────────────────────────────────────────────
-// Mirrors Coachly's CategoryMixDonut layout: 200px donut + 2-col legend.
-// Slice = days. Tooltip shows days + total amount. Includes a "Sober" slice
-// for days with no substances logged.
 function SubstanceMixDonut({ records, c, t }) {
   const data = useMemo(() => {
     const stats = {};
@@ -543,7 +871,6 @@ function SubstanceMixDonut({ records, c, t }) {
       .sort((a, b) => b[1].days - a[1].days)
       .map(([name, v]) => ({ name, days: v.days, amount: v.totalAmount }));
 
-    // Prepend Sober if there are any sober days
     if (soberDays > 0) {
       entries.unshift({ name: "sober", days: soberDays, amount: 0 });
     }
@@ -553,7 +880,6 @@ function SubstanceMixDonut({ records, c, t }) {
   const totalDays = data.reduce((s, d) => s + d.days, 0);
   const isEmpty = data.length === 0;
 
-  // Sober uses the green from SCORE_COLORS (semantic match with the heatmap)
   const sliceColor = (name) => {
     if (name === "sober") return "#22C55E";
     if (name === "empty") return "#E8EEF5";
@@ -585,7 +911,10 @@ function SubstanceMixDonut({ records, c, t }) {
               isAnimationActive={false}
             >
               {(isEmpty ? [{ name: "empty" }] : data).map((entry, i) => (
-                <Cell key={`${entry.name}-${i}`} fill={sliceColor(entry.name)} />
+                <Cell
+                  key={`${entry.name}-${i}`}
+                  fill={sliceColor(entry.name)}
+                />
               ))}
             </Pie>
             {!isEmpty && (
@@ -610,7 +939,6 @@ function SubstanceMixDonut({ records, c, t }) {
           </PieChart>
         </ResponsiveContainer>
 
-        {/* Center text — total tracked days */}
         {!isEmpty && (
           <div
             style={{
@@ -623,17 +951,32 @@ function SubstanceMixDonut({ records, c, t }) {
               pointerEvents: "none",
             }}
           >
-            <div style={{ fontSize: 22, fontWeight: 800, color: c.accentStrong, lineHeight: 1 }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 800,
+                color: c.accentStrong,
+                lineHeight: 1,
+              }}
+            >
               {totalDays}
             </div>
-            <div style={{ fontSize: 9, fontWeight: 700, color: c.muted, letterSpacing: 0.6, textTransform: "uppercase", marginTop: 3 }}>
+            <div
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                color: c.muted,
+                letterSpacing: 0.6,
+                textTransform: "uppercase",
+                marginTop: 3,
+              }}
+            >
               {t.daysLogged ?? "days"}
             </div>
           </div>
         )}
       </div>
 
-      {/* Legend: 2-column grid like Coachly */}
       {!isEmpty ? (
         <div
           style={{
@@ -645,9 +988,13 @@ function SubstanceMixDonut({ records, c, t }) {
           }}
         >
           {data.map((d) => {
-            const pct = totalDays > 0 ? Math.round((d.days / totalDays) * 100) : 0;
+            const pct =
+              totalDays > 0 ? Math.round((d.days / totalDays) * 100) : 0;
             return (
-              <div key={d.name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div
+                key={d.name}
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+              >
                 <span
                   style={{
                     width: 10,
@@ -657,10 +1004,19 @@ function SubstanceMixDonut({ records, c, t }) {
                     background: sliceColor(d.name),
                   }}
                 />
-                <span style={{ color: c.text, fontWeight: 600, flex: 1, textTransform: "capitalize" }}>
+                <span
+                  style={{
+                    color: c.text,
+                    fontWeight: 600,
+                    flex: 1,
+                    textTransform: "capitalize",
+                  }}
+                >
                   {labelOf(d.name)}
                 </span>
-                <span style={{ color: c.muted, fontVariantNumeric: "tabular-nums" }}>
+                <span
+                  style={{ color: c.muted, fontVariantNumeric: "tabular-nums" }}
+                >
                   {d.days}d · {pct}%
                 </span>
               </div>
@@ -668,7 +1024,15 @@ function SubstanceMixDonut({ records, c, t }) {
           })}
         </div>
       ) : (
-        <div style={{ textAlign: "center", color: c.muted, fontSize: 11, fontStyle: "italic", padding: "8px 0" }}>
+        <div
+          style={{
+            textAlign: "center",
+            color: c.muted,
+            fontSize: 11,
+            fontStyle: "italic",
+            padding: "8px 0",
+          }}
+        >
           {t.noSubstances ?? "No data"}
         </div>
       )}
@@ -711,7 +1075,9 @@ export default function GraphsPage() {
     cutoff.setDate(cutoff.getDate() - range);
     return [...(data.records ?? [])]
       .filter((r) => new Date(r.date ?? r.createdAt) >= cutoff)
-      .sort((a, b) => (a.date ?? a.createdAt).localeCompare(b.date ?? b.createdAt));
+      .sort((a, b) =>
+        (a.date ?? a.createdAt).localeCompare(b.date ?? b.createdAt),
+      );
   }, [data, range]);
 
   const moodData = useMemo(
@@ -725,23 +1091,6 @@ export default function GraphsPage() {
     [records],
   );
 
-  const substanceData = useMemo(() => {
-    const weeks = {};
-    records.forEach((r) => {
-      const d = new Date(r.date ?? r.createdAt);
-      const day = d.getDay();
-      const diff = d.getDate() - (day === 0 ? 6 : day - 1);
-      const mon = new Date(d);
-      mon.setDate(diff);
-      const key = `${pad(mon.getMonth() + 1)}/${pad(mon.getDate())}`;
-      if (!weeks[key]) weeks[key] = { week: key };
-      (r.substances ?? []).forEach((s) => {
-        weeks[key][s] = (weeks[key][s] ?? 0) + 1;
-      });
-    });
-    return Object.values(weeks);
-  }, [records]);
-
   const allSubs = useMemo(() => {
     const s = new Set();
     records.forEach((r) => (r.substances ?? []).forEach((x) => s.add(x)));
@@ -752,18 +1101,21 @@ export default function GraphsPage() {
     () =>
       records
         .filter((r) => r.weight)
-        .map((r) => ({ date: shortDate(r.date ?? r.createdAt), weight: r.weight })),
+        .map((r) => ({
+          date: shortDate(r.date ?? r.createdAt),
+          weight: r.weight,
+        })),
     [records],
   );
 
   const qScores = useMemo(() => {
     if (!data) return [];
     return [
-      { key: "latestGad7",      label: "GAD-7",     max: 21, color: "#7C3AED" },
-      { key: "latestPhq9",      label: "PHQ-9",     max: 27, color: "#DC2626" },
-      { key: "latestAudit",     label: "AUDIT",     max: 40, color: "#D97706" },
-      { key: "latestDast10",    label: "DAST-10",   max: 10, color: "#059669" },
-      { key: "latestCage",      label: "CAGE",      max: 4,  color: "#0284C7" },
+      { key: "latestGad7", label: "GAD-7", max: 21, color: "#7C3AED" },
+      { key: "latestPhq9", label: "PHQ-9", max: 27, color: "#DC2626" },
+      { key: "latestAudit", label: "AUDIT", max: 40, color: "#D97706" },
+      { key: "latestDast10", label: "DAST-10", max: 10, color: "#059669" },
+      { key: "latestCage", label: "CAGE", max: 4, color: "#0284C7" },
       { key: "latestReadiness", label: "Readiness", max: 30, color: "#0891B2" },
     ].map((q) => {
       const raw = data[q.key];
@@ -786,8 +1138,23 @@ export default function GraphsPage() {
   return (
     <div style={{ maxWidth: 880, margin: "0 auto", width: "100%" }}>
       {/* Range selector */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: MU_VAR, letterSpacing: 0.5 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 20,
+          flexWrap: "wrap",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: MU_VAR,
+            letterSpacing: 0.5,
+          }}
+        >
           {(t.graphs ?? "RANGE").toUpperCase()}:
         </span>
         {[7, 30, 90, 365].map((r) => (
@@ -842,12 +1209,18 @@ export default function GraphsPage() {
             marginBottom: 16,
           }}
         >
-          <Card title="Recovery Profile" subtitle="Higher = better across all axes">
+          <Card
+            title="Recovery Profile"
+            subtitle="Higher = better across all axes"
+          >
             <WellbeingRadarChart records={records} c={c} />
           </Card>
 
           {allSubs.length >= 3 && (
-            <Card title="Substance Profile" subtitle="Days used & avg amount per substance">
+            <Card
+              title="Substance Profile"
+              subtitle="Days used & avg amount per substance"
+            >
               <SubstanceRadarChart records={records} c={c} />
             </Card>
           )}
@@ -860,7 +1233,7 @@ export default function GraphsPage() {
         </div>
       )}
 
-      {/* ── Top grid: Sobriety + Mix + Side Effects + Substance Use ── */}
+      {/* ── Top grid: Amount Trend + Mix + Side Effects + Day-of-Week ── */}
       {records.length > 0 && (
         <div
           style={{
@@ -869,60 +1242,48 @@ export default function GraphsPage() {
             gap: 16,
           }}
         >
-          <Card title="Sobriety Heatmap" subtitle="One cell per day · color = day severity">
-            <SoberStreakHeatmap records={records} range={range === 365 ? Math.max(records.length, 90) : range} c={c} />
+          <Card title="Side Effects" subtitle="Days each effect was logged">
+            <SideEffectsBar records={records} c={c} />
           </Card>
 
           <Card title="Substance Mix" subtitle="Days used per substance">
             <SubstanceMixDonut records={records} c={c} t={t} />
           </Card>
 
-          <Card title="Side Effects" subtitle="Days each effect was logged">
-            <SideEffectsBar records={records} c={c} />
+          <Card
+            title={t.amountOverTime ?? "Amount Over Time"}
+            subtitle={t.dailyConsumption ?? "Daily consumption · 0 = sober"}
+          >
+            <SubstanceAmountTrend records={records} c={c} t={t} />
           </Card>
 
-          {substanceData.length > 0 && allSubs.length > 0 && (
-            <Card title={t.substancesByWeek ?? "Substance Use"} subtitle={`${t.days ?? "days"} / week`}>
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={substanceData} margin={{ top: 8, right: 10, left: 0, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
-                  <XAxis
-                    dataKey="week"
-                    tick={{ fontSize: 10, fill: c.muted }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10, fill: c.muted }}
-                    tickLine={false}
-                    axisLine={false}
-                    allowDecimals={false}
-                  />
-                  <Tooltip content={<CustomTooltip c={c} />} />
-                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8, color: c.text }} />
-                  {allSubs.map((s) => (
-                    <Bar
-                      key={s}
-                      dataKey={s}
-                      name={s.charAt(0).toUpperCase() + s.slice(1)}
-                      fill={SC[s] ?? "#bdbdbd"}
-                      radius={[3, 3, 0, 0]}
-                      maxBarSize={32}
-                    />
-                  ))}
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          )}
+          <Card
+            title={t.dayOfWeekPattern ?? "Day-of-Week Pattern"}
+            subtitle={t.useRateByWeekday ?? "Use rate by weekday"}
+          >
+            <DayOfWeekPattern records={records} c={c} t={t} />
+          </Card>
         </div>
       )}
 
       {/* ── Mood/Cravings/Wellbeing line chart ── */}
-      {moodData.some((d) => d.mood != null || d.cravings != null || d.wellbeing != null) && (
-        <Card title={t.moodCravingsWellbeing ?? "Mood, Cravings & Wellbeing"} subtitle="Scale 1–5">
+      {moodData.some(
+        (d) => d.mood != null || d.cravings != null || d.wellbeing != null,
+      ) && (
+        <Card
+          title={t.moodCravingsWellbeing ?? "Mood, Cravings & Wellbeing"}
+          subtitle="Scale 1–5"
+        >
           <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={moodData} margin={{ top: 4, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
+            <LineChart
+              data={moodData}
+              margin={{ top: 4, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={c.grid}
+                vertical={false}
+              />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 10, fill: c.muted }}
@@ -938,7 +1299,9 @@ export default function GraphsPage() {
                 ticks={[1, 2, 3, 4, 5]}
               />
               <Tooltip content={<CustomTooltip c={c} />} />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8, color: c.text }} />
+              <Legend
+                wrapperStyle={{ fontSize: 11, paddingTop: 8, color: c.text }}
+              />
               <ReferenceLine y={3} stroke={c.grid} strokeDasharray="4 4" />
               <Line
                 type="monotone"
@@ -977,10 +1340,20 @@ export default function GraphsPage() {
 
       {/* ── Weight trend ── */}
       {weightData.length > 1 && (
-        <Card title={t.weightOverTime ?? "Weight Trend"} subtitle={t.kg ?? "kg"}>
+        <Card
+          title={t.weightOverTime ?? "Weight Trend"}
+          subtitle={t.kg ?? "kg"}
+        >
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={weightData} margin={{ top: 4, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
+            <LineChart
+              data={weightData}
+              margin={{ top: 4, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={c.grid}
+                vertical={false}
+              />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 10, fill: c.muted }}
