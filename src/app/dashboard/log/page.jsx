@@ -1,16 +1,19 @@
 // src/app/dashboard/log/page.jsx
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useDashboardT } from "../LangContext";
 
-const A = "#4a7ab5",
-  AD = "#2d4a6e",
-  AL = "#dde8f4",
-  BG = "#eef2f7",
-  SU = "#ffffff",
-  BO = "#d0dcea",
-  TX = "#1a2c3d",
-  MU = "#7a9ab8";
+// Theme tokens — read from CSS variables
+const A   = "var(--accent)";
+const AD  = "var(--accent-strong)";
+const AL  = "var(--accent-soft)";
+const BG  = "var(--bg)";
+const SU  = "var(--card)";
+const BO  = "var(--card-border)";
+const TX  = "var(--text)";
+const MU  = "var(--text-muted)";
+
+// Substance colors — semantic, same in both modes
 const SC = {
   alcohol: "#7986cb",
   cannabis: "#66bb6a",
@@ -23,6 +26,7 @@ const SC = {
   other: "#bdbdbd",
 };
 const sc = (s) => SC[s] ?? "#bdbdbd";
+
 function pad(n) {
   return String(n).padStart(2, "0");
 }
@@ -31,6 +35,7 @@ function fmtDate(d) {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
 }
 function cravingBg(n) {
+  // Severity color stays semantic
   if (n == null) return "transparent";
   if (n <= 1) return "#a8d5a2";
   if (n <= 2) return "#f5c97a";
@@ -38,7 +43,7 @@ function cravingBg(n) {
   return "#e87070";
 }
 
-function ScoreDot({ val, color }) {
+function ScoreDot({ val }) {
   if (val == null) return <span style={{ fontSize: 11, color: MU }}>—</span>;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -95,7 +100,7 @@ function LogRow({ rec, t }) {
         borderRadius: 10,
         border: `1px solid ${BO}`,
         overflow: "hidden",
-        boxShadow: "0 1px 4px rgba(74,122,181,0.05)",
+        boxShadow: "var(--shadow-card)",
       }}
     >
       {/* Compact row */}
@@ -350,9 +355,9 @@ function LogRow({ rec, t }) {
                   <span
                     key={e}
                     style={{
-                      background: "#fff3e0",
-                      color: "#e65100",
-                      border: "1px solid #ffcc8055",
+                      background: "var(--warn-soft)",
+                      color: "var(--warn)",
+                      border: "1px solid var(--warn-soft)",
                       borderRadius: 20,
                       padding: "3px 10px",
                       fontSize: 11,
@@ -387,7 +392,7 @@ function LogRow({ rec, t }) {
                   padding: "8px 12px",
                   fontSize: 12,
                   color: TX,
-                  borderLeft: `3px solid ${A}`,
+                  borderLeft: `3px solid var(--accent)`,
                   fontStyle: "italic",
                   lineHeight: 1.6,
                   gridColumn: "1 / -1",
@@ -406,22 +411,25 @@ function LogRow({ rec, t }) {
 export default function LogPage() {
   const t = useDashboardT();
 
-  const [data] = useState(() => {
-    if (typeof window === "undefined") return null;
+  // Hydration-safe data load
+  const [data, setData] = useState(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
     try {
       const raw = sessionStorage.getItem("patientData");
-      return raw ? JSON.parse(raw) : null;
+      setData(raw ? JSON.parse(raw) : null);
     } catch {
-      return null;
+      setData(null);
     }
-  });
+    setHydrated(true);
+  }, []);
 
   const [search, setSearch] = useState("");
   const [subFilter, setSubFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // All substances seen across records
   const allSubs = useMemo(() => {
     const s = new Set();
     (data?.records ?? []).forEach((r) =>
@@ -430,24 +438,19 @@ export default function LogPage() {
     return ["all", ...s];
   }, [data]);
 
-  // Filtered + sorted records
   const records = useMemo(() => {
     let recs = [...(data?.records ?? [])];
-    // Sort newest first
     recs.sort((a, b) =>
       (b.date ?? b.createdAt).localeCompare(a.date ?? a.createdAt),
     );
-    // Date range
     if (dateFrom)
       recs = recs.filter((r) => (r.date ?? r.createdAt) >= dateFrom);
     if (dateTo)
       recs = recs.filter(
         (r) => (r.date ?? r.createdAt) <= dateTo + "T23:59:59",
       );
-    // Substance filter
     if (subFilter !== "all")
       recs = recs.filter((r) => (r.substances ?? []).includes(subFilter));
-    // Note search
     if (search.trim())
       recs = recs.filter((r) =>
         (r.note ?? "").toLowerCase().includes(search.trim().toLowerCase()),
@@ -455,7 +458,7 @@ export default function LogPage() {
     return recs;
   }, [data, dateFrom, dateTo, subFilter, search]);
 
-  if (!data)
+  if (!hydrated || !data)
     return (
       <div style={{ padding: 40, textAlign: "center", color: MU }}>
         {t.loading ?? "Loading…"}
@@ -474,7 +477,7 @@ export default function LogPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 880, margin: "0 auto", width: "100%" }}>
       {/* Filters bar */}
       <div
         style={{
