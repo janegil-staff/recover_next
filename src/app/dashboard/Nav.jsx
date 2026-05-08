@@ -44,6 +44,7 @@ export default function Nav({ patient }) {
           zIndex: 10,
           boxShadow: "var(--shadow-card)",
         }}
+        suppressHydrationWarning
       >
         <div
           style={{
@@ -262,6 +263,7 @@ export default function Nav({ patient }) {
                   textOverflow: "ellipsis",
                   maxWidth: 52,
                 }}
+                suppressHydrationWarning
               >
                 {tab.label}
               </span>

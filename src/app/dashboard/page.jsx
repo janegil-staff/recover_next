@@ -541,7 +541,7 @@ export default function CalendarPage() {
   }, [data]);
 
   if (!hydrated || !data)
-    return (<div style={{ padding: 40, textAlign: "center", color: MU }}>{t.loading ?? "Loading…"}</div>);
+    return (<div suppressHydrationWarning style={{ padding: 40, textAlign: "center", color: MU }}>{t.loading ?? "Loading…"}</div>);
 
   const { y, m } = month;
   const days = daysInMonth(y, m);
