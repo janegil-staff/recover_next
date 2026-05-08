@@ -5,7 +5,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useDashboardT } from "./LangContext";
 
-import { BO, MU, SU } from "@/components/dashboard/calendar/theme";
+import { BO, MU } from "@/components/dashboard/calendar/theme";
 import { fmtDate, pad } from "@/components/dashboard/calendar/helpers";
 import WellnessIndex from "@/components/dashboard/calendar/WellnessIndex";
 import CalendarGrid from "@/components/dashboard/calendar/CalendarGrid";
@@ -16,14 +16,10 @@ import QuestionnairesList from "@/components/dashboard/calendar/QuestionnairesLi
 import DayModal from "@/components/dashboard/calendar/DayModal";
 import QuestionnaireModal from "@/components/dashboard/calendar/QuestionnaireModal";
 import StreakComparison from "@/components/dashboard/StreakComparison";
-
-const A = "var(--accent)";
-const AD = "var(--accent-strong)";
-const AL = "var(--accent-soft)";
+import Collapsible from "@/components/dashboard/Collapsible";
+import RelevantAdviceList from "@/components/dashboard/calendar/RelevantAdviceList";
 
 // ── Section wayfinding label ─────────────────────────────────────────────
-// A small uppercase header that groups cards into "thoughts" the eye can
-// process one at a time. Quiet enough to not compete with the cards below.
 function SectionLabel({ children }) {
   return (
     <div
@@ -45,8 +41,6 @@ function SectionLabel({ children }) {
 export default function CalendarPage() {
   const t = useDashboardT();
 
-  // Hydration-safe data load: same loading state on server + first client
-  // render, then populate from sessionStorage in an effect.
   const [data, setData] = useState(null);
   const [hydrated, setHydrated] = useState(false);
 
@@ -107,6 +101,24 @@ export default function CalendarPage() {
       .filter(Boolean);
   }, [data]);
 
+  // Collapsible badge counts
+  const substanceCount = useMemo(
+    () =>
+      monthRecs.reduce(
+        (n, r) => n + ((r.substances ?? []).length > 0 ? 1 : 0),
+        0,
+      ),
+    [monthRecs],
+  );
+  const medicationCount = useMemo(
+    () =>
+      monthRecs.reduce(
+        (n, r) => n + ((r.medicationsTaken ?? []).length > 0 ? 1 : 0),
+        0,
+      ),
+    [monthRecs],
+  );
+
   if (!hydrated || !data)
     return (
       <div
@@ -122,22 +134,16 @@ export default function CalendarPage() {
   return (
     <div style={{ maxWidth: 880, margin: "0 auto", width: "100%" }}>
       <style>{`
-        .cal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+        .cal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
         @media(max-width:720px){
           .cal-grid{grid-template-columns:1fr}
         }
         .qrow:hover { background: var(--accent-soft); }
-
-        /* Vertical rhythm — a single class for major section gaps so spacing
-           changes touch one line, not many. */
         .dash-section + .dash-section { margin-top: 28px; }
-
-        /* Slightly soften secondary cards so the wellness card reads as
-           the dominant element. Uses color-mix so it adapts to dark mode. */
         .secondary-card {
           background: var(--card);
           border-radius: 14px;
-          border: 1px solid color-mix(in srgb, var(--card-border) 65%, transparent);
+          border: 1px solid var(--card-border);
           box-shadow: var(--shadow-card);
           overflow: hidden;
         }
@@ -150,100 +156,101 @@ export default function CalendarPage() {
         <StreakComparison data={data} t={t} />
       </div>
 
-      {/* ── THIS MONTH — calendar + monthly trends + questionnaires ── */}
+      {/* ── SELECTED MONTH — calendar (left) + all collapsibles (right) ── */}
       <div className="dash-section">
         <SectionLabel>
-          {t.sectionSelectedMonth ?? "Selected month"} · {monthLabel} {month.y}
+          {monthLabel} {month.y}
         </SectionLabel>
+
         <div className="cal-grid">
-          {/* Calendar + substances + medications stacked in left column */}
-          <div className="secondary-card">
-            <CalendarGrid
-              month={month}
-              recMap={recMap}
-              onMonthChange={setMonth}
-              onDayClick={setModalDate}
-              t={t}
-            />
-            <MonthlySubstances
-              monthRecs={monthRecs}
-              monthLabel={monthLabel}
-              t={t}
-            />
-            <MonthlyMedications
-              monthRecs={monthRecs}
-              profileMeds={profileMeds}
-              monthLabel={monthLabel}
-              t={t}
-            />
+          {/* ── Left column: Calendar only ── */}
+          <div>
+            <div className="secondary-card">
+              <CalendarGrid
+                month={month}
+                recMap={recMap}
+                onMonthChange={setMonth}
+                onDayClick={setModalDate}
+                t={t}
+              />
+            </div>
           </div>
 
-          {/* Right column: Monthly Averages + Questionnaires */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div className="secondary-card" style={{ flex: 1 }}>
-              {/* Monthly Averages */}
-              <div style={{ padding: "12px 14px 10px" }}>
-                <div
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: A,
-                    letterSpacing: 1.2,
-                    textTransform: "uppercase",
-                    marginBottom: 8,
-                  }}
-                >
-                  {t.monthlyTrends ?? "Monthly Averages"}
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    marginBottom: 12,
-                    padding: "6px 10px",
-                    background: AL,
-                    borderRadius: 8,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 7,
-                      height: 7,
-                      borderRadius: "50%",
-                      background: A,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: AD }}>
-                    {monthRecs.length}{" "}
-                    <span style={{ fontWeight: 500, color: MU }}>
-                      {t.daysLogged ?? "days logged"}
-                    </span>
-                  </span>
-                </div>
-                <MonthlyTrendsCard monthRecs={monthRecs} t={t} />
-              </div>
+          {/* ── Right column: All collapsibles in priority order ── */}
+          <div>
+            <Collapsible
+              id="monthly-trends"
+              title={t.monthlyTrends ?? "Monthly Averages"}
+              badge={
+                monthRecs.length === 0
+                  ? (t.noneThisMonth ?? "none this month")
+                  : `${monthRecs.length} ${t.daysLogged ?? "days logged"}`
+              }
+            >
+              <MonthlyTrendsCard monthRecs={monthRecs} t={t} />
+            </Collapsible>
 
-              <div style={{ borderTop: `1px solid ${BO}` }} />
-
-              {/* Questionnaires */}
-              <div style={{ padding: "12px 14px 4px" }}>
-                <div
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: A,
-                    letterSpacing: 1.2,
-                    textTransform: "uppercase",
-                    marginBottom: 4,
-                  }}
-                >
-                  {t.questionnaires ?? "Questionnaires"}
-                </div>
-              </div>
+            <Collapsible
+              id="questionnaires"
+              title={t.questionnaires ?? "Questionnaires"}
+            >
               <QuestionnairesList data={data} onOpen={setQModal} />
-            </div>
+            </Collapsible>
+
+            <Collapsible
+              id="relevant-advice"
+              title={t.relevantAdvice ?? "Relevant Advice"}
+              badge={
+                (data.relevantAdvice ?? []).length === 0
+                  ? (t.noneSurfaced ?? "none surfaced")
+                  : `${[...new Set(data.relevantAdvice)].length} ${t.items ?? "items"}`
+              }
+            >
+              <RelevantAdviceList data={data} t={t} />
+            </Collapsible>
+
+            <Collapsible
+              id="substances"
+              title={t.substancesUsed ?? "Substances"}
+              badge={
+                substanceCount === 0
+                  ? (t.noneThisMonth ?? "none this month")
+                  : `${substanceCount} ${
+                      substanceCount === 1
+                        ? (t.daySingular ?? "day")
+                        : (t.daysPlural ?? "days")
+                    }`
+              }
+            >
+              <MonthlySubstances
+                monthRecs={monthRecs}
+                monthLabel={monthLabel}
+                t={t}
+              />
+            </Collapsible>
+
+            <Collapsible
+              id="medications"
+              title={t.medicationsTitle ?? "Medications"}
+              badge={
+                profileMeds.length === 0
+                  ? (t.noneThisMonth ?? "none this month")
+                  : medicationCount === 0
+                    ? `${profileMeds.length} ${t.prescribed ?? "prescribed"}`
+                    : `${profileMeds.length} ${t.prescribed ?? "prescribed"} · ${medicationCount} ${
+                        medicationCount === 1
+                          ? (t.daySingular ?? "day")
+                          : (t.daysPlural ?? "days")
+                      } ${t.takenLower ?? "taken"}`
+              }
+            >
+              <MonthlyMedications
+                monthRecs={monthRecs}
+                profileMeds={profileMeds}
+                monthLabel={monthLabel}
+                t={t}
+              />
+            </Collapsible>
           </div>
         </div>
       </div>

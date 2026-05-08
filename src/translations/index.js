@@ -666,6 +666,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT in harmful range',
     'peak': 'peak',
     'endedOn': 'ended',
+    'noneThisMonth': 'none this month',
+    'prescribed': 'prescribed',
+    'takenLower': 'taken',
+    'noAdvice': 'No advice surfaced for this patient yet.',
+    'noneSurfaced': 'none surfaced',
+    'items': 'items',
+    'advice': 'Advice',
   },
 
   no: {
@@ -1307,6 +1314,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT i skadelig område',
     'peak': 'topp',
     'endedOn': 'endte',
+    'noneThisMonth': 'ingen denne måneden',
+    'prescribed': 'foreskrevet',
+    'takenLower': 'tatt',
+    'noAdvice': 'Ingen råd hentet frem for denne pasienten ennå.',
+    'noneSurfaced': 'ingen vist',
+    'items': 'stk',
+    'advice': 'Råd',
   },
 
   sv: {
@@ -1862,6 +1876,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT i skadligt intervall',
     'peak': 'topp',
     'endedOn': 'slutade',
+    'noneThisMonth': 'inga denna månad',
+    'prescribed': 'föreskrivna',
+    'takenLower': 'tagna',
+    'noAdvice': 'Inga råd har hämtats fram för denna patient ännu.',
+    'noneSurfaced': 'inga visade',
+    'items': 'st',
+    'advice': 'Råd',
   },
 
   da: {
@@ -2417,6 +2438,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT i skadeligt område',
     'peak': 'top',
     'endedOn': 'endte',
+    'noneThisMonth': 'ingen denne måned',
+    'prescribed': 'ordineret',
+    'takenLower': 'taget',
+    'noAdvice': 'Intet rådgivning fremhævet for denne patient endnu.',
+    'noneSurfaced': 'ingen vist',
+    'items': 'stk',
+    'advice': 'Råd',
   },
 
   de: {
@@ -2972,6 +3000,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT im schädlichen Bereich',
     'peak': 'Spitze',
     'endedOn': 'endete',
+    'noneThisMonth': 'keine in diesem Monat',
+    'prescribed': 'verordnet',
+    'takenLower': 'eingenommen',
+    'noAdvice': 'Noch keine Hinweise für diesen Patienten angezeigt.',
+    'noneSurfaced': 'keine angezeigt',
+    'items': 'Stück',
+    'advice': 'Hinweis',
   },
 
   fr: {
@@ -3527,6 +3562,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT dans la plage nocive',
     'peak': 'pic',
     'endedOn': 'terminé',
+    'noneThisMonth': 'aucun ce mois',
+    'prescribed': 'prescrits',
+    'takenLower': 'pris',
+    'noAdvice': 'Aucun conseil n\'a encore été affiché pour ce patient.',
+    'noneSurfaced': 'aucun affiché',
+    'items': 'éléments',
+    'advice': 'Conseil',
   },
 
   nl: {
@@ -4082,6 +4124,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT in schadelijk bereik',
     'peak': 'piek',
     'endedOn': 'eindigde',
+    'noneThisMonth': 'geen deze maand',
+    'prescribed': 'voorgeschreven',
+    'takenLower': 'ingenomen',
+    'noAdvice': 'Nog geen advies getoond voor deze patiënt.',
+    'noneSurfaced': 'geen getoond',
+    'items': 'items',
+    'advice': 'Advies',
   },
 
   it: {
@@ -4637,6 +4686,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT in zona nociva',
     'peak': 'picco',
     'endedOn': 'terminata',
+    'noneThisMonth': 'nessuno questo mese',
+    'prescribed': 'prescritti',
+    'takenLower': 'presi',
+    'noAdvice': 'Nessun consiglio presentato per questo paziente.',
+    'noneSurfaced': 'nessuno mostrato',
+    'items': 'elementi',
+    'advice': 'Consiglio',
   },
 
   es: {
@@ -5192,6 +5248,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT en rango nocivo',
     'peak': 'pico',
     'endedOn': 'terminó',
+    'noneThisMonth': 'ninguno este mes',
+    'prescribed': 'recetados',
+    'takenLower': 'tomados',
+    'noAdvice': 'Aún no se ha mostrado consejo para este paciente.',
+    'noneSurfaced': 'ninguno mostrado',
+    'items': 'elementos',
+    'advice': 'Consejo',
   },
 
   fi: {
@@ -5747,6 +5810,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT haitallisella alueella',
     'peak': 'huippu',
     'endedOn': 'päättyi',
+    'noneThisMonth': 'ei tässä kuussa',
+    'prescribed': 'määrätty',
+    'takenLower': 'otettu',
+    'noAdvice': 'Tälle potilaalle ei ole vielä esitetty neuvoja.',
+    'noneSurfaced': 'ei näytetty',
+    'items': 'kpl',
+    'advice': 'Neuvo',
   },
 
   pt: {
@@ -6302,6 +6372,13 @@ const LANG_MAP = {
     'flagAuditHigh': 'AUDIT em faixa nociva',
     'peak': 'pico',
     'endedOn': 'terminou',
+    'noneThisMonth': 'nenhum este mês',
+    'prescribed': 'prescritos',
+    'takenLower': 'tomados',
+    'noAdvice': 'Ainda não foi apresentado nenhum conselho para este paciente.',
+    'noneSurfaced': 'nenhum apresentado',
+    'items': 'itens',
+    'advice': 'Conselho',
   },
 };
 
