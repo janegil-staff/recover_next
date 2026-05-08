@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   LineChart, Line, ReferenceLine, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from "recharts";
@@ -84,11 +84,10 @@ async function generatePDF({data,t,rangeMonths,recs,filteredQuestionnaires}){
   await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
   await new Promise(r=>setTimeout(r,800));
 
-  const [moodImg,recoveryRadarImg,substanceRadarImg,substanceBarImg,weightImg,qRadarImg,substanceMixImg]=await Promise.all([
+  const [moodImg,recoveryRadarImg,substanceRadarImg,weightImg,qRadarImg,substanceMixImg]=await Promise.all([
     captureElement("pdf-chart-mood"),
     captureElement("pdf-chart-recovery-radar"),
     captureElement("pdf-chart-substance-radar"),
-    captureElement("pdf-chart-substance"),
     captureElement("pdf-chart-weight"),
     captureElement("pdf-chart-q-radar"),
     captureElement("pdf-chart-substance-mix"),
@@ -211,14 +210,101 @@ async function generatePDF({data,t,rangeMonths,recs,filteredQuestionnaires}){
 
   y=Math.max(ly,ry)+3;
 
-  // Period stats — full width
+  // ── Period stats + Sober streak panel side by side ─────────────────────────
   sectionHeader(periodLabel);
-  row(t.daysLogged??"Days logged",   recs.length,         false);
-  row(t.avgMood??"Avg mood",         avgOf(recs,"mood"),  true);
-  row(t.avgCravings??"Avg cravings", avgOf(recs,"cravings"),false);
-  row(t.avgWellbeing??"Avg wellbeing",avgOf(recs,"wellbeing"),true);
-  row(t.totalRecords??"Total records",allRecs.length,     false);
-  y+=3;
+
+  const halfStatsCW = (CW - 8) / 2;
+  const streakX = ML + halfStatsCW + 8;
+  const statsStartY = y;
+
+  // Stats rows (left half, right-aligned values)
+  function statRow(label, value, atY, shade = false) {
+    if (shade) { doc.setFillColor(...LGRAY); doc.rect(ML, atY, halfStatsCW, 6, "F"); }
+    doc.setFontSize(9); doc.setFont("helvetica", "normal");
+    doc.setTextColor(...GRAY); doc.text(String(label), ML + 2, atY + 4);
+    doc.setTextColor(...DARK); doc.setFont("helvetica", "bold");
+    doc.text(String(value ?? "—"), ML + halfStatsCW - 2, atY + 4, { align: "right" });
+  }
+
+  let statY = statsStartY;
+  const statsRows = [
+    [t.daysLogged ?? "Days logged",     recs.length,             false],
+    [t.avgMood ?? "Avg mood",           avgOf(recs, "mood"),     true],
+    [t.avgCravings ?? "Avg cravings",   avgOf(recs, "cravings"), false],
+    [t.avgWellbeing ?? "Avg wellbeing", avgOf(recs, "wellbeing"), true],
+    [t.totalRecords ?? "Total records", allRecs.length,          false],
+  ];
+  statsRows.forEach(([l, v, shade]) => { statRow(l, v, statY, shade); statY += 6; });
+
+  // Sober streak metrics from recs (sorted oldest→newest by date)
+  const sortedAsc = [...recs].sort((a, b) =>
+    String(a.date ?? a.createdAt).localeCompare(String(b.date ?? b.createdAt))
+  );
+  let soberCount = 0, useCount = 0, longest = 0, running = 0, current = 0;
+  sortedAsc.forEach(r => {
+    const isSober = (r.substances ?? []).length === 0;
+    if (isSober) {
+      soberCount++;
+      running++;
+      if (running > longest) longest = running;
+    } else {
+      useCount++;
+      running = 0;
+    }
+  });
+  // Current streak — count back from end
+  for (let i = sortedAsc.length - 1; i >= 0; i--) {
+    if ((sortedAsc[i].substances ?? []).length === 0) current++;
+    else break;
+  }
+
+  // Sober streak panel (right half)
+  const panelStartY = statsStartY;
+  const panelH = statY - statsStartY; // match stats height
+
+  // Title — render ABOVE the panel, at exactly the same y as the ALL TIME sectionHeader text
+  // sectionHeader: y+=4, draw line, y+=4, draw text at y, y+=5
+  // → ALL TIME baseline = statsStartY - 5
+  doc.setFontSize(9); doc.setFont("helvetica", "bold");
+  doc.setTextColor(...GRAY);
+  doc.text((t.soberStreak ?? "SOBER STREAK").toUpperCase(), streakX, statsStartY - 5);
+
+  // Background card
+  doc.setFillColor(245, 250, 247); // soft green tint
+  doc.setDrawColor(34, 197, 94, 60); // green border at low opacity (jsPDF will use full color)
+  doc.roundedRect(streakX, panelStartY, halfStatsCW, panelH, 2, 2, "F");
+
+  // Big "current streak" number, centered
+  const bigY = panelStartY + 12;
+  doc.setFontSize(22); doc.setFont("helvetica", "bold");
+  doc.setTextColor(34, 197, 94); // green
+  doc.text(String(current), streakX + halfStatsCW / 2, bigY, { align: "center" });
+  // "days" subtitle right under the number
+  doc.setFontSize(8); doc.setFont("helvetica", "normal");
+  doc.setTextColor(...GRAY);
+  const dayLabel = current === 1 ? (t.daySingular ?? "day") : (t.daysPlural ?? "days");
+  doc.text(`${dayLabel} ${t.streakNow ?? "in a row"}`, streakX + halfStatsCW / 2, bigY + 4, { align: "center" });
+
+  // Three supporting stats below in a row
+  const supY = panelStartY + panelH - 6;
+  const colW = halfStatsCW / 3;
+  const subStats = [
+    [String(longest), t.longest ?? "Longest"],
+    [String(soberCount), t.soberDays ?? "Sober"],
+    [String(useCount), t.useDays ?? "Use"],
+  ];
+  subStats.forEach(([num, label], i) => {
+    const cx = streakX + colW * i + colW / 2;
+    doc.setFontSize(10); doc.setFont("helvetica", "bold");
+    doc.setTextColor(...DARK);
+    doc.text(num, cx, supY - 2, { align: "center" });
+    doc.setFontSize(7); doc.setFont("helvetica", "normal");
+    doc.setTextColor(...GRAY);
+    doc.text(label, cx, supY + 2, { align: "center" });
+  });
+
+  y = Math.max(statY, panelStartY + panelH);
+  y += 3;
 
   if(moodImg){
     sectionHeader(t.moodCravingsWellbeing??"Mood / Cravings / Wellbeing");
@@ -305,9 +391,6 @@ async function generatePDF({data,t,rangeMonths,recs,filteredQuestionnaires}){
     doc.text(t.noSubstancesMonth??"No substances logged",ML+2,y+4);y+=7;
   }
   y+=3;
-  if(substanceBarImg){addChart(substanceBarImg,null,55);}
-
-  y+=3;
 
   const adviceIds=[...new Set(data.relevantAdvice??[])];
   if(adviceIds.length>0){
@@ -331,7 +414,9 @@ async function generatePDF({data,t,rangeMonths,recs,filteredQuestionnaires}){
     y+=3;
   }
 
-  // Full log (already filtered to range via `recs`)
+  // Full log (already filtered to range via `recs`) — always starts on a new page
+  doc.addPage();
+  y = 16;
   const sorted=[...recs].sort((a,b)=>(b.date??b.createdAt).localeCompare(a.date??a.createdAt));
   sectionHeader(t.history??"Log Records");
   if(sorted.length===0){
@@ -412,19 +497,6 @@ function OffscreenCharts({data,recs,filteredQuestionnaires,t}){
     avgAmount:Math.round((v.totalAmt/v.count)*10)/10,
     fullMark:maxCount,
   }));
-
-  const allSubs=[...new Set(recs.flatMap(r=>r.substances??[]))];
-  const weeks={};
-  recs.forEach(r=>{
-    const d=new Date(r.date??r.createdAt);
-    const day=d.getDay();
-    const diff=d.getDate()-(day===0?6:day-1);
-    const mon=new Date(d);mon.setDate(diff);
-    const key=`${pad(mon.getMonth()+1)}/${pad(mon.getDate())}`;
-    if(!weeks[key])weeks[key]={week:key};
-    (r.substances??[]).forEach(s=>{weeks[key][s]=(weeks[key][s]??0)+1;});
-  });
-  const substanceTimeData=Object.values(weeks);
 
   // Weight chart uses range-filtered records too (was previously using allRecs;
   // now it matches the requested range so doctor sees relevant weight trend)
@@ -517,22 +589,6 @@ function OffscreenCharts({data,recs,filteredQuestionnaires,t}){
           </RadarChart>
         </ResponsiveContainer>
       </div>
-
-      {substanceTimeData.length>0&&allSubs.length>0&&(
-        <div id="pdf-chart-substance" style={{width:700,height:260,background:"#fff",padding:"8px 8px 8px 0"}}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={substanceTimeData} margin={{top:8,right:16,left:-10,bottom:0}} barCategoryGap="20%" barGap={2}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e8f0" vertical={false}/>
-              <XAxis dataKey="week" tick={{fontSize:7,fill:"#7a9ab8"}} tickLine={false} axisLine={false}/>
-              <YAxis tick={{fontSize:7,fill:"#7a9ab8"}} tickLine={false} axisLine={false} allowDecimals={false}/>
-              <Tooltip/><Legend wrapperStyle={{fontSize:8,paddingTop:4}}/>
-              {allSubs.map(s=>(
-                <Bar key={s} dataKey={s} name={s.charAt(0).toUpperCase()+s.slice(1)} fill={SC_COLORS[s]??"#bdbdbd"} radius={[3,3,0,0]} maxBarSize={32}/>
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
 
       {/* Substance Mix donut — sits next to substances list in the PDF */}
       {mixEntries.length>0&&(
@@ -703,7 +759,7 @@ export default function PdfExportModal({data,t:tProp,onClose}){
               ✓ 🕸 Recovery Profile radar<br/>
               ✓ 🕸 Substance Profile radar<br/>
               ✓ 🕸 {t.questionnaires??"Questionnaire"} radar<br/>
-              ✓ {t.substancesMonth??"Substance summary"} + bar chart<br/>
+              ✓ {t.substancesMonth??"Substance summary"} + donut chart<br/>
               ✓ {t.weight??"Weight"} trend chart<br/>
               ✓ {t.relevantAdvice??"Relevant advice"} &nbsp;·&nbsp; ✓ {t.history??"Full log"}
             </div>
