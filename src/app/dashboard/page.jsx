@@ -7,14 +7,14 @@ import { useDashboardT } from "./LangContext";
 // Constants kept as strings so existing template literals (e.g. `${A}cc`,
 // `${color}30`) still concatenate; opacity-suffix patterns use rgba/var fallbacks
 // where needed.
-const A   = "var(--accent)";
-const AD  = "var(--accent-strong)";
-const AL  = "var(--accent-soft)";
-const BG  = "var(--bg)";
-const SU  = "var(--card)";
-const BO  = "var(--card-border)";
-const TX  = "var(--text)";
-const MU  = "var(--text-muted)";
+const A = "var(--accent)";
+const AD = "var(--accent-strong)";
+const AL = "var(--accent-soft)";
+const BG = "var(--bg)";
+const SU = "var(--card)";
+const BO = "var(--card-border)";
+const TX = "var(--text)";
+const MU = "var(--text-muted)";
 
 // Substance colors — semantic, look the same in both modes
 const SC = {
@@ -47,7 +47,13 @@ function daysInMonth(y, m) {
 function firstDow(y, m) {
   return (new Date(y, m, 1).getDay() + 6) % 7;
 }
-const FREQ_SCORE = { none: 0, once: 1, few_times: 2, daily: 3, multiple_daily: 4 };
+const FREQ_SCORE = {
+  none: 0,
+  once: 1,
+  few_times: 2,
+  daily: 3,
+  multiple_daily: 4,
+};
 
 function dayScore(rec) {
   if (!rec) return null;
@@ -93,114 +99,363 @@ function qVal(rec, key, index) {
 }
 
 const QC = [
-  { key: "latestGad7",      label: "GAD-7",               max: 21, color: "#7C3AED", fn: s => s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":"Severe" },
-  { key: "latestPhq9",      label: "PHQ-9",               max: 27, color: "#DC2626", fn: s => s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":s<=19?"Mod-severe":"Severe" },
-  { key: "latestAudit",     label: "AUDIT",               max: 40, color: "#D97706", fn: s => s<=7?"Low risk":s<=15?"Hazardous":s<=19?"Harmful":"Likely dep." },
-  { key: "latestDast10",    label: "DAST-10",             max: 10, color: "#059669", fn: s => s===0?"No problem":s<=2?"Low":s<=5?"Moderate":s<=8?"Substantial":"Severe" },
-  { key: "latestCage",      label: "CAGE",                max: 4,  color: "#0284C7", fn: s => s<=1?"Unlikely":s<=2?"Possible":"Likely dep." },
-  { key: "latestReadiness", label: "Readiness to change", max: 30, color: "#0891B2", fn: s => s<=10?"Not ready":s<=20?"Considering":"Ready" },
+  {
+    key: "latestGad7",
+    label: "GAD-7",
+    max: 21,
+    color: "#7C3AED",
+    fn: (s) =>
+      s <= 4 ? "Minimal" : s <= 9 ? "Mild" : s <= 14 ? "Moderate" : "Severe",
+  },
+  {
+    key: "latestPhq9",
+    label: "PHQ-9",
+    max: 27,
+    color: "#DC2626",
+    fn: (s) =>
+      s <= 4
+        ? "Minimal"
+        : s <= 9
+          ? "Mild"
+          : s <= 14
+            ? "Moderate"
+            : s <= 19
+              ? "Mod-severe"
+              : "Severe",
+  },
+  {
+    key: "latestAudit",
+    label: "AUDIT",
+    max: 40,
+    color: "#D97706",
+    fn: (s) =>
+      s <= 7
+        ? "Low risk"
+        : s <= 15
+          ? "Hazardous"
+          : s <= 19
+            ? "Harmful"
+            : "Likely dep.",
+  },
+  {
+    key: "latestDast10",
+    label: "DAST-10",
+    max: 10,
+    color: "#059669",
+    fn: (s) =>
+      s === 0
+        ? "No problem"
+        : s <= 2
+          ? "Low"
+          : s <= 5
+            ? "Moderate"
+            : s <= 8
+              ? "Substantial"
+              : "Severe",
+  },
+  {
+    key: "latestCage",
+    label: "CAGE",
+    max: 4,
+    color: "#0284C7",
+    fn: (s) => (s <= 1 ? "Unlikely" : s <= 2 ? "Possible" : "Likely dep."),
+  },
+  {
+    key: "latestReadiness",
+    label: "Readiness to change",
+    max: 30,
+    color: "#0891B2",
+    fn: (s) => (s <= 10 ? "Not ready" : s <= 20 ? "Considering" : "Ready"),
+  },
 ];
 
 const Q_DETAILS = {
   latestGad7: {
-    label: "GAD-7 · Anxiety", max: 21, color: "#7C3AED",
-    sev: s => s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":"Severe",
+    label: "GAD-7 · Anxiety",
+    max: 21,
+    color: "#7C3AED",
+    sev: (s) =>
+      s <= 4 ? "Minimal" : s <= 9 ? "Mild" : s <= 14 ? "Moderate" : "Severe",
     questions: [
-      { key:"feelingNervous",    label:"Feeling nervous, anxious or on edge" },
-      { key:"noWorryingControl", label:"Not being able to stop or control worrying" },
-      { key:"worrying",          label:"Worrying too much about different things" },
-      { key:"troubleRelaxing",   label:"Trouble relaxing" },
-      { key:"restless",          label:"Being so restless that it is hard to sit still" },
-      { key:"easilyAnnoyed",     label:"Becoming easily annoyed or irritable" },
-      { key:"afraid",            label:"Feeling afraid as if something awful might happen" },
+      { key: "feelingNervous", label: "Feeling nervous, anxious or on edge" },
+      {
+        key: "noWorryingControl",
+        label: "Not being able to stop or control worrying",
+      },
+      { key: "worrying", label: "Worrying too much about different things" },
+      { key: "troubleRelaxing", label: "Trouble relaxing" },
+      {
+        key: "restless",
+        label: "Being so restless that it is hard to sit still",
+      },
+      { key: "easilyAnnoyed", label: "Becoming easily annoyed or irritable" },
+      {
+        key: "afraid",
+        label: "Feeling afraid as if something awful might happen",
+      },
     ],
   },
   latestPhq9: {
-    label: "PHQ-9 · Depression", max: 27, color: "#DC2626",
-    sev: s => s<=4?"Minimal":s<=9?"Mild":s<=14?"Moderate":s<=19?"Mod-severe":"Severe",
+    label: "PHQ-9 · Depression",
+    max: 27,
+    color: "#DC2626",
+    sev: (s) =>
+      s <= 4
+        ? "Minimal"
+        : s <= 9
+          ? "Mild"
+          : s <= 14
+            ? "Moderate"
+            : s <= 19
+              ? "Mod-severe"
+              : "Severe",
     questions: [
-      { key:"noPleasureDoingThings",  label:"Little interest or pleasure in doing things" },
-      { key:"depressed",              label:"Feeling down, depressed, or hopeless" },
-      { key:"stayingAsleep",          label:"Trouble falling or staying asleep, or sleeping too much" },
-      { key:"noEnergy",               label:"Feeling tired or having little energy" },
-      { key:"noAppetite",             label:"Poor appetite or overeating" },
-      { key:"selfPity",               label:"Feeling bad about yourself — or that you are a failure" },
-      { key:"troubleConcentration",   label:"Trouble concentrating on things" },
-      { key:"slowMovingSpeeking",     label:"Moving or speaking so slowly that other people could have noticed" },
-      { key:"suicidal",               label:"Thoughts that you would be better off dead or of hurting yourself" },
+      {
+        key: "noPleasureDoingThings",
+        label: "Little interest or pleasure in doing things",
+      },
+      { key: "depressed", label: "Feeling down, depressed, or hopeless" },
+      {
+        key: "stayingAsleep",
+        label: "Trouble falling or staying asleep, or sleeping too much",
+      },
+      { key: "noEnergy", label: "Feeling tired or having little energy" },
+      { key: "noAppetite", label: "Poor appetite or overeating" },
+      {
+        key: "selfPity",
+        label: "Feeling bad about yourself — or that you are a failure",
+      },
+      { key: "troubleConcentration", label: "Trouble concentrating on things" },
+      {
+        key: "slowMovingSpeeking",
+        label:
+          "Moving or speaking so slowly that other people could have noticed",
+      },
+      {
+        key: "suicidal",
+        label:
+          "Thoughts that you would be better off dead or of hurting yourself",
+      },
     ],
   },
   latestAudit: {
-    label: "AUDIT · Alcohol Use", max: 40, color: "#D97706",
-    sev: s => s<=7?"Low risk":s<=15?"Hazardous":s<=19?"Harmful":"Likely dependent",
+    label: "AUDIT · Alcohol Use",
+    max: 40,
+    color: "#D97706",
+    sev: (s) =>
+      s <= 7
+        ? "Low risk"
+        : s <= 15
+          ? "Hazardous"
+          : s <= 19
+            ? "Harmful"
+            : "Likely dependent",
     questions: [
-      { key:"frequency",         label:"How often do you have a drink containing alcohol?" },
-      { key:"typicalAmount",     label:"How many units on a typical day when drinking?" },
-      { key:"frequencyHeavy",    label:"How often do you have 6 or more units on one occasion?" },
-      { key:"unableToStop",      label:"How often have you found you were unable to stop drinking once started?" },
-      { key:"failedExpected",    label:"How often have you failed to do what was normally expected due to drinking?" },
-      { key:"morningDrink",      label:"How often have you needed a drink in the morning?" },
-      { key:"guilt",             label:"How often have you had a feeling of guilt after drinking?" },
-      { key:"memoryLoss",        label:"How often have you been unable to remember the night before due to drinking?" },
-      { key:"injured",           label:"Have you or someone else been injured as a result of your drinking?" },
-      { key:"concernedByOthers", label:"Has a relative, doctor or other person been concerned about your drinking?" },
+      {
+        key: "frequency",
+        label: "How often do you have a drink containing alcohol?",
+      },
+      {
+        key: "typicalAmount",
+        label: "How many units on a typical day when drinking?",
+      },
+      {
+        key: "frequencyHeavy",
+        label: "How often do you have 6 or more units on one occasion?",
+      },
+      {
+        key: "unableToStop",
+        label:
+          "How often have you found you were unable to stop drinking once started?",
+      },
+      {
+        key: "failedExpected",
+        label:
+          "How often have you failed to do what was normally expected due to drinking?",
+      },
+      {
+        key: "morningDrink",
+        label: "How often have you needed a drink in the morning?",
+      },
+      {
+        key: "guilt",
+        label: "How often have you had a feeling of guilt after drinking?",
+      },
+      {
+        key: "memoryLoss",
+        label:
+          "How often have you been unable to remember the night before due to drinking?",
+      },
+      {
+        key: "injured",
+        label:
+          "Have you or someone else been injured as a result of your drinking?",
+      },
+      {
+        key: "concernedByOthers",
+        label:
+          "Has a relative, doctor or other person been concerned about your drinking?",
+      },
     ],
   },
   latestDast10: {
-    label: "DAST-10 · Drug Use", max: 10, color: "#059669",
-    sev: s => s===0?"No problem":s<=2?"Low":s<=5?"Moderate":s<=8?"Substantial":"Severe",
+    label: "DAST-10 · Drug Use",
+    max: 10,
+    color: "#059669",
+    sev: (s) =>
+      s === 0
+        ? "No problem"
+        : s <= 2
+          ? "Low"
+          : s <= 5
+            ? "Moderate"
+            : s <= 8
+              ? "Substantial"
+              : "Severe",
     questions: [
-      { key:"usedDrugs",           label:"Have you used drugs other than those required for medical reasons?" },
-      { key:"abusedPrescription",  label:"Do you abuse more than one drug at a time?" },
-      { key:"unableToStop",        label:"Are you always able to stop using drugs when you want to?" },
-      { key:"blackouts",           label:"Have you had blackouts or flashbacks as a result of drug use?" },
-      { key:"guiltAboutDrugUse",   label:"Do you ever feel bad or guilty about your drug use?" },
-      { key:"spouseComplains",     label:"Does your spouse/partner or parents ever complain about your involvement with drugs?" },
-      { key:"neglectedFamily",     label:"Have you neglected your family due to use of drugs?" },
-      { key:"illegalActivities",   label:"Have you engaged in illegal activities in order to obtain drugs?" },
-      { key:"withdrawal",          label:"Have you ever experienced withdrawal symptoms when you stopped taking drugs?" },
-      { key:"medicalProblems",     label:"Have you had medical problems as a result of drug use?" },
+      {
+        key: "usedDrugs",
+        label:
+          "Have you used drugs other than those required for medical reasons?",
+      },
+      {
+        key: "abusedPrescription",
+        label: "Do you abuse more than one drug at a time?",
+      },
+      {
+        key: "unableToStop",
+        label: "Are you always able to stop using drugs when you want to?",
+      },
+      {
+        key: "blackouts",
+        label: "Have you had blackouts or flashbacks as a result of drug use?",
+      },
+      {
+        key: "guiltAboutDrugUse",
+        label: "Do you ever feel bad or guilty about your drug use?",
+      },
+      {
+        key: "spouseComplains",
+        label:
+          "Does your spouse/partner or parents ever complain about your involvement with drugs?",
+      },
+      {
+        key: "neglectedFamily",
+        label: "Have you neglected your family due to use of drugs?",
+      },
+      {
+        key: "illegalActivities",
+        label:
+          "Have you engaged in illegal activities in order to obtain drugs?",
+      },
+      {
+        key: "withdrawal",
+        label:
+          "Have you ever experienced withdrawal symptoms when you stopped taking drugs?",
+      },
+      {
+        key: "medicalProblems",
+        label: "Have you had medical problems as a result of drug use?",
+      },
     ],
   },
   latestCage: {
-    label: "CAGE · Alcohol Screening", max: 4, color: "#0284C7",
-    sev: s => s<=1?"Unlikely":s<=2?"Possible":"Likely dependent",
+    label: "CAGE · Alcohol Screening",
+    max: 4,
+    color: "#0284C7",
+    sev: (s) =>
+      s <= 1 ? "Unlikely" : s <= 2 ? "Possible" : "Likely dependent",
     questions: [
-      { key:"cutDown",   label:"Have you ever felt you should Cut down on your drinking?" },
-      { key:"annoyed",   label:"Have people Annoyed you by criticising your drinking?" },
-      { key:"guilty",    label:"Have you ever felt bad or Guilty about your drinking?" },
-      { key:"eyeOpener", label:"Have you ever had a drink first thing in the morning (Eye opener)?" },
+      {
+        key: "cutDown",
+        label: "Have you ever felt you should Cut down on your drinking?",
+      },
+      {
+        key: "annoyed",
+        label: "Have people Annoyed you by criticising your drinking?",
+      },
+      {
+        key: "guilty",
+        label: "Have you ever felt bad or Guilty about your drinking?",
+      },
+      {
+        key: "eyeOpener",
+        label:
+          "Have you ever had a drink first thing in the morning (Eye opener)?",
+      },
     ],
   },
   latestReadiness: {
-    label: "Readiness to Change", max: 30, color: "#0891B2",
-    sev: s => s<=10?"Not ready":s<=20?"Considering":"Ready",
+    label: "Readiness to Change",
+    max: 30,
+    color: "#0891B2",
+    sev: (s) => (s <= 10 ? "Not ready" : s <= 20 ? "Considering" : "Ready"),
     questions: [
-      { key:"q1",  label:"I don't think I drink too much." },
-      { key:"q2",  label:"I am trying to drink less than I used to." },
-      { key:"q3",  label:"I enjoy my drinking but sometimes I drink too much." },
-      { key:"q4",  label:"Sometimes I think I should cut down on my drinking." },
-      { key:"q5",  label:"It's a waste of time thinking about my drinking." },
-      { key:"q6",  label:"I have just recently changed my drinking habits." },
-      { key:"q7",  label:"Anyone can talk about wanting to do something about drinking — I am actually doing something about it." },
-      { key:"q8",  label:"I am at the stage where I should think about drinking less alcohol." },
-      { key:"q9",  label:"My drinking is a problem sometimes." },
-      { key:"q10", label:"There is no need for me to think about changing my drinking." },
+      { key: "q1", label: "I don't think I drink too much." },
+      { key: "q2", label: "I am trying to drink less than I used to." },
+      {
+        key: "q3",
+        label: "I enjoy my drinking but sometimes I drink too much.",
+      },
+      {
+        key: "q4",
+        label: "Sometimes I think I should cut down on my drinking.",
+      },
+      { key: "q5", label: "It's a waste of time thinking about my drinking." },
+      { key: "q6", label: "I have just recently changed my drinking habits." },
+      {
+        key: "q7",
+        label:
+          "Anyone can talk about wanting to do something about drinking — I am actually doing something about it.",
+      },
+      {
+        key: "q8",
+        label:
+          "I am at the stage where I should think about drinking less alcohol.",
+      },
+      { key: "q9", label: "My drinking is a problem sometimes." },
+      {
+        key: "q10",
+        label: "There is no need for me to think about changing my drinking.",
+      },
     ],
   },
 };
 
-const SCORE_LABELS = ["Not at all", "Several days", "More than half the days", "Nearly every day"];
+const SCORE_LABELS = [
+  "Not at all",
+  "Several days",
+  "More than half the days",
+  "Nearly every day",
+];
 
 // ── Monthly Trends ──────────────────────────────────────────────────────────
-const FREQ_VAL = { none: 0, once: 1, few_times: 2, daily: 3, multiple_daily: 4 };
+const FREQ_VAL = {
+  none: 0,
+  once: 1,
+  few_times: 2,
+  daily: 3,
+  multiple_daily: 4,
+};
 
 const TREND_SERIES = [
-  { key: "cravings",  label: "Cravings",  color: "#f4a07a", max: 5,  icon: "🔥" },
-  { key: "mood",      label: "Mood",      color: "#4a7ab5", max: 5,  icon: "😊" },
-  { key: "wellbeing", label: "Wellbeing", color: "#66bb6a", max: 5,  icon: "💙" },
-  { key: "frequency", label: "Frequency", color: "#ab47bc", max: 4,  icon: "📅" },
-  { key: "amount",    label: "Amount",    color: "#ff7043", max: 10, icon: "💊" },
+  { key: "cravings", label: "Cravings", color: "#f4a07a", max: 5, icon: "🔥" },
+  { key: "mood", label: "Mood", color: "#4a7ab5", max: 5, icon: "😊" },
+  {
+    key: "wellbeing",
+    label: "Wellbeing",
+    color: "#66bb6a",
+    max: 5,
+    icon: "💙",
+  },
+  {
+    key: "frequency",
+    label: "Frequency",
+    color: "#ab47bc",
+    max: 4,
+    icon: "📅",
+  },
+  { key: "amount", label: "Amount", color: "#ff7043", max: 10, icon: "💊" },
 ];
 
 function MonthlyTrendsCard({ monthRecs, t }) {
@@ -213,7 +468,9 @@ function MonthlyTrendsCard({ monthRecs, t }) {
           return r[key] ?? null;
         })
         .filter((v) => v != null);
-      out[key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+      out[key] = vals.length
+        ? vals.reduce((a, b) => a + b, 0) / vals.length
+        : null;
     });
     return out;
   }, [monthRecs]);
@@ -225,18 +482,53 @@ function MonthlyTrendsCard({ monthRecs, t }) {
         const pct = avg != null ? (avg / s.max) * 100 : 0;
         return (
           <div key={s.key}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 5,
+              }}
+            >
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <span style={{ fontSize: 14 }}>{s.icon}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: TX }}>{t[s.key] ?? s.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: TX }}>
+                  {t[s.key] ?? s.label}
+                </span>
               </div>
-              <span style={{ fontSize: 15, fontWeight: 800, color: avg != null ? s.color : MU }}>
+              <span
+                style={{
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: avg != null ? s.color : MU,
+                }}
+              >
                 {avg != null ? avg.toFixed(1) : "—"}
-                {avg != null && <span style={{ fontSize: 10, fontWeight: 500, color: MU }}> / {s.max}</span>}
+                {avg != null && (
+                  <span style={{ fontSize: 10, fontWeight: 500, color: MU }}>
+                    {" "}
+                    / {s.max}
+                  </span>
+                )}
               </span>
             </div>
-            <div style={{ height: 6, background: BG, borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ width: `${pct}%`, height: "100%", background: s.color, borderRadius: 3, transition: "width .4s ease" }} />
+            <div
+              style={{
+                height: 6,
+                background: BG,
+                borderRadius: 3,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${pct}%`,
+                  height: "100%",
+                  background: s.color,
+                  borderRadius: 3,
+                  transition: "width .4s ease",
+                }}
+              />
             </div>
           </div>
         );
@@ -296,10 +588,21 @@ function QuestionnaireModal({ qKey, data, onClose }) {
           }}
         >
           <div>
-            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 2 }}>
+            <div
+              style={{
+                color: "rgba(255,255,255,0.7)",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 1.2,
+                textTransform: "uppercase",
+                marginBottom: 2,
+              }}
+            >
               Questionnaire
             </div>
-            <div style={{ color: "#fff", fontSize: 17, fontWeight: 700 }}>{def.label}</div>
+            <div style={{ color: "#fff", fontSize: 17, fontWeight: 700 }}>
+              {def.label}
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -321,7 +624,14 @@ function QuestionnaireModal({ qKey, data, onClose }) {
             ×
           </button>
         </div>
-        <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div
+          style={{
+            padding: 18,
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
           <div
             style={{
               background: def.color + "10",
@@ -334,14 +644,43 @@ function QuestionnaireModal({ qKey, data, onClose }) {
             }}
           >
             <div style={{ flex: 1 }}>
-              <div style={{ height: 6, background: BG, borderRadius: 3, overflow: "hidden", marginBottom: 6 }}>
-                <div style={{ width: `${pct}%`, height: "100%", background: def.color, borderRadius: 3, transition: "width .4s ease" }} />
+              <div
+                style={{
+                  height: 6,
+                  background: BG,
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  marginBottom: 6,
+                }}
+              >
+                <div
+                  style={{
+                    width: `${pct}%`,
+                    height: "100%",
+                    background: def.color,
+                    borderRadius: 3,
+                    transition: "width .4s ease",
+                  }}
+                />
               </div>
-              <div style={{ fontSize: 11, color: def.color, fontWeight: 700 }}>{sev}</div>
+              <div style={{ fontSize: 11, color: def.color, fontWeight: 700 }}>
+                {sev}
+              </div>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: def.color, lineHeight: 1 }}>{total}</div>
-              <div style={{ fontSize: 10, color: MU, fontWeight: 600 }}>/ {def.max}</div>
+              <div
+                style={{
+                  fontSize: 28,
+                  fontWeight: 800,
+                  color: def.color,
+                  lineHeight: 1,
+                }}
+              >
+                {total}
+              </div>
+              <div style={{ fontSize: 10, color: MU, fontWeight: 600 }}>
+                / {def.max}
+              </div>
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -349,7 +688,13 @@ function QuestionnaireModal({ qKey, data, onClose }) {
               const val = qVal(rec, key, qi);
               // Severity color stays semantic
               const scoreColor =
-                val === 0 ? "#4caf50" : val === 1 ? "#ff9800" : val === 2 ? "#ff5722" : "#f44336";
+                val === 0
+                  ? "#4caf50"
+                  : val === 1
+                    ? "#ff9800"
+                    : val === 2
+                      ? "#ff5722"
+                      : "#f44336";
               return (
                 <div
                   key={key}
@@ -362,8 +707,19 @@ function QuestionnaireModal({ qKey, data, onClose }) {
                   }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, color: TX, fontWeight: 500, lineHeight: 1.4 }}>{label}</div>
-                    <div style={{ fontSize: 10, color: MU, marginTop: 2 }}>{SCORE_LABELS[val] ?? "—"}</div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: TX,
+                        fontWeight: 500,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {label}
+                    </div>
+                    <div style={{ fontSize: 10, color: MU, marginTop: 2 }}>
+                      {SCORE_LABELS[val] ?? "—"}
+                    </div>
                   </div>
                   <div
                     style={{
@@ -400,7 +756,16 @@ function QuestionnaireModal({ qKey, data, onClose }) {
 function Section({ title, children }) {
   return (
     <div>
-      <div style={{ fontSize: 10, fontWeight: 700, color: MU, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          color: MU,
+          letterSpacing: 1,
+          textTransform: "uppercase",
+          marginBottom: 8,
+        }}
+      >
         {title}
       </div>
       {children}
@@ -410,9 +775,19 @@ function Section({ title, children }) {
 
 function Pill({ label, val, color }) {
   return (
-    <div style={{ background: color + "18", border: `1px solid ${color}33`, borderRadius: 10, padding: "8px 14px", textAlign: "center" }}>
+    <div
+      style={{
+        background: color + "18",
+        border: `1px solid ${color}33`,
+        borderRadius: 10,
+        padding: "8px 14px",
+        textAlign: "center",
+      }}
+    >
       <div style={{ fontSize: 16, fontWeight: 700, color }}>{val}</div>
-      <div style={{ fontSize: 9, color: MU, fontWeight: 600, marginTop: 1 }}>{label.toUpperCase()}</div>
+      <div style={{ fontSize: 9, color: MU, fontWeight: 600, marginTop: 1 }}>
+        {label.toUpperCase()}
+      </div>
     </div>
   );
 }
@@ -470,10 +845,21 @@ function DayModal({ date, rec, onClose, t }) {
           }}
         >
           <div>
-            <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 2 }}>
+            <div
+              style={{
+                color: "rgba(255,255,255,0.65)",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 1.2,
+                textTransform: "uppercase",
+                marginBottom: 2,
+              }}
+            >
               {t.dailyLog ?? "Daily log"}
             </div>
-            <div style={{ color: "#fff", fontSize: 17, fontWeight: 700 }}>{date}</div>
+            <div style={{ color: "#fff", fontSize: 17, fontWeight: 700 }}>
+              {date}
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -495,12 +881,43 @@ function DayModal({ date, rec, onClose, t }) {
             ×
           </button>
         </div>
-        <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+        <div
+          style={{
+            padding: 18,
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3,1fr)",
+              gap: 8,
+            }}
+          >
             {[
-              { label: t.mood ?? "Mood", val: rec.mood, icon: "😊", max: 5, color: "#4a7ab5" },
-              { label: t.cravings ?? "Cravings", val: rec.cravings, icon: "🔥", max: 5, color: "#f4a07a" },
-              { label: t.wellbeing ?? "Wellbeing", val: rec.wellbeing, icon: "💙", max: 5, color: "#9c27b0" },
+              {
+                label: t.mood ?? "Mood",
+                val: rec.mood,
+                icon: "😊",
+                max: 5,
+                color: "#4a7ab5",
+              },
+              {
+                label: t.cravings ?? "Cravings",
+                val: rec.cravings,
+                icon: "🔥",
+                max: 5,
+                color: "#f4a07a",
+              },
+              {
+                label: t.wellbeing ?? "Wellbeing",
+                val: rec.wellbeing,
+                icon: "💙",
+                max: 5,
+                color: "#9c27b0",
+              },
             ].map((s) => (
               <div
                 key={s.label}
@@ -513,22 +930,64 @@ function DayModal({ date, rec, onClose, t }) {
                 }}
               >
                 <div style={{ fontSize: 18, marginBottom: 3 }}>{s.icon}</div>
-                <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1, color: s.val != null ? AD : MU }}>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    color: s.val != null ? AD : MU,
+                  }}
+                >
                   {s.val != null ? s.val : "—"}
                 </div>
-                <div style={{ fontSize: 9, color: MU, fontWeight: 700, letterSpacing: 0.4, marginTop: 2 }}>
+                <div
+                  style={{
+                    fontSize: 9,
+                    color: MU,
+                    fontWeight: 700,
+                    letterSpacing: 0.4,
+                    marginTop: 2,
+                  }}
+                >
                   {s.label.toUpperCase()} / {s.max}
                 </div>
-                <div style={{ height: 3, background: BO, borderRadius: 2, marginTop: 5, overflow: "hidden" }}>
-                  <div style={{ width: s.val != null ? `${(s.val / s.max) * 100}%` : "0%", height: "100%", background: s.color, borderRadius: 2 }} />
+                <div
+                  style={{
+                    height: 3,
+                    background: BO,
+                    borderRadius: 2,
+                    marginTop: 5,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: s.val != null ? `${(s.val / s.max) * 100}%` : "0%",
+                      height: "100%",
+                      background: s.color,
+                      borderRadius: 2,
+                    }}
+                  />
                 </div>
               </div>
             ))}
           </div>
           <Section title={t.frequency ?? "Frequency & Amount"}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <Pill label={t.frequency ?? "Frequency"} val={rec.frequency ? (freqLabel[rec.frequency] ?? rec.frequency) : "—"} color="#4a7ab5" />
-              <Pill label={t.amount ?? "Amount"} val={rec.amount != null ? rec.amount : "—"} color="#2d4a6e" />
+              <Pill
+                label={t.frequency ?? "Frequency"}
+                val={
+                  rec.frequency
+                    ? (freqLabel[rec.frequency] ?? rec.frequency)
+                    : "—"
+                }
+                color="#4a7ab5"
+              />
+              <Pill
+                label={t.amount ?? "Amount"}
+                val={rec.amount != null ? rec.amount : "—"}
+                color="#2d4a6e"
+              />
             </div>
           </Section>
           <Section title={t.substances ?? "Substances"}>
@@ -553,15 +1012,33 @@ function DayModal({ date, rec, onClose, t }) {
                 ))}
               </div>
             ) : (
-              <span style={{ fontSize: 12, color: MU }}>—</span>
+              <span
+                style={{
+                  background: "#22C55E22",
+                  color: "#16A34A",
+                  border: "1px solid #22C55E44",
+                  borderRadius: 20,
+                  padding: "5px 13px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                {t.sober ?? "Sober"}
+              </span>
             )}
           </Section>
           <Section title={t.medicationsTitle ?? "Medications"}>
             {meds.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {meds.map((med, i) => {
-                  const name = typeof med === "object" ? (med.name ?? med.id ?? "Unknown") : String(med);
-                  const dose = typeof med === "object" ? (med.dosage ?? med.dose ?? null) : null;
+                  const name =
+                    typeof med === "object"
+                      ? (med.name ?? med.id ?? "Unknown")
+                      : String(med);
+                  const dose =
+                    typeof med === "object"
+                      ? (med.dosage ?? med.dose ?? null)
+                      : null;
                   return (
                     <div
                       key={i}
@@ -575,7 +1052,16 @@ function DayModal({ date, rec, onClose, t }) {
                         border: `1px solid ${BO}`,
                       }}
                     >
-                      <div style={{ fontSize: 12, fontWeight: 600, color: TX, textTransform: "capitalize" }}>{name}</div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: TX,
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {name}
+                      </div>
                       {dose != null && (
                         <span
                           style={{
@@ -624,7 +1110,9 @@ function DayModal({ date, rec, onClose, t }) {
           <Section title={t.weight ?? "Weight"}>
             {rec.weight ? (
               <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
-                <span style={{ fontSize: 26, fontWeight: 800, color: AD }}>{rec.weight}</span>
+                <span style={{ fontSize: 26, fontWeight: 800, color: AD }}>
+                  {rec.weight}
+                </span>
                 <span style={{ fontSize: 13, color: MU }}>{t.kg ?? "kg"}</span>
               </div>
             ) : (
@@ -683,8 +1171,18 @@ export default function CalendarPage() {
   const [qModal, setQModal] = useState(null);
 
   const months = t.months ?? [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
   const weekdays = t.weekdays ?? ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -700,12 +1198,18 @@ export default function CalendarPage() {
   const monthRecs = useMemo(() => {
     if (!data) return [];
     const prefix = `${month.y}-${pad(month.m + 1)}`;
-    return (data.records ?? []).filter((r) => fmtDate(r.date ?? r.createdAt).startsWith(prefix));
+    return (data.records ?? []).filter((r) =>
+      fmtDate(r.date ?? r.createdAt).startsWith(prefix),
+    );
   }, [data, month]);
 
   const monthSubCounts = useMemo(() => {
     const c = {};
-    monthRecs.forEach((r) => (r.substances ?? []).forEach((s) => { c[s] = (c[s] ?? 0) + 1; }));
+    monthRecs.forEach((r) =>
+      (r.substances ?? []).forEach((s) => {
+        c[s] = (c[s] ?? 0) + 1;
+      }),
+    );
     return Object.entries(c).sort((a, b) => b[1] - a[1]);
   }, [monthRecs]);
 
@@ -713,7 +1217,10 @@ export default function CalendarPage() {
     const c = {};
     monthRecs.forEach((r) =>
       (r.medicationsTaken ?? []).forEach((med) => {
-        const name = typeof med === "object" ? (med.name ?? med.id ?? "Unknown") : String(med);
+        const name =
+          typeof med === "object"
+            ? (med.name ?? med.id ?? "Unknown")
+            : String(med);
         c[name] = (c[name] ?? 0) + 1;
       }),
     );
@@ -722,7 +1229,9 @@ export default function CalendarPage() {
 
   const profileMeds = useMemo(() => {
     return (data?.medicines ?? data?.medications ?? [])
-      .map((m) => (typeof m === "object" ? (m.name ?? m.id ?? String(m)) : String(m)))
+      .map((m) =>
+        typeof m === "object" ? (m.name ?? m.id ?? String(m)) : String(m),
+      )
       .filter(Boolean);
   }, [data]);
 
@@ -762,7 +1271,14 @@ export default function CalendarPage() {
           }}
         >
           {/* Month nav */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px 8px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 14px 8px",
+            }}
+          >
             <button
               onClick={() =>
                 setMonth((p) => {
@@ -787,7 +1303,15 @@ export default function CalendarPage() {
             >
               ‹
             </button>
-            <span style={{ fontSize: 11, fontWeight: 700, color: A, letterSpacing: 1.2, textTransform: "uppercase" }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: A,
+                letterSpacing: 1.2,
+                textTransform: "uppercase",
+              }}
+            >
               {months[m]} {y}
             </span>
             <button
@@ -816,15 +1340,38 @@ export default function CalendarPage() {
             </button>
           </div>
           {/* Weekday headers */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", padding: "0 10px", gap: 2 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(7,1fr)",
+              padding: "0 10px",
+              gap: 2,
+            }}
+          >
             {weekdays.map((d, i) => (
-              <div key={i} style={{ textAlign: "center", fontSize: 9, fontWeight: 700, color: MU, paddingBottom: 3 }}>
+              <div
+                key={i}
+                style={{
+                  textAlign: "center",
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: MU,
+                  paddingBottom: 3,
+                }}
+              >
                 {d}
               </div>
             ))}
           </div>
           {/* Day cells */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", padding: "0 10px 10px", gap: 2 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(7,1fr)",
+              padding: "0 10px 10px",
+              gap: 2,
+            }}
+          >
             {Array.from({ length: firstDay }).map((_, i) => (
               <div key={`e${i}`} />
             ))}
@@ -854,30 +1401,87 @@ export default function CalendarPage() {
                     position: "relative",
                   }}
                 >
-                  <div style={{ fontSize: 10, fontWeight: isToday ? 700 : 400, color: rec ? (dayScore(rec) >= 3.5 ? "#fff" : "#1a2c3d") : MU, lineHeight: 1 }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: isToday ? 700 : 400,
+                      color: rec
+                        ? dayScore(rec) >= 3.5
+                          ? "#fff"
+                          : "#1a2c3d"
+                        : MU,
+                      lineHeight: 1,
+                    }}
+                  >
                     {day}
                   </div>
                   {tookMeds && (
                     <img
                       src="/ico_medicine.png"
                       alt="medication taken"
-                      style={{ position: "absolute", top: -4, right: -4, width: 13, height: 13, objectFit: "contain" }}
+                      style={{
+                        position: "absolute",
+                        top: -4,
+                        right: -4,
+                        width: 13,
+                        height: 13,
+                        objectFit: "contain",
+                      }}
                     />
                   )}
                   {highCravings && (
-                    <span style={{ position: "absolute", bottom: -4, left: -4, fontSize: 13, lineHeight: 1 }}>🔥</span>
+                    <span
+                      style={{
+                        position: "absolute",
+                        bottom: -4,
+                        left: -4,
+                        fontSize: 13,
+                        lineHeight: 1,
+                      }}
+                    >
+                      🔥
+                    </span>
                   )}
                   {hasNote && (
                     <svg
                       viewBox="0 0 20 20"
-                      style={{ position: "absolute", bottom: -4, right: -4, width: 13, height: 13 }}
+                      style={{
+                        position: "absolute",
+                        bottom: -4,
+                        right: -4,
+                        width: 13,
+                        height: 13,
+                      }}
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <rect x="2" y="2" width="16" height="12" rx="3" fill="#4a7ab5" />
+                      <rect
+                        x="2"
+                        y="2"
+                        width="16"
+                        height="12"
+                        rx="3"
+                        fill="#4a7ab5"
+                      />
                       <path d="M5 16 L8 13 H2 Q2 16 5 16Z" fill="#4a7ab5" />
-                      <rect x="5" y="5.5" width="10" height="1.5" rx="0.75" fill="white" opacity="0.9" />
-                      <rect x="5" y="8.5" width="7" height="1.5" rx="0.75" fill="white" opacity="0.9" />
+                      <rect
+                        x="5"
+                        y="5.5"
+                        width="10"
+                        height="1.5"
+                        rx="0.75"
+                        fill="white"
+                        opacity="0.9"
+                      />
+                      <rect
+                        x="5"
+                        y="8.5"
+                        width="7"
+                        height="1.5"
+                        rx="0.75"
+                        fill="white"
+                        opacity="0.9"
+                      />
                     </svg>
                   )}
                 </div>
@@ -887,28 +1491,89 @@ export default function CalendarPage() {
 
           {/* Monthly substances */}
           <div style={{ borderTop: `1px solid ${BO}`, padding: "10px 14px" }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: A, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: A,
+                letterSpacing: 1.2,
+                textTransform: "uppercase",
+                marginBottom: 8,
+              }}
+            >
               {t.substancesThisMonth ?? "Substances"} — {months[m]}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {monthSubCounts.length === 0 ? (
-                <span style={{ fontSize: 12, color: MU }}>{t.noSubstances ?? "No substances logged this month"}</span>
+                <span style={{ fontSize: 12, color: MU }}>
+                  {t.noSubstances ?? "No substances logged this month"}
+                </span>
               ) : (
                 (() => {
                   const max = monthSubCounts[0][1];
                   return monthSubCounts.map(([s, n]) => (
                     <div key={s}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: sc(s), flexShrink: 0 }} />
-                          <span style={{ fontSize: 13, color: TX, textTransform: "capitalize", fontWeight: 500 }}>{s}</span>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              background: sc(s),
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontSize: 13,
+                              color: TX,
+                              textTransform: "capitalize",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {s}
+                          </span>
                         </div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: sc(s) }}>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: sc(s),
+                          }}
+                        >
                           {n} {t.days ?? "days"}
                         </span>
                       </div>
-                      <div style={{ height: 5, background: BG, borderRadius: 3, overflow: "hidden" }}>
-                        <div style={{ width: `${(n / max) * 100}%`, height: "100%", background: sc(s), borderRadius: 3, transition: "width .4s ease" }} />
+                      <div
+                        style={{
+                          height: 5,
+                          background: BG,
+                          borderRadius: 3,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${(n / max) * 100}%`,
+                            height: "100%",
+                            background: sc(s),
+                            borderRadius: 3,
+                            transition: "width .4s ease",
+                          }}
+                        />
                       </div>
                     </div>
                   ));
@@ -919,12 +1584,30 @@ export default function CalendarPage() {
 
           {/* Medications */}
           <div style={{ borderTop: `1px solid ${BO}`, padding: "10px 14px" }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: A, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: A,
+                letterSpacing: 1.2,
+                textTransform: "uppercase",
+                marginBottom: 8,
+              }}
+            >
               {t.myMedications ?? "Medications"} — {months[m]}
             </div>
             {profileMeds.length > 0 && (
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: MU, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 6 }}>
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: MU,
+                    letterSpacing: 0.8,
+                    textTransform: "uppercase",
+                    marginBottom: 6,
+                  }}
+                >
                   {t.prescribed ?? "Prescribed"}
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
@@ -949,27 +1632,88 @@ export default function CalendarPage() {
               </div>
             )}
             <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: MU, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 6 }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: MU,
+                  letterSpacing: 0.8,
+                  textTransform: "uppercase",
+                  marginBottom: 6,
+                }}
+              >
                 {t.takenThisMonth ?? "Taken this month"}
               </div>
               {monthMedCounts.length === 0 ? (
-                <span style={{ fontSize: 12, color: MU }}>{t.noMedsLogged ?? "No medications logged this month"}</span>
+                <span style={{ fontSize: 12, color: MU }}>
+                  {t.noMedsLogged ?? "No medications logged this month"}
+                </span>
               ) : (
                 (() => {
                   const max = monthMedCounts[0][1];
                   return monthMedCounts.map(([name, n]) => (
                     <div key={name} style={{ marginBottom: 8 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#42a5f5", flexShrink: 0 }} />
-                          <span style={{ fontSize: 13, color: TX, textTransform: "capitalize", fontWeight: 500 }}>{name}</span>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              background: "#42a5f5",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontSize: 13,
+                              color: TX,
+                              textTransform: "capitalize",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {name}
+                          </span>
                         </div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: "#42a5f5" }}>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: "#42a5f5",
+                          }}
+                        >
                           {n} {t.days ?? "days"}
                         </span>
                       </div>
-                      <div style={{ height: 5, background: BG, borderRadius: 3, overflow: "hidden" }}>
-                        <div style={{ width: `${(n / max) * 100}%`, height: "100%", background: "#42a5f5", borderRadius: 3, transition: "width .4s ease" }} />
+                      <div
+                        style={{
+                          height: 5,
+                          background: BG,
+                          borderRadius: 3,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${(n / max) * 100}%`,
+                            height: "100%",
+                            background: "#42a5f5",
+                            borderRadius: 3,
+                            transition: "width .4s ease",
+                          }}
+                        />
                       </div>
                     </div>
                   ));
@@ -993,7 +1737,16 @@ export default function CalendarPage() {
           >
             {/* Monthly Averages */}
             <div style={{ padding: "12px 14px 10px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: A, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: A,
+                  letterSpacing: 1.2,
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                }}
+              >
                 {t.monthlyTrends ?? "Monthly Averages"} — {months[m]}
               </div>
               <div
@@ -1007,10 +1760,20 @@ export default function CalendarPage() {
                   borderRadius: 8,
                 }}
               >
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: A, flexShrink: 0 }} />
+                <div
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: A,
+                    flexShrink: 0,
+                  }}
+                />
                 <span style={{ fontSize: 12, fontWeight: 700, color: AD }}>
                   {monthRecs.length}{" "}
-                  <span style={{ fontWeight: 500, color: MU }}>{t.daysLogged ?? "days logged"}</span>
+                  <span style={{ fontWeight: 500, color: MU }}>
+                    {t.daysLogged ?? "days logged"}
+                  </span>
                 </span>
               </div>
               <MonthlyTrendsCard monthRecs={monthRecs} t={t} />
@@ -1020,11 +1783,26 @@ export default function CalendarPage() {
 
             {/* Questionnaires */}
             <div style={{ padding: "12px 14px 4px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: A, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 4 }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: A,
+                  letterSpacing: 1.2,
+                  textTransform: "uppercase",
+                  marginBottom: 4,
+                }}
+              >
                 {t.questionnaires ?? "Questionnaires"}
               </div>
             </div>
-            <div style={{ padding: "0 14px 12px", display: "flex", flexDirection: "column" }}>
+            <div
+              style={{
+                padding: "0 14px 12px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               {QC.map((q, qi) => {
                 const total = scoreTotal(data[q.key]);
                 return (
@@ -1034,16 +1812,34 @@ export default function CalendarPage() {
                     className={data[q.key] ? "qrow" : ""}
                     style={{
                       padding: "9px 6px",
-                      borderBottom: qi < QC.length - 1 ? `1px solid ${BG}` : "none",
+                      borderBottom:
+                        qi < QC.length - 1 ? `1px solid ${BG}` : "none",
                       cursor: data[q.key] ? "pointer" : "default",
                       borderRadius: 6,
                       transition: "background .1s",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: total != null ? 4 : 0 }}>
-                      <span style={{ fontSize: 12, color: TX, fontWeight: 600 }}>{q.label}</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: total != null ? 4 : 0,
+                      }}
+                    >
+                      <span
+                        style={{ fontSize: 12, color: TX, fontWeight: 600 }}
+                      >
+                        {q.label}
+                      </span>
                       {total != null ? (
-                        <span style={{ fontSize: 11, color: q.color, fontWeight: 700 }}>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: q.color,
+                            fontWeight: 700,
+                          }}
+                        >
                           {total}/{q.max}
                         </span>
                       ) : (
@@ -1052,8 +1848,22 @@ export default function CalendarPage() {
                     </div>
                     {total != null && (
                       <>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <div style={{ flex: 1, height: 4, background: BG, borderRadius: 2, overflow: "hidden" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <div
+                            style={{
+                              flex: 1,
+                              height: 4,
+                              background: BG,
+                              borderRadius: 2,
+                              overflow: "hidden",
+                            }}
+                          >
                             <div
                               style={{
                                 width: `${Math.min(100, (total / q.max) * 100)}%`,
@@ -1081,7 +1891,14 @@ export default function CalendarPage() {
                             read more
                           </span>
                         </div>
-                        <div style={{ fontSize: 10, color: q.color, fontWeight: 600, marginTop: 3 }}>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: q.color,
+                            fontWeight: 600,
+                            marginTop: 3,
+                          }}
+                        >
                           {q.fn(total)}
                         </div>
                       </>
@@ -1095,10 +1912,19 @@ export default function CalendarPage() {
       </div>
 
       {modalDate && recMap[modalDate] && (
-        <DayModal date={modalDate} rec={recMap[modalDate]} onClose={() => setModalDate(null)} t={t} />
+        <DayModal
+          date={modalDate}
+          rec={recMap[modalDate]}
+          onClose={() => setModalDate(null)}
+          t={t}
+        />
       )}
       {qModal && (
-        <QuestionnaireModal qKey={qModal} data={data} onClose={() => setQModal(null)} />
+        <QuestionnaireModal
+          qKey={qModal}
+          data={data}
+          onClose={() => setQModal(null)}
+        />
       )}
     </div>
   );
