@@ -520,6 +520,12 @@ async function generatePDF({
     }),
   );
   const subEntries = Object.entries(subCounts).sort((a, b) => b[1] - a[1]);
+
+  // Add sober as a list entry so the list matches the donut
+  const soberDaysCount = recs.filter((r) => !r.substances?.length).length;
+  if (soberDaysCount > 0) {
+    subEntries.unshift(["sober", soberDaysCount]);
+  }
   checkPage(80);
   sectionHeader(`${t.substancesUsed ?? "Substances"} — ${periodLabel}`);
 
@@ -537,7 +543,7 @@ async function generatePDF({
         doc.rect(ML, listY, subHalfCW, 5.5, "F");
       }
       // Color square matching donut slice
-      const color = SC_COLORS[s] ?? "#bdbdbd";
+      const color = s === "sober" ? "#94A3B8" : (SC_COLORS[s] ?? "#bdbdbd");
       const r = parseInt(color.slice(1, 3), 16);
       const g = parseInt(color.slice(3, 5), 16);
       const b = parseInt(color.slice(5, 7), 16);
@@ -767,7 +773,7 @@ function OffscreenCharts({ data, recs, filteredQuestionnaires, t }) {
   }
   const mixTotal = recs.length;
   const sliceColor = (name) =>
-    name === "sober" ? "#22C55E" : (SC_COLORS[name] ?? "#bdbdbd");
+    name === "sober" ? "#94A3B8" : (SC_COLORS[name] ?? "#bdbdbd");
   const sliceLabel = (name) =>
     name === "sober"
       ? (t.sober ?? "Sober")
