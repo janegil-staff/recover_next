@@ -15,10 +15,32 @@ import MonthlyTrendsCard from "@/components/dashboard/calendar/MonthlyTrendsCard
 import QuestionnairesList from "@/components/dashboard/calendar/QuestionnairesList";
 import DayModal from "@/components/dashboard/calendar/DayModal";
 import QuestionnaireModal from "@/components/dashboard/calendar/QuestionnaireModal";
+import StreakComparison from "@/components/dashboard/StreakComparison";
 
 const A = "var(--accent)";
 const AD = "var(--accent-strong)";
 const AL = "var(--accent-soft)";
+
+// ── Section wayfinding label ─────────────────────────────────────────────
+// A small uppercase header that groups cards into "thoughts" the eye can
+// process one at a time. Quiet enough to not compete with the cards below.
+function SectionLabel({ children }) {
+  return (
+    <div
+      style={{
+        fontSize: 10,
+        fontWeight: 700,
+        color: MU,
+        letterSpacing: 1.4,
+        textTransform: "uppercase",
+        marginBottom: 8,
+        marginTop: 4,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function CalendarPage() {
   const t = useDashboardT();
@@ -105,115 +127,123 @@ export default function CalendarPage() {
           .cal-grid{grid-template-columns:1fr}
         }
         .qrow:hover { background: var(--accent-soft); }
+
+        /* Vertical rhythm — a single class for major section gaps so spacing
+           changes touch one line, not many. */
+        .dash-section + .dash-section { margin-top: 28px; }
+
+        /* Slightly soften secondary cards so the wellness card reads as
+           the dominant element. Uses color-mix so it adapts to dark mode. */
+        .secondary-card {
+          background: var(--card);
+          border-radius: 14px;
+          border: 1px solid color-mix(in srgb, var(--card-border) 65%, transparent);
+          box-shadow: var(--shadow-card);
+          overflow: hidden;
+        }
       `}</style>
 
-      <WellnessIndex data={data} t={t} month={month} />
+      {/* ── SNAPSHOT — wellness index + streak comparison ── */}
+      <div className="dash-section">
+        <SectionLabel>{t.sectionSnapshot ?? "Snapshot"}</SectionLabel>
+        <WellnessIndex data={data} t={t} month={month} />
+        <StreakComparison data={data} t={t} />
+      </div>
 
-      <div className="cal-grid">
-        {/* ── Calendar card ── */}
-        <div
-          style={{
-            background: SU,
-            borderRadius: 14,
-            border: `1px solid ${BO}`,
-            boxShadow: "var(--shadow-card)",
-            overflow: "hidden",
-          }}
-        >
-          <CalendarGrid
-            month={month}
-            recMap={recMap}
-            onMonthChange={setMonth}
-            onDayClick={setModalDate}
-            t={t}
-          />
-          <MonthlySubstances
-            monthRecs={monthRecs}
-            monthLabel={monthLabel}
-            t={t}
-          />
-          <MonthlyMedications
-            monthRecs={monthRecs}
-            profileMeds={profileMeds}
-            monthLabel={monthLabel}
-            t={t}
-          />
-        </div>
+      {/* ── THIS MONTH — calendar + monthly trends + questionnaires ── */}
+      <div className="dash-section">
+        <SectionLabel>
+          {t.sectionSelectedMonth ?? "Selected month"} · {monthLabel} {month.y}
+        </SectionLabel>
+        <div className="cal-grid">
+          {/* Calendar + substances + medications stacked in left column */}
+          <div className="secondary-card">
+            <CalendarGrid
+              month={month}
+              recMap={recMap}
+              onMonthChange={setMonth}
+              onDayClick={setModalDate}
+              t={t}
+            />
+            <MonthlySubstances
+              monthRecs={monthRecs}
+              monthLabel={monthLabel}
+              t={t}
+            />
+            <MonthlyMedications
+              monthRecs={monthRecs}
+              profileMeds={profileMeds}
+              monthLabel={monthLabel}
+              t={t}
+            />
+          </div>
 
-        {/* ── Right column: Averages + Questionnaires ── */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div
-            style={{
-              background: SU,
-              borderRadius: 14,
-              border: `1px solid ${BO}`,
-              boxShadow: "var(--shadow-card)",
-              overflow: "hidden",
-              flex: 1,
-            }}
-          >
-            {/* Monthly Averages */}
-            <div style={{ padding: "12px 14px 10px" }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: A,
-                  letterSpacing: 1.2,
-                  textTransform: "uppercase",
-                  marginBottom: 8,
-                }}
-              >
-                {t.monthlyTrends ?? "Monthly Averages"} — {monthLabel}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  marginBottom: 12,
-                  padding: "6px 10px",
-                  background: AL,
-                  borderRadius: 8,
-                }}
-              >
+          {/* Right column: Monthly Averages + Questionnaires */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className="secondary-card" style={{ flex: 1 }}>
+              {/* Monthly Averages */}
+              <div style={{ padding: "12px 14px 10px" }}>
                 <div
                   style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    background: A,
-                    flexShrink: 0,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: A,
+                    letterSpacing: 1.2,
+                    textTransform: "uppercase",
+                    marginBottom: 8,
                   }}
-                />
-                <span style={{ fontSize: 12, fontWeight: 700, color: AD }}>
-                  {monthRecs.length}{" "}
-                  <span style={{ fontWeight: 500, color: MU }}>
-                    {t.daysLogged ?? "days logged"}
+                >
+                  {t.monthlyTrends ?? "Monthly Averages"}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    marginBottom: 12,
+                    padding: "6px 10px",
+                    background: AL,
+                    borderRadius: 8,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: A,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: AD }}>
+                    {monthRecs.length}{" "}
+                    <span style={{ fontWeight: 500, color: MU }}>
+                      {t.daysLogged ?? "days logged"}
+                    </span>
                   </span>
-                </span>
+                </div>
+                <MonthlyTrendsCard monthRecs={monthRecs} t={t} />
               </div>
-              <MonthlyTrendsCard monthRecs={monthRecs} t={t} />
-            </div>
 
-            <div style={{ borderTop: `1px solid ${BO}` }} />
+              <div style={{ borderTop: `1px solid ${BO}` }} />
 
-            {/* Questionnaires */}
-            <div style={{ padding: "12px 14px 4px" }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: A,
-                  letterSpacing: 1.2,
-                  textTransform: "uppercase",
-                  marginBottom: 4,
-                }}
-              >
-                {t.questionnaires ?? "Questionnaires"}
+              {/* Questionnaires */}
+              <div style={{ padding: "12px 14px 4px" }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: A,
+                    letterSpacing: 1.2,
+                    textTransform: "uppercase",
+                    marginBottom: 4,
+                  }}
+                >
+                  {t.questionnaires ?? "Questionnaires"}
+                </div>
               </div>
+              <QuestionnairesList data={data} onOpen={setQModal} />
             </div>
-            <QuestionnairesList data={data} onOpen={setQModal} />
           </div>
         </div>
       </div>
