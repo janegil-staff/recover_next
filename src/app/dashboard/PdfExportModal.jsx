@@ -640,9 +640,56 @@ function OffscreenCharts({data,recs,filteredQuestionnaires,t}){
   );
 }
 
+// Self-load translations as a fallback. If the caller passes a populated `t`
+// prop, we use that. Otherwise we look for the active language (via cookie,
+// localStorage, document.documentElement.lang, or default to 'no') and load
+// the translations dict directly. This way the PDF is correctly translated
+// even when callers forget to pass the `t` prop.
+import translationsDict from "@/translations";
+
+function detectLanguage() {
+  if (typeof window === "undefined") return "no";
+  // 1. localStorage / sessionStorage
+  try {
+    const stored = window.localStorage?.getItem("language") || window.localStorage?.getItem("lang");
+    if (stored && translationsDict[stored]) return stored;
+  } catch (e) { /* private mode etc. */ }
+  // 2. <html lang="…">
+  const htmlLang = document.documentElement?.lang;
+  if (htmlLang && translationsDict[htmlLang]) return htmlLang;
+  // 3. URL query (?language=de)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("language") || params.get("lang");
+    if (q && translationsDict[q]) return q;
+  } catch (e) { /* no-op */ }
+  // 4. Default
+  return "no";
+}
+
 // ── Modal ─────────────────────────────────────────────────────────────────────
 export default function PdfExportModal({data,t:tProp,onClose}){
-  const t=tProp??{};
+  // If caller passed a non-empty `t`, use it. Otherwise self-load.
+  const t = useMemo(() => {
+    if (tProp && Object.keys(tProp).length > 0) return tProp;
+    const lang = detectLanguage();
+    return translationsDict?.[lang] ?? translationsDict?.no ?? {};
+  }, [tProp]);
+
+  // ───── TEMPORARY DIAGNOSTIC — remove once language is confirmed working ─────
+  if (typeof window !== "undefined") {
+    console.log("[PdfExportModal] tProp received:", tProp);
+    console.log("[PdfExportModal] tProp keys:", tProp ? Object.keys(tProp).length : 0);
+    console.log("[PdfExportModal] translationsDict:", translationsDict);
+    console.log("[PdfExportModal] translationsDict keys:", translationsDict ? Object.keys(translationsDict) : "undefined");
+    console.log("[PdfExportModal] detected lang:", detectLanguage());
+    console.log("[PdfExportModal] resolved t.spiderDiagrams:", t.spiderDiagrams);
+    console.log("[PdfExportModal] resolved t.gender:", t.gender);
+    console.log("[PdfExportModal] resolved t.heightLabel:", t.heightLabel);
+    console.log("[PdfExportModal] resolved t keys total:", Object.keys(t).length);
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const [rangeId,setRangeId]=useState("all");
   const [loading,setLoading]=useState(false);
   const [step,setStep]      =useState("");
