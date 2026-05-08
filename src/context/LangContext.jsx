@@ -29,34 +29,43 @@ function detectLang() {
   return SUPPORTED_LANGS.includes(browserLang) ? browserLang : 'en';
 }
 
+// ── Synchronously resolve initial language to avoid hydration mismatch ────────
+// We read what the client will eventually pick BEFORE first render so SSR and
+// first client render produce identical HTML.
+function resolveInitialLang(defaultLang) {
+  if (typeof window === 'undefined') return defaultLang ?? 'en';
+  try {
+    const stored = localStorage.getItem('focusapp_lang');
+    if (stored && SUPPORTED_LANGS.includes(stored)) return stored;
+  } catch {}
+  return detectLang();
+}
+
 // ── Context ───────────────────────────────────────────────────────────────────
 const LangContext = createContext(null);
 
 export function LangProvider({ children, defaultLang }) {
+  // Start with defaultLang on server; client will swap on first render via the
+  // useEffect below. We mark `hydrated` so consumers can avoid mismatched text.
   const [lang, setLangState] = useState(defaultLang ?? 'en');
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    // 1. Check localStorage for user override
-    const stored = localStorage.getItem('focusapp_lang');
-    if (stored && SUPPORTED_LANGS.includes(stored)) {
-      setLangState(stored);
-      return;
-    }
-    // 2. Detect from domain / browser
-    const detected = detectLang();
-    setLangState(detected);
-  }, []);
+    const resolved = resolveInitialLang(defaultLang);
+    setLangState(resolved);
+    setHydrated(true);
+  }, [defaultLang]);
 
   const setLang = (newLang) => {
     if (!SUPPORTED_LANGS.includes(newLang)) return;
-    localStorage.setItem('focusapp_lang', newLang);
+    try { localStorage.setItem('focusapp_lang', newLang); } catch {}
     setLangState(newLang);
   };
 
   const translations = getTranslations(lang);
 
   return (
-    <LangContext.Provider value={{ lang, setLang, t: translations, translations }}>
+    <LangContext.Provider value={{ lang, setLang, t: translations, translations, hydrated }}>
       {children}
     </LangContext.Provider>
   );

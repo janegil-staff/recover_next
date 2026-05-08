@@ -133,6 +133,7 @@ export default function Nav({ patient }) {
 
             <button
               onClick={logout}
+              suppressHydrationWarning
               style={{
                 background: "none",
                 border: "1px solid var(--card-border)",
@@ -172,6 +173,7 @@ export default function Nav({ patient }) {
               <button
                 key={tab.href}
                 onClick={() => router.push(tab.href)}
+                suppressHydrationWarning
                 style={{
                   background: "none",
                   border: "none",
@@ -229,6 +231,7 @@ export default function Nav({ patient }) {
             <button
               key={tab.href}
               onClick={() => router.push(tab.href)}
+              suppressHydrationWarning
               style={{
                 flex: 1,
                 background: "none",
