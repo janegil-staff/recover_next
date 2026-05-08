@@ -4,14 +4,14 @@ import { useState, useMemo, useEffect } from "react";
 import { useDashboardT } from "../LangContext";
 
 // Theme tokens — read from CSS variables
-const A   = "var(--accent)";
-const AD  = "var(--accent-strong)";
-const AL  = "var(--accent-soft)";
-const BG  = "var(--bg)";
-const SU  = "var(--card)";
-const BO  = "var(--card-border)";
-const TX  = "var(--text)";
-const MU  = "var(--text-muted)";
+const A = "var(--accent)";
+const AD = "var(--accent-strong)";
+const AL = "var(--accent-soft)";
+const BG = "var(--bg)";
+const SU = "var(--card)";
+const BO = "var(--card-border)";
+const TX = "var(--text)";
+const MU = "var(--text-muted)";
 
 // Substance colors — semantic, same in both modes
 const SC = {
@@ -193,8 +193,18 @@ function LogRow({ rec, t }) {
               </span>
             ))
           ) : (
-            <span style={{ fontSize: 10, color: MU }}>
-              {t.noSubstancesLogged ?? "—"}
+            <span
+              style={{
+                fontSize: 9,
+                color: "#16A34A",
+                fontWeight: 700,
+                background: "#22C55E22",
+                border: "1px solid #22C55E44",
+                borderRadius: 10,
+                padding: "2px 7px",
+              }}
+            >
+              {t.sober ?? "Sober"}
             </span>
           )}
         </div>
@@ -477,7 +487,16 @@ export default function LogPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 880, margin: "0 auto", width: "100%" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+        maxWidth: 880,
+        margin: "0 auto",
+        width: "100%",
+      }}
+    >
       {/* Filters bar */}
       <div
         style={{

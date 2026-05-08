@@ -374,6 +374,7 @@ const LANG_MAP = {
       sleep:       ['Great', 'Good', 'Okay', 'Poor', 'Terrible'],
       energy:      ['Pumped', 'Energetic', 'Okay', 'Tired', 'Exhausted'],
       impulsivity: ['Very calm', 'Calm', 'Some urges', 'Impulsive', 'Very impulsive'],
+    'sober': 'Sober'
     },
     scoreBest:      '1 = Best',
     scoreWorst:     '5 = Worst',
@@ -853,6 +854,7 @@ const LANG_MAP = {
       sleep:       ['Flott', 'Bra', 'OK', 'Dårlig', 'Forferdelig'],
       energy:      ['Full av energi', 'Energisk', 'OK', 'Trøtt', 'Utmattet'],
       impulsivity: ['Veldig rolig', 'Rolig', 'Noen impulser', 'Impulsiv', 'Veldig impulsiv'],
+    'sober': 'Edru'
     },
     scoreBest:      '1 = Best',
     scoreWorst:     '5 = Verst',
@@ -1300,6 +1302,7 @@ const LANG_MAP = {
       sleep: ['Fantastisk','Bra','OK','Dålig','Fruktansvärd'],
       energy: ['Full energi','Energisk','OK','Trött','Utmattad'],
       impulsivity: ['Mycket lugn','Lugn','Lite impulser','Impulsiv','Mycket impulsiv'],
+    'sober': 'Nykter'
     },
     scoreBest: '1 = Bäst', scoreWorst: '5 = Sämst', scoreNone: 'Ingen', scoreLight: 'Lätt', scoreMedium: 'Måttlig', scoreHeavy: 'Svår', scoreExtreme: 'Extrem', scorePoor: 'Dålig', scoreSevere: 'Allvarlig',
     calendar: 'Kalender', diary: 'Dagbok', dayView: 'Dag', monthView: 'Månad', monthSummary: 'Månadssammanfattning',
@@ -1703,6 +1706,7 @@ const LANG_MAP = {
       sleep: ['Fantastisk','Godt','OK','Dårligt','Forfærdeligt'],
       energy: ['Fuld energi','Energisk','OK','Træt','Udmattet'],
       impulsivity: ['Meget rolig','Rolig','Nogle impulser','Impulsiv','Meget impulsiv'],
+    'sober': 'Ædru'
     },
     scoreBest: '1 = Bedst', scoreWorst: '5 = Værst', scoreNone: 'Ingen', scoreLight: 'Let', scoreMedium: 'Moderat', scoreHeavy: 'Alvorlig', scoreExtreme: 'Ekstrem', scorePoor: 'Dårlig', scoreSevere: 'Alvorlig',
     calendar: 'Kalender', diary: 'Dagbog', monthSummary: 'Månedsoversigt',
@@ -2106,6 +2110,7 @@ const LANG_MAP = {
       sleep: ['Großartig','Gut','OK','Schlecht','Schrecklich'],
       energy: ['Voller Energie','Energiegeladen','OK','Müde','Erschöpft'],
       impulsivity: ['Sehr ruhig','Ruhig','Etwas impulsiv','Impulsiv','Sehr impulsiv'],
+    'sober': 'Nüchtern'
     },
     scoreBest: '1 = Beste', scoreWorst: '5 = Schlechteste', scoreNone: 'Keine', scoreLight: 'Leicht', scoreMedium: 'Mittel', scoreHeavy: 'Schwer', scoreExtreme: 'Extrem', scorePoor: 'Schlecht', scoreSevere: 'Schwer',
     calendar: 'Kalender', diary: 'Tagebuch', monthSummary: 'Monatsübersicht',
@@ -2509,6 +2514,7 @@ const LANG_MAP = {
       sleep: ['Parfait','Bien','OK','Mauvais','Terrible'],
       energy: ['Plein énergie','Énergique','OK','Fatigué','Épuisé'],
       impulsivity: ['Très calme','Calme','Quelques impulsions','Impulsif','Très impulsif'],
+    'sober': 'Sobre'
     },
     scoreBest: '1 = Meilleur', scoreWorst: '5 = Pire', scoreNone: 'Aucun', scoreLight: 'Léger', scoreMedium: 'Modéré', scoreHeavy: 'Sévère', scoreExtreme: 'Extrême', scorePoor: 'Médiocre', scoreSevere: 'Sévère',
     calendar: 'Calendrier', diary: 'Journal', monthSummary: 'Résumé du mois',
@@ -2912,6 +2918,7 @@ const LANG_MAP = {
       sleep: ['Geweldig','Goed','OK','Slecht','Verschrikkelijk'],
       energy: ['Vol energie','Energiek','OK','Moe','Uitgeput'],
       impulsivity: ['Zeer rustig','Rustig','Wat impulsen','Impulsief','Zeer impulsief'],
+    'sober': 'Nuchter'
     },
     scoreBest: '1 = Beste', scoreWorst: '5 = Slechtste', scoreNone: 'Geen', scoreLight: 'Licht', scoreMedium: 'Matig', scoreHeavy: 'Ernstig', scoreExtreme: 'Extreem', scorePoor: 'Slecht', scoreSevere: 'Ernstig',
     calendar: 'Kalender', diary: 'Dagboek', monthSummary: 'Maandoverzicht',
@@ -3315,6 +3322,7 @@ const LANG_MAP = {
       sleep: ['Ottimo','Bene','OK','Male','Terribile'],
       energy: ['Pieno di energia','Energico','OK','Stanco','Esausto'],
       impulsivity: ['Molto calmo','Calmo','Alcuni impulsi','Impulsivo','Molto impulsivo'],
+    'sober': 'Sobrio'
     },
     scoreBest: '1 = Migliore', scoreWorst: '5 = Peggiore', scoreNone: 'Nessuno', scoreLight: 'Lieve', scoreMedium: 'Moderato', scoreHeavy: 'Grave', scoreExtreme: 'Estremo', scorePoor: 'Scarso', scoreSevere: 'Grave',
     calendar: 'Calendario', diary: 'Diario', monthSummary: 'Riepilogo mensile',
@@ -4121,6 +4129,7 @@ const LANG_MAP = {
       sleep: ['Loistava','Hyvä','OK','Huono','Kauhea'],
       energy: ['Täynnä energiaa','Energinen','OK','Väsynyt','Uupunut'],
       impulsivity: ['Erittäin rauhallinen','Rauhallinen','Joitain impulsseja','Impulsiivinen','Erittäin impulsiivinen'],
+    'sober': 'Selvä'
     },
     scoreBest: '1 = Paras', scoreWorst: '5 = Huonoin', scoreNone: 'Ei mitään', scoreLight: 'Lievä', scoreMedium: 'Kohtalainen', scoreHeavy: 'Vakava', scoreExtreme: 'Äärimmäinen', scorePoor: 'Huono', scoreSevere: 'Vakava',
     calendar: 'Kalenteri', diary: 'Päiväkirja', monthSummary: 'Kuukauden yhteenveto',
@@ -4524,6 +4533,7 @@ const LANG_MAP = {
       sleep: ['Ótimo','Bom','OK','Mau','Terrível'],
       energy: ['Cheio de energia','Enérgico','OK','Cansado','Exausto'],
       impulsivity: ['Muito calmo','Calmo','Alguns impulsos','Impulsivo','Muito impulsivo'],
+    'sober': 'Sóbrio'
     },
     scoreBest: '1 = Melhor', scoreWorst: '5 = Pior', scoreNone: 'Nenhum', scoreLight: 'Leve', scoreMedium: 'Moderado', scoreHeavy: 'Grave', scoreExtreme: 'Extremo', scorePoor: 'Fraco', scoreSevere: 'Grave',
     calendar: 'Calendário', diary: 'Diário', monthSummary: 'Resumo do mês',
