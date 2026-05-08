@@ -51,6 +51,109 @@ const FREQ_SCORE = {
   daily: 3,
   multiple_daily: 4,
 };
+
+// ── Last-log badge — flags when a patient stops logging ────────────────────
+// Disengagement often precedes relapse. This compact badge gives the doctor
+// an immediate "is this patient still active?" signal at a glance.
+function LastLogBadge({ data, t }) {
+  const info = useMemo(() => {
+    const recs = data?.records ?? [];
+    if (recs.length === 0) return null;
+
+    // Find the most recent record (records may not be sorted)
+    const latest = recs.reduce((max, r) => {
+      const d = new Date(r.date ?? r.createdAt);
+      return !max || d > max.d ? { d, r } : max;
+    }, null);
+    if (!latest) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastDay = new Date(latest.d);
+    lastDay.setHours(0, 0, 0, 0);
+    const days = Math.max(
+      0,
+      Math.round((today - lastDay) / (24 * 60 * 60 * 1000)),
+    );
+
+    return { days, date: latest.d };
+  }, [data]);
+
+  if (!info) return null;
+
+  // Color tiers
+  const tier =
+    info.days === 0
+      ? {
+          color: "#16A34A",
+          bg: "#16A34A18",
+          border: "#16A34A44",
+          label: t.logToday ?? "Logged today",
+        }
+      : info.days === 1
+        ? {
+            color: "#16A34A",
+            bg: "#16A34A18",
+            border: "#16A34A44",
+            label: t.logYesterday ?? "Logged yesterday",
+          }
+        : info.days <= 4
+          ? {
+              color: "#D97706",
+              bg: "#FBBF2422",
+              border: "#FBBF2466",
+              label: `${info.days} ${t.daysAgo ?? "days ago"}`,
+            }
+          : {
+              color: "#DC2626",
+              bg: "#EF444422",
+              border: "#EF444466",
+              label: `${info.days} ${t.daysAgo ?? "days ago"}`,
+            };
+
+  return (
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: tier.bg,
+        border: `1px solid ${tier.border}`,
+        borderRadius: 999,
+        padding: "4px 10px",
+        fontSize: 11,
+        fontWeight: 600,
+        color: tier.color,
+        whiteSpace: "nowrap",
+      }}
+    >
+      <span
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: tier.color,
+          animation:
+            info.days >= 5 ? "lastLogPulse 2s ease-in-out infinite" : "none",
+        }}
+      />
+      <span
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: 0.5,
+          textTransform: "uppercase",
+          color: tier.color,
+          opacity: 0.7,
+        }}
+      >
+        {t.lastLog ?? "Last log"}
+      </span>
+      <span>{tier.label}</span>
+    </div>
+  );
+}
+
 // ── Wellness Index — composite snapshot of patient status ─────────────────
 // 0–100 score with breakdown and trend arrow. Recomputes for the selected
 // calendar month vs the previous month, so the doctor sees the index for
@@ -1697,6 +1800,17 @@ export default function CalendarPage() {
         }
         .qrow:hover { background: var(--accent-soft); }
       `}</style>
+
+      {/* Top status bar */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 10,
+        }}
+      >
+        <LastLogBadge data={data} t={t} />
+      </div>
 
       {/* Wellness index — top of dashboard */}
       <WellnessIndex data={data} t={t} month={month} />

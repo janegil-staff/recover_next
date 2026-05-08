@@ -623,6 +623,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. previous month',
     'compLowCravings': 'Low cravings',
     'compMentalWellness': 'Mental wellness',
+    'lastLog': 'Last log',
+    'logToday': 'Logged today',
+    'logYesterday': 'Logged yesterday',
+    'daysAgo': 'days ago',
   },
 
   no: {
@@ -1221,6 +1225,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. forrige måned',
     'compLowCravings': 'Lavt sug',
     'compMentalWellness': 'Psykisk velvære',
+    'lastLog': 'Sist logget',
+    'logToday': 'Logget i dag',
+    'logYesterday': 'Logget i går',
+    'daysAgo': 'dager siden',
   },
 
   sv: {
@@ -1733,6 +1741,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. föregående månad',
     'compLowCravings': 'Lågt sug',
     'compMentalWellness': 'Psykiskt välbefinnande',
+    'lastLog': 'Senaste logg',
+    'logToday': 'Loggat idag',
+    'logYesterday': 'Loggat igår',
+    'daysAgo': 'dagar sedan',
   },
 
   da: {
@@ -2245,6 +2257,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. forrige måned',
     'compLowCravings': 'Lav trang',
     'compMentalWellness': 'Mental trivsel',
+    'lastLog': 'Sidst logget',
+    'logToday': 'Logget i dag',
+    'logYesterday': 'Logget i går',
+    'daysAgo': 'dage siden',
   },
 
   de: {
@@ -2757,6 +2773,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. Vormonat',
     'compLowCravings': 'Geringes Verlangen',
     'compMentalWellness': 'Psychisches Wohlbefinden',
+    'lastLog': 'Letzter Eintrag',
+    'logToday': 'Heute eingetragen',
+    'logYesterday': 'Gestern eingetragen',
+    'daysAgo': 'Tage her',
   },
 
   fr: {
@@ -3269,6 +3289,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. mois précédent',
     'compLowCravings': 'Faibles envies',
     'compMentalWellness': 'Bien-être mental',
+    'lastLog': 'Dernier journal',
+    'logToday': 'Enregistré aujourd\'hui',
+    'logYesterday': 'Enregistré hier',
+    'daysAgo': 'jours',
   },
 
   nl: {
@@ -3781,6 +3805,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. vorige maand',
     'compLowCravings': 'Weinig trek',
     'compMentalWellness': 'Mentaal welzijn',
+    'lastLog': 'Laatste log',
+    'logToday': 'Vandaag gelogd',
+    'logYesterday': 'Gisteren gelogd',
+    'daysAgo': 'dagen geleden',
   },
 
   it: {
@@ -4293,6 +4321,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. mese precedente',
     'compLowCravings': 'Basso desiderio',
     'compMentalWellness': 'Benessere mentale',
+    'lastLog': 'Ultimo registro',
+    'logToday': 'Registrato oggi',
+    'logYesterday': 'Registrato ieri',
+    'daysAgo': 'giorni fa',
   },
 
   es: {
@@ -4805,6 +4837,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. mes anterior',
     'compLowCravings': 'Antojos bajos',
     'compMentalWellness': 'Bienestar mental',
+    'lastLog': 'Último registro',
+    'logToday': 'Registrado hoy',
+    'logYesterday': 'Registrado ayer',
+    'daysAgo': 'días atrás',
   },
 
   fi: {
@@ -5317,6 +5353,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. edellinen kuukausi',
     'compLowCravings': 'Vähäinen himo',
     'compMentalWellness': 'Henkinen hyvinvointi',
+    'lastLog': 'Viimeisin kirjaus',
+    'logToday': 'Kirjattu tänään',
+    'logYesterday': 'Kirjattu eilen',
+    'daysAgo': 'päivää sitten',
   },
 
   pt: {
@@ -5829,6 +5869,10 @@ const LANG_MAP = {
     'vsPrevMonth': 'vs. mês anterior',
     'compLowCravings': 'Desejo baixo',
     'compMentalWellness': 'Bem-estar mental',
+    'lastLog': 'Último registo',
+    'logToday': 'Registado hoje',
+    'logYesterday': 'Registado ontem',
+    'daysAgo': 'dias atrás',
   },
 };
 
