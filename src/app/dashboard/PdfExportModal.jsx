@@ -445,7 +445,7 @@ async function generatePDF({data,t,rangeMonths,recs,filteredQuestionnaires}){
       doc.text(String(r.mood??"-"),cols[1].x,y+4);
       doc.text(String(r.cravings??"-"),cols[2].x,y+4);
       doc.text(String(r.wellbeing??"-"),cols[3].x,y+4);
-      doc.text((r.substances??[]).join(", ").slice(0,24)||"—",cols[4].x,y+4);
+      doc.text((r.substances??[]).join(", ").slice(0,24)||(t.sober??"Sober"),cols[4].x,y+4);
       doc.text((r.note??"").slice(0,38),cols[5].x,y+4);
       y+=5.5;
     });
