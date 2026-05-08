@@ -1,8 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: {
-    unoptimized: true,
+module.exports = {
+  experimental: {
+    serverActions: {
+      encryptionKey: process.env.SERVER_ACTIONS_ENCRYPTION_KEY,
+    },
   },
 };
-
-export default nextConfig;
