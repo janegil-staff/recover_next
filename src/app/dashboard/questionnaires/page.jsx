@@ -1,7 +1,7 @@
 // src/app/dashboard/questionnaires/page.jsx
 "use client";
 import { useState } from "react";
-import { useDashboardT } from "../LangContext";
+import { useDashboardT, useLang } from "../LangContext";
 
 const A = "#4a7ab5",
   AD = "#2d4a6e",
@@ -10,6 +10,50 @@ const A = "#4a7ab5",
   BO = "#d0dcea",
   TX = "#1a2c3d",
   MU = "#7a9ab8";
+
+const LOCALE_MAP = {
+  no: "nb-NO",
+  en: "en-US",
+  nl: "nl-NL",
+  fr: "fr-FR",
+  de: "de-DE",
+  it: "it-IT",
+  sv: "sv-SE",
+  da: "da-DK",
+  fi: "fi-FI",
+  es: "es-ES",
+  pl: "pl-PL",
+  pt: "pt-PT",
+};
+
+function formatCompletedDate(dateInput, lang, t) {
+  if (!dateInput) return "";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return String(dateInput);
+
+  const today = new Date();
+  const isToday =
+    d.getFullYear() === today.getFullYear() &&
+    d.getMonth() === today.getMonth() &&
+    d.getDate() === today.getDate();
+
+  if (isToday) return t.today ?? "Today";
+
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const isYesterday =
+    d.getFullYear() === yesterday.getFullYear() &&
+    d.getMonth() === yesterday.getMonth() &&
+    d.getDate() === yesterday.getDate();
+
+  if (isYesterday) return t.yesterday ?? "Yesterday";
+
+  return d.toLocaleDateString(LOCALE_MAP[lang] || "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
 // Severity labels come from translations, with English fallbacks
 function makeQC(t) {
@@ -156,6 +200,7 @@ function scoreTotal(o) {
 
 export default function QuestionnairesPage() {
   const t = useDashboardT();
+  const { lang } = useLang();
 
   const [data] = useState(() => {
     if (typeof window === "undefined") return null;
@@ -185,6 +230,7 @@ export default function QuestionnairesPage() {
         const total = scoreTotal(data[q.key]);
         const rawData = data[q.key];
         const completedDate = rawData?.date;
+        const completedLabel = formatCompletedDate(completedDate, lang, t);
         return (
           <div
             key={q.key}
@@ -211,9 +257,9 @@ export default function QuestionnairesPage() {
                 <div style={{ fontSize: 11, color: MU, marginTop: 2 }}>
                   {q.subtitle}
                 </div>
-                {completedDate && (
+                {completedLabel && (
                   <div style={{ fontSize: 10, color: MU, marginTop: 3 }}>
-                    {t.date ?? "Completed"}: {completedDate}
+                    {t.completed ?? "Completed"}: {completedLabel}
                   </div>
                 )}
               </div>

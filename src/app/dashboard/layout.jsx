@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }) {
 
   return (
     <DashboardLangProvider>
-      <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      <div style={{ minHeight: "100vh"}}>
         <Nav patient={patient} />
         {/* dashboard-content class gets padding-bottom:72px on mobile via Nav's <style> */}
         <main className="dashboard-content" style={{ padding: "20px 20px" }}>
