@@ -7,6 +7,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  PieChart, Pie, Cell,
 } from "recharts";
 
 // Card-level colors use CSS variables for non-SVG content
@@ -61,6 +62,35 @@ function pad(n) {
 function shortDate(d) {
   const dt = new Date(d);
   return `${pad(dt.getMonth() + 1)}/${pad(dt.getDate())}`;
+}
+function fmtDate(d) {
+  const dt = new Date(d);
+  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+}
+
+// Score → color, matches mobile app's SCORE_COLORS palette
+const SCORE_COLORS = {
+  0: "#22C55E", // green   — best
+  1: "#7AABDB", // blue
+  2: "#FBBF24", // yellow
+  3: "#FB923C", // orange
+  4: "#EF4444", // red
+  5: "#991B1B", // dark red — worst
+};
+const FREQ_SCORE = { none: 0, once: 1, few_times: 2, daily: 3, multiple_daily: 4 };
+
+// Same logic as mobile's avgScore — clamped 0–5
+function dayScore(rec) {
+  if (!rec) return null;
+  const vals = [];
+  if (rec.cravings != null) vals.push(rec.cravings);
+  if (rec.mood != null) vals.push(6 - rec.mood);
+  if (rec.wellbeing != null) vals.push(6 - rec.wellbeing);
+  if (rec.amount != null) vals.push(Math.min(5, (rec.amount / 10) * 5));
+  if (rec.frequency != null && FREQ_SCORE[rec.frequency] != null)
+    vals.push(FREQ_SCORE[rec.frequency]);
+  if (!vals.length) return null;
+  return Math.min(5, Math.round(vals.reduce((a, b) => a + b, 0) / vals.length));
 }
 
 function Card({ title, subtitle, children, style }) {
@@ -257,6 +287,395 @@ function WellbeingRadarChart({ records, c }) {
   );
 }
 
+// ── Sober streak heatmap ───────────────────────────────────────────────────
+// GitHub-contributions style. One cell per day in the range. Color uses
+// SCORE_COLORS (mobile palette). Days without records are neutral gray.
+function SoberStreakHeatmap({ records, range, c }) {
+  const recMap = useMemo(() => {
+    const m = {};
+    records.forEach((r) => {
+      m[fmtDate(r.date ?? r.createdAt)] = r;
+    });
+    return m;
+  }, [records]);
+
+  // Build the grid of dates from oldest in range → today, oldest first
+  const days = useMemo(() => {
+    const out = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(today);
+    start.setDate(start.getDate() - (range - 1));
+    for (let i = 0; i < range; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      out.push(d);
+    }
+    return out;
+  }, [range]);
+
+  // Streak metrics
+  const stats = useMemo(() => {
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let running = 0;
+    let soberCount = 0;
+    let usedCount = 0;
+    let runningCurrent = 0;
+
+    days.forEach((d, i) => {
+      const rec = recMap[fmtDate(d)];
+      const subs = rec?.substances ?? [];
+      const isSober = rec && subs.length === 0;
+      const isUsed = rec && subs.length > 0;
+      if (isSober) soberCount++;
+      if (isUsed) usedCount++;
+
+      // Longest streak — count any sober day; reset on use; missing days break the streak
+      if (isSober) {
+        running++;
+        longestStreak = Math.max(longestStreak, running);
+      } else {
+        running = 0;
+      }
+
+      // Current streak — counted from end of range backward in second pass
+      if (i === days.length - 1) {
+        // start counting backward
+        for (let j = days.length - 1; j >= 0; j--) {
+          const r = recMap[fmtDate(days[j])];
+          const ss = r?.substances ?? [];
+          if (r && ss.length === 0) {
+            runningCurrent++;
+          } else {
+            break;
+          }
+        }
+        currentStreak = runningCurrent;
+      }
+    });
+
+    return { currentStreak, longestStreak, soberCount, usedCount, totalDays: days.length };
+  }, [days, recMap]);
+
+  // Cell sizing — aim for ~7 columns when range=7, otherwise wider grid
+  const cols = range <= 14 ? range : range <= 31 ? 7 : range <= 90 ? 13 : 14;
+  const rows = Math.ceil(days.length / cols);
+
+  // Reorganize days into a column-major grid so newest is bottom-right
+  const grid = [];
+  for (let col = 0; col < cols; col++) {
+    grid.push([]);
+    for (let row = 0; row < rows; row++) {
+      const idx = col * rows + row;
+      grid[col].push(idx < days.length ? days[idx] : null);
+    }
+  }
+
+  const cellSize = 14;
+  const cellGap = 3;
+
+  return (
+    <div>
+      {/* Stats row */}
+      <div style={{ display: "flex", gap: 14, marginBottom: 14, flexWrap: "wrap" }}>
+        <Stat label="Current sober streak" value={`${stats.currentStreak}d`} accent={c.accent} muted={c.muted} text={c.text} />
+        <Stat label="Longest in range"     value={`${stats.longestStreak}d`} accent="#22C55E" muted={c.muted} text={c.text} />
+        <Stat label="Sober days"            value={`${stats.soberCount}/${stats.totalDays}`} accent="#22C55E" muted={c.muted} text={c.text} />
+        <Stat label="Use days"              value={`${stats.usedCount}/${stats.totalDays}`}  accent="#EF4444" muted={c.muted} text={c.text} />
+      </div>
+
+      {/* Heatmap grid */}
+      <div style={{ display: "flex", gap: cellGap, alignItems: "flex-start" }}>
+        {grid.map((column, ci) => (
+          <div key={ci} style={{ display: "flex", flexDirection: "column", gap: cellGap }}>
+            {column.map((d, ri) => {
+              if (!d) return <div key={ri} style={{ width: cellSize, height: cellSize }} />;
+              const rec = recMap[fmtDate(d)];
+              const score = dayScore(rec);
+              const bg = rec == null ? c.grid : score == null ? c.grid : SCORE_COLORS[score];
+              const tooltip = rec
+                ? `${fmtDate(d)} · ${rec.substances?.length ? rec.substances.join(", ") : "Sober"}${score != null ? ` · score ${score}` : ""}`
+                : `${fmtDate(d)} · No log`;
+              return (
+                <div
+                  key={ri}
+                  title={tooltip}
+                  style={{
+                    width: cellSize,
+                    height: cellSize,
+                    background: bg,
+                    borderRadius: 3,
+                    border: rec == null ? `1px dashed ${c.border}` : "none",
+                    cursor: "default",
+                  }}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, fontSize: 10, color: c.muted, flexWrap: "wrap" }}>
+        <span style={{ fontWeight: 600 }}>Severity:</span>
+        {[0, 1, 2, 3, 4, 5].map((s) => (
+          <div key={s} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: SCORE_COLORS[s] }} />
+            <span>{s === 0 ? "best" : s === 5 ? "worst" : s}</span>
+          </div>
+        ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div style={{ width: 10, height: 10, borderRadius: 2, background: "transparent", border: `1px dashed ${c.border}` }} />
+          <span>no log</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value, accent, muted, text }) {
+  return (
+    <div style={{ flex: "1 1 auto", minWidth: 100 }}>
+      <div style={{ fontSize: 18, fontWeight: 800, color: accent, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: 9, color: muted, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 4 }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+// ── Side effects frequency bar ────────────────────────────────────────────
+// Horizontal bars, sorted by count descending. Color is warning-orange.
+function SideEffectsBar({ records, c }) {
+  const data = useMemo(() => {
+    const counts = {};
+    records.forEach((r) => {
+      (r.sideEffects ?? []).forEach((e) => {
+        counts[e] = (counts[e] ?? 0) + 1;
+      });
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([effect, count]) => ({
+        effect: effect.replace(/_/g, " "),
+        count,
+      }));
+  }, [records]);
+
+  if (data.length === 0) {
+    return (
+      <div style={{ textAlign: "center", color: MU_VAR, fontSize: 12, padding: 20 }}>
+        No side effects logged in this period
+      </div>
+    );
+  }
+
+  const height = Math.max(180, data.length * 28 + 30);
+
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 4, right: 24, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke={c.grid} horizontal={false} />
+        <XAxis
+          type="number"
+          tick={{ fontSize: 10, fill: c.muted }}
+          tickLine={false}
+          axisLine={false}
+          allowDecimals={false}
+        />
+        <YAxis
+          type="category"
+          dataKey="effect"
+          tick={{ fontSize: 11, fill: c.text, fontWeight: 600 }}
+          tickLine={false}
+          axisLine={false}
+          width={110}
+        />
+        <Tooltip
+          contentStyle={{
+            fontSize: 11,
+            borderRadius: 8,
+            border: `1px solid ${c.border}`,
+            background: c.surface,
+            color: c.text,
+          }}
+          formatter={(v) => [`${v} day${v === 1 ? "" : "s"}`, "Count"]}
+        />
+        <Bar
+          dataKey="count"
+          fill="#f4a07a"
+          radius={[0, 4, 4, 0]}
+          maxBarSize={20}
+          label={{ position: "right", fill: c.text, fontSize: 10, fontWeight: 700 }}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// ── Substance mix donut ────────────────────────────────────────────────────
+// Mirrors Coachly's CategoryMixDonut layout: 200px donut + 2-col legend.
+// Slice = days. Tooltip shows days + total amount. Includes a "Sober" slice
+// for days with no substances logged.
+function SubstanceMixDonut({ records, c, t }) {
+  const data = useMemo(() => {
+    const stats = {};
+    let soberDays = 0;
+    records.forEach((r) => {
+      const subs = r.substances ?? [];
+      if (subs.length === 0) {
+        soberDays += 1;
+        return;
+      }
+      subs.forEach((s) => {
+        if (!stats[s]) stats[s] = { days: 0, totalAmount: 0 };
+        stats[s].days += 1;
+        stats[s].totalAmount += Number(r.amount) || 0;
+      });
+    });
+
+    const entries = Object.entries(stats)
+      .sort((a, b) => b[1].days - a[1].days)
+      .map(([name, v]) => ({ name, days: v.days, amount: v.totalAmount }));
+
+    // Prepend Sober if there are any sober days
+    if (soberDays > 0) {
+      entries.unshift({ name: "sober", days: soberDays, amount: 0 });
+    }
+    return entries;
+  }, [records]);
+
+  const totalDays = data.reduce((s, d) => s + d.days, 0);
+  const isEmpty = data.length === 0;
+
+  // Sober uses the green from SCORE_COLORS (semantic match with the heatmap)
+  const sliceColor = (name) => {
+    if (name === "sober") return "#22C55E";
+    if (name === "empty") return "#E8EEF5";
+    return SC[name] ?? SC.other;
+  };
+
+  const labelOf = (name) => {
+    if (name === "sober") return t.sober ?? "Sober";
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <div style={{ width: "100%", height: 200, position: "relative" }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={isEmpty ? [{ name: "empty", days: 1 }] : data}
+              dataKey="days"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              innerRadius={45}
+              outerRadius={80}
+              startAngle={90}
+              endAngle={-270}
+              paddingAngle={data.length > 1 ? 2 : 0}
+              labelLine={false}
+              isAnimationActive={false}
+            >
+              {(isEmpty ? [{ name: "empty" }] : data).map((entry, i) => (
+                <Cell key={`${entry.name}-${i}`} fill={sliceColor(entry.name)} />
+              ))}
+            </Pie>
+            {!isEmpty && (
+              <Tooltip
+                formatter={(value, name, props) => {
+                  const amt = props?.payload?.amount ?? 0;
+                  const isSober = name === "sober";
+                  const detail = isSober
+                    ? `${value} ${t.days ?? "days"}`
+                    : `${value} ${t.days ?? "days"} · ${amt} ${t.totalAmount ?? "total amount"}`;
+                  return [detail, labelOf(name)];
+                }}
+                contentStyle={{
+                  fontSize: 11,
+                  borderRadius: 8,
+                  border: `1px solid ${c.border}`,
+                  background: c.surface,
+                  color: c.text,
+                }}
+              />
+            )}
+          </PieChart>
+        </ResponsiveContainer>
+
+        {/* Center text — total tracked days */}
+        {!isEmpty && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <div style={{ fontSize: 22, fontWeight: 800, color: c.accentStrong, lineHeight: 1 }}>
+              {totalDays}
+            </div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: c.muted, letterSpacing: 0.6, textTransform: "uppercase", marginTop: 3 }}>
+              {t.daysLogged ?? "days"}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Legend: 2-column grid like Coachly */}
+      {!isEmpty ? (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "4px 12px",
+            padding: "8px 4px 0",
+            fontSize: 11,
+          }}
+        >
+          {data.map((d) => {
+            const pct = totalDays > 0 ? Math.round((d.days / totalDays) * 100) : 0;
+            return (
+              <div key={d.name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 2,
+                    flexShrink: 0,
+                    background: sliceColor(d.name),
+                  }}
+                />
+                <span style={{ color: c.text, fontWeight: 600, flex: 1, textTransform: "capitalize" }}>
+                  {labelOf(d.name)}
+                </span>
+                <span style={{ color: c.muted, fontVariantNumeric: "tabular-nums" }}>
+                  {d.days}d · {pct}%
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={{ textAlign: "center", color: c.muted, fontSize: 11, fontStyle: "italic", padding: "8px 0" }}>
+          {t.noSubstances ?? "No data"}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function GraphsPage() {
   const t = useDashboardT();
   const { theme } = useTheme();
@@ -420,7 +839,7 @@ export default function GraphsPage() {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
             gap: 16,
-            marginBottom: 0,
+            marginBottom: 16,
           }}
         >
           <Card title="Recovery Profile" subtitle="Higher = better across all axes">
@@ -436,6 +855,63 @@ export default function GraphsPage() {
           {qScores.filter((q) => q.score != null).length >= 3 && (
             <Card title="Questionnaire Radar" subtitle="% of maximum score">
               <QRadarChart qScores={qScores} c={c} />
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* ── Top grid: Sobriety + Mix + Side Effects + Substance Use ── */}
+      {records.length > 0 && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
+            gap: 16,
+          }}
+        >
+          <Card title="Sobriety Heatmap" subtitle="One cell per day · color = day severity">
+            <SoberStreakHeatmap records={records} range={range === 365 ? Math.max(records.length, 90) : range} c={c} />
+          </Card>
+
+          <Card title="Substance Mix" subtitle="Days used per substance">
+            <SubstanceMixDonut records={records} c={c} t={t} />
+          </Card>
+
+          <Card title="Side Effects" subtitle="Days each effect was logged">
+            <SideEffectsBar records={records} c={c} />
+          </Card>
+
+          {substanceData.length > 0 && allSubs.length > 0 && (
+            <Card title={t.substancesByWeek ?? "Substance Use"} subtitle={`${t.days ?? "days"} / week`}>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={substanceData} margin={{ top: 8, right: 10, left: 0, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
+                  <XAxis
+                    dataKey="week"
+                    tick={{ fontSize: 10, fill: c.muted }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: c.muted }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip content={<CustomTooltip c={c} />} />
+                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8, color: c.text }} />
+                  {allSubs.map((s) => (
+                    <Bar
+                      key={s}
+                      dataKey={s}
+                      name={s.charAt(0).toUpperCase() + s.slice(1)}
+                      fill={SC[s] ?? "#bdbdbd"}
+                      radius={[3, 3, 0, 0]}
+                      maxBarSize={32}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
             </Card>
           )}
         </div>
@@ -495,41 +971,6 @@ export default function GraphsPage() {
                 activeDot={{ r: 5 }}
               />
             </LineChart>
-          </ResponsiveContainer>
-        </Card>
-      )}
-
-      {/* ── Substance bar chart ── */}
-      {substanceData.length > 0 && allSubs.length > 0 && (
-        <Card title={t.substancesByWeek ?? "Substance Use"} subtitle={`${t.days ?? "days"} / week`}>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={substanceData} margin={{ top: 8, right: 10, left: 0, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
-              <XAxis
-                dataKey="week"
-                tick={{ fontSize: 10, fill: c.muted }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 10, fill: c.muted }}
-                tickLine={false}
-                axisLine={false}
-                allowDecimals={false}
-              />
-              <Tooltip content={<CustomTooltip c={c} />} />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8, color: c.text }} />
-              {allSubs.map((s) => (
-                <Bar
-                  key={s}
-                  dataKey={s}
-                  name={s.charAt(0).toUpperCase() + s.slice(1)}
-                  fill={SC[s] ?? "#bdbdbd"}
-                  radius={[3, 3, 0, 0]}
-                  maxBarSize={32}
-                />
-              ))}
-            </BarChart>
           </ResponsiveContainer>
         </Card>
       )}

@@ -61,14 +61,23 @@ function dayScore(rec) {
   if (!vals.length) return null;
   return vals.reduce((a, b) => a + b, 0) / vals.length;
 }
+// Score → color, matches mobile app's SCORE_COLORS palette
+const SCORE_COLORS = {
+  0: "#22C55E", // green   — best
+  1: "#7AABDB", // blue
+  2: "#FBBF24", // yellow
+  3: "#FB923C", // orange
+  4: "#EF4444", // red
+  5: "#991B1B", // dark red — worst
+};
+
 function dayBg(rec) {
-  // Day-cell heat map — semantic color, same in both modes
+  // Day-cell heat map — matches mobile app
   const s = dayScore(rec);
   if (s == null) return "transparent";
-  if (s <= 1.5) return "#a8d5a2";
-  if (s <= 2.5) return "#f5c97a";
-  if (s <= 3.5) return "#f4a07a";
-  return "#e87070";
+  // Round to nearest integer 0–5, same bucketing as mobile's avgScore
+  const bucket = Math.max(0, Math.min(5, Math.round(s)));
+  return SCORE_COLORS[bucket];
 }
 function scoreTotal(o) {
   if (!o) return null;
@@ -845,7 +854,7 @@ export default function CalendarPage() {
                     position: "relative",
                   }}
                 >
-                  <div style={{ fontSize: 10, fontWeight: isToday ? 700 : 400, color: rec ? "#1a2c3d" : MU, lineHeight: 1 }}>
+                  <div style={{ fontSize: 10, fontWeight: isToday ? 700 : 400, color: rec ? (dayScore(rec) >= 3.5 ? "#fff" : "#1a2c3d") : MU, lineHeight: 1 }}>
                     {day}
                   </div>
                   {tookMeds && (
