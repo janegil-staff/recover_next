@@ -1000,7 +1000,7 @@ function SubstanceMixDonut({ records, c, t }) {
   const isEmpty = data.length === 0;
 
   const sliceColor = (name) => {
-    if (name === "sober") return "#22C55E";
+    if (name === "sober") return "#94A3B8"; // neutral slate grey
     if (name === "empty") return "#E8EEF5";
     return SC[name] ?? SC.other;
   };
