@@ -558,6 +558,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'No side effects logged in this period',
     'weekdaysShort': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     'readiness': 'Readiness',
+    'soberStreaks': 'Sober Streaks',
+    'streaksSubtitle': 'Current run, longest stretch, sober/used heatmap',
+    'currentStreak': 'Current streak',
+    'longestStreak': 'Longest streak',
+    'soberDaysTotal': 'Sober days total',
+    'topStreaks': 'Top streaks',
+    'ongoing': 'ongoing',
+    'used': 'Used',
   },
 
   no: {
@@ -1091,6 +1099,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Ingen bivirkninger logget i denne perioden',
     'weekdaysShort': ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'],
     'readiness': 'Endringsvilje',
+    'soberStreaks': 'Edru-perioder',
+    'streaksSubtitle': 'Pågående periode, lengste strekk, edru/brukt-oversikt',
+    'currentStreak': 'Pågående periode',
+    'longestStreak': 'Lengste periode',
+    'soberDaysTotal': 'Edru dager totalt',
+    'topStreaks': 'Lengste perioder',
+    'ongoing': 'pågår',
+    'used': 'Brukt',
   },
 
   sv: {
@@ -1538,6 +1554,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Inga biverkningar loggade denna period',
     'weekdaysShort': ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'],
     'readiness': 'Förändringsvilja',
+    'soberStreaks': 'Nyktra perioder',
+    'streaksSubtitle': 'Pågående period, längsta sträcka, nykter/använt-karta',
+    'currentStreak': 'Pågående',
+    'longestStreak': 'Längsta',
+    'soberDaysTotal': 'Totalt nyktra dagar',
+    'topStreaks': 'Längsta perioder',
+    'ongoing': 'pågående',
+    'used': 'Använt',
   },
 
   da: {
@@ -1985,6 +2009,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Ingen bivirkninger logget i denne periode',
     'weekdaysShort': ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'],
     'readiness': 'Forandringsparathed',
+    'soberStreaks': 'Ædrue perioder',
+    'streaksSubtitle': 'Igangværende periode, længste stræk, ædru/brugt-oversigt',
+    'currentStreak': 'Igangværende',
+    'longestStreak': 'Længste',
+    'soberDaysTotal': 'Ædrue dage i alt',
+    'topStreaks': 'Længste perioder',
+    'ongoing': 'igangværende',
+    'used': 'Brugt',
   },
 
   de: {
@@ -2432,6 +2464,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Keine Nebenwirkungen in diesem Zeitraum',
     'weekdaysShort': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
     'readiness': 'Veränderungsbereitschaft',
+    'soberStreaks': 'Nüchterne Strähnen',
+    'streaksSubtitle': 'Aktuelle Strähne, längster Zeitraum, nüchtern/Konsum-Übersicht',
+    'currentStreak': 'Aktuelle Strähne',
+    'longestStreak': 'Längste Strähne',
+    'soberDaysTotal': 'Nüchterne Tage gesamt',
+    'topStreaks': 'Längste Strähnen',
+    'ongoing': 'laufend',
+    'used': 'Konsumiert',
   },
 
   fr: {
@@ -2879,6 +2919,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Aucun effet secondaire enregistré sur cette période',
     'weekdaysShort': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
     'readiness': 'Volonté de changer',
+    'soberStreaks': 'Périodes sobres',
+    'streaksSubtitle': 'Période actuelle, plus longue série, carte sobre/usage',
+    'currentStreak': 'Série actuelle',
+    'longestStreak': 'Série la plus longue',
+    'soberDaysTotal': 'Jours sobres au total',
+    'topStreaks': 'Plus longues séries',
+    'ongoing': 'en cours',
+    'used': 'Usage',
   },
 
   nl: {
@@ -3326,6 +3374,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Geen bijwerkingen in deze periode',
     'weekdaysShort': ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'],
     'readiness': 'Veranderingsbereidheid',
+    'soberStreaks': 'Nuchtere reeksen',
+    'streaksSubtitle': 'Huidige reeks, langste periode, nuchter/gebruikt-overzicht',
+    'currentStreak': 'Huidige reeks',
+    'longestStreak': 'Langste reeks',
+    'soberDaysTotal': 'Nuchtere dagen totaal',
+    'topStreaks': 'Langste reeksen',
+    'ongoing': 'lopend',
+    'used': 'Gebruikt',
   },
 
   it: {
@@ -3773,6 +3829,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Nessun effetto collaterale in questo periodo',
     'weekdaysShort': ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
     'readiness': 'Disponibilità al cambiamento',
+    'soberStreaks': 'Serie di sobrietà',
+    'streaksSubtitle': 'Serie attuale, periodo più lungo, mappa sobrio/uso',
+    'currentStreak': 'Serie attuale',
+    'longestStreak': 'Serie più lunga',
+    'soberDaysTotal': 'Giorni sobri totali',
+    'topStreaks': 'Serie più lunghe',
+    'ongoing': 'in corso',
+    'used': 'Uso',
   },
 
   es: {
@@ -4220,6 +4284,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Sin efectos secundarios en este periodo',
     'weekdaysShort': ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
     'readiness': 'Disposición al cambio',
+    'soberStreaks': 'Rachas de sobriedad',
+    'streaksSubtitle': 'Racha actual, más larga, mapa sobrio/uso',
+    'currentStreak': 'Racha actual',
+    'longestStreak': 'Racha más larga',
+    'soberDaysTotal': 'Días sobrios totales',
+    'topStreaks': 'Mejores rachas',
+    'ongoing': 'en curso',
+    'used': 'Consumo',
   },
 
   fi: {
@@ -4667,6 +4739,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Ei sivuvaikutuksia tällä jaksolla',
     'weekdaysShort': ['Ma', 'Ti', 'Ke', 'To', 'Pe', 'La', 'Su'],
     'readiness': 'Muutosvalmius',
+    'soberStreaks': 'Selvät jaksot',
+    'streaksSubtitle': 'Nykyinen jakso, pisin jakso, selvä/käyttö-kartta',
+    'currentStreak': 'Nykyinen jakso',
+    'longestStreak': 'Pisin jakso',
+    'soberDaysTotal': 'Selvät päivät yhteensä',
+    'topStreaks': 'Pisimmät jaksot',
+    'ongoing': 'käynnissä',
+    'used': 'Käytetty',
   },
 
   pt: {
@@ -5114,6 +5194,14 @@ const LANG_MAP = {
     'noSideEffectsLogged': 'Sem efeitos secundários neste período',
     'weekdaysShort': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
     'readiness': 'Disposição para mudar',
+    'soberStreaks': 'Sequências sóbrias',
+    'streaksSubtitle': 'Sequência atual, mais longa, mapa sóbrio/uso',
+    'currentStreak': 'Sequência atual',
+    'longestStreak': 'Sequência mais longa',
+    'soberDaysTotal': 'Total de dias sóbrios',
+    'topStreaks': 'Maiores sequências',
+    'ongoing': 'em curso',
+    'used': 'Uso',
   },
 };
 
