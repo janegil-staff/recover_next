@@ -1,21 +1,25 @@
-// add_streak_at_average_translation.cjs
+// add_best_worst_translations.cjs
 const fs = require("fs");
 const FILE = "src/translations/index.js";
 let src = fs.readFileSync(FILE, "utf8");
 
-const KEY = "streakContextAverage";
-const VALUES = {
-  no: "Som vanlig",
-  en: "At average",
-  sv: "Som vanligt",
-  da: "Som sædvanligt",
-  de: "Wie üblich",
-  fr: "Dans la moyenne",
-  nl: "Gemiddeld",
-  it: "Nella media",
-  es: "En el promedio",
-  fi: "Keskiarvossa",
-  pt: "Na média",
+const KEYS = {
+  best: {
+    no: "Best", en: "Best",
+    sv: "Bäst", da: "Bedst",
+    de: "Bester", fr: "Meilleur",
+    nl: "Best", it: "Migliore",
+    es: "Mejor", fi: "Paras",
+    pt: "Melhor",
+  },
+  worst: {
+    no: "Verst", en: "Worst",
+    sv: "Sämst", da: "Værst",
+    de: "Schlechtester", fr: "Pire",
+    nl: "Slechtst", it: "Peggiore",
+    es: "Peor", fi: "Huonoin",
+    pt: "Pior",
+  },
 };
 
 const lines = src.split("\n");
@@ -37,20 +41,25 @@ function findBlocks(L) {
   return blocks;
 }
 
-let inserted = 0;
+let inserted = 0, already = 0;
 for (const block of [...findBlocks(lines)].reverse()) {
-  const value = VALUES[block.lang];
-  if (!value) continue;
-  const body = lines.slice(block.open, block.close + 1).join("\n");
-  if (new RegExp(`['"]${KEY}['"]\\s*:`).test(body)) continue;
   const innerIndent = block.indent + "  ";
+  const body = lines.slice(block.open, block.close + 1).join("\n");
+  const insertions = [];
+  for (const [key, langValues] of Object.entries(KEYS)) {
+    const value = langValues[block.lang];
+    if (!value) continue;
+    if (new RegExp(`['"]${key}['"]\\s*:`).test(body)) { already++; continue; }
+    insertions.push(`${innerIndent}'${key}': '${value.replace(/'/g, "\\'")}',`);
+    inserted++;
+  }
+  if (!insertions.length) continue;
   const prevLine = lines[block.close - 1];
   if (prevLine && !/,\s*$/.test(prevLine.trim()) && prevLine.trim() !== "{") {
     lines[block.close - 1] = prevLine.replace(/(\S)\s*$/, "$1,");
   }
-  lines.splice(block.close, 0, `${innerIndent}'${KEY}': '${value.replace(/'/g, "\\'")}',`);
-  inserted++;
+  lines.splice(block.close, 0, ...insertions);
 }
 
 fs.writeFileSync(FILE, lines.join("\n"));
-console.log(`✅ Inserted ${KEY} into ${inserted} block(s)`);
+console.log(`✅ Inserted: ${inserted}, already: ${already}`);

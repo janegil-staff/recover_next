@@ -679,6 +679,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     'streakContextAverage': 'At average',
     'wellnessOverTime': 'Wellness over time',
+    'trajectory': 'Trajectory',
+    'best': 'Best',
+    'worst': 'Worst',
   },
 
   no: {
@@ -1333,6 +1336,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Des'],
     'streakContextAverage': 'Som vanlig',
     'wellnessOverTime': 'Velvære over tid',
+    'trajectory': 'Utvikling',
+    'best': 'Best',
+    'worst': 'Verst',
   },
 
   sv: {
@@ -1901,6 +1907,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
     'streakContextAverage': 'Som vanligt',
     'wellnessOverTime': 'Välbefinnande över tid',
+    'trajectory': 'Utveckling',
+    'best': 'Bäst',
+    'worst': 'Sämst',
   },
 
   da: {
@@ -2469,6 +2478,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
     'streakContextAverage': 'Som sædvanligt',
     'wellnessOverTime': 'Trivsel over tid',
+    'trajectory': 'Udvikling',
+    'best': 'Bedst',
+    'worst': 'Værst',
   },
 
   de: {
@@ -3037,6 +3049,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
     'streakContextAverage': 'Wie üblich',
     'wellnessOverTime': 'Wohlbefinden im Zeitverlauf',
+    'trajectory': 'Verlauf',
+    'best': 'Bester',
+    'worst': 'Schlechtester',
   },
 
   fr: {
@@ -3605,6 +3620,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
     'streakContextAverage': 'Dans la moyenne',
     'wellnessOverTime': 'Bien-être au fil du temps',
+    'trajectory': 'Trajectoire',
+    'best': 'Meilleur',
+    'worst': 'Pire',
   },
 
   nl: {
@@ -4173,6 +4191,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Feb', 'Mrt', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
     'streakContextAverage': 'Gemiddeld',
     'wellnessOverTime': 'Welzijn over tijd',
+    'trajectory': 'Verloop',
+    'best': 'Best',
+    'worst': 'Slechtst',
   },
 
   it: {
@@ -4741,6 +4762,9 @@ const LANG_MAP = {
     'monthsShort': ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
     'streakContextAverage': 'Nella media',
     'wellnessOverTime': 'Benessere nel tempo',
+    'trajectory': 'Andamento',
+    'best': 'Migliore',
+    'worst': 'Peggiore',
   },
 
   es: {
@@ -5309,6 +5333,9 @@ const LANG_MAP = {
     'monthsShort': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
     'streakContextAverage': 'En el promedio',
     'wellnessOverTime': 'Bienestar a lo largo del tiempo',
+    'trajectory': 'Trayectoria',
+    'best': 'Mejor',
+    'worst': 'Peor',
   },
 
   fi: {
@@ -5877,6 +5904,9 @@ const LANG_MAP = {
     'monthsShort': ['Tam', 'Hel', 'Maa', 'Huh', 'Tou', 'Kes', 'Hei', 'Elo', 'Syy', 'Lok', 'Mar', 'Jou'],
     'streakContextAverage': 'Keskiarvossa',
     'wellnessOverTime': 'Hyvinvointi ajan kuluessa',
+    'trajectory': 'Kehityskaari',
+    'best': 'Paras',
+    'worst': 'Huonoin',
   },
 
   pt: {
@@ -6445,6 +6475,9 @@ const LANG_MAP = {
     'monthsShort': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
     'streakContextAverage': 'Na média',
     'wellnessOverTime': 'Bem-estar ao longo do tempo',
+    'trajectory': 'Trajetória',
+    'best': 'Melhor',
+    'worst': 'Pior',
   },
 };
 

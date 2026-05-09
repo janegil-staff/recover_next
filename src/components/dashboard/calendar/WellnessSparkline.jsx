@@ -124,7 +124,7 @@ const lineColor = "var(--text)";
             textTransform: "uppercase",
           }}
         >
-          {t.wellnessOverTime ?? "Wellness over time"}
+          {t.trajectory ?? "Trajectory"}
         </div>
         <div
           style={{
