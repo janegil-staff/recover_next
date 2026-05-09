@@ -26,7 +26,7 @@ import {
   PAGE_BOTTOM,
   SC_COLORS,
 } from "./theme";
-import { fmtDate, parseAdviceId, avgOf } from "./helpers";
+import { fmtDate, parseAdviceId, parseAdviceFull, ADVICE_CATEGORIES, avgOf } from "./helpers";
 import { formatRangeLabel } from "./ranges";
 import { LOGO_B64 } from "./logo";
 
@@ -457,36 +457,75 @@ export async function generatePDF({
   }
   y += 3;
 
-  // ── Relevant advice ──
-  const adviceIds = [...new Set(data.relevantAdvice ?? [])];
-  if (adviceIds.length > 0) {
-    sectionHeader(t.relevantAdvice ?? "Relevant Advice");
-    adviceIds.forEach((id, i) => {
-      const nid = parseAdviceId(id);
-      const title = t[`advice_${nid}_title`] ?? `Advice ${nid}`;
-      const body = t[`advice_${nid}_body`] ?? "";
-      checkPage(16);
-      const fc = i % 2 === 0 ? LGRAY : WHITE;
-      doc.setFillColor(...fc);
-      doc.rect(ML, y, CW, body ? 15 : 7, "F");
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(...NAVY);
-      doc.text(`${i + 1}. ${title}`, ML + 2, y + 5);
-      if (body) {
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(8);
-        doc.setTextColor(...GRAY);
-        const lines = doc.splitTextToSize(body, CW - 4);
-        doc.text(lines.slice(0, 2), ML + 4, y + 10);
-        y += 16;
-      } else {
-        y += 8;
-      }
-    });
-    y += 3;
-  }
+const adviceIds = data.relevantAdvice ?? [];
+if (adviceIds.length > 0) {
+  sectionHeader(t.relevantAdvice ?? "Relevant Advice");
+  adviceIds.forEach((rawId, i) => {
+    const { prefix, nid } = parseAdviceFull(rawId);
+    const cat = ADVICE_CATEGORIES[prefix] ?? null;
+    const title = t[`advice_${nid}_title`] ?? `Advice ${nid}`;
+    const body = t[`advice_${nid}_body`] ?? "";
+    const categoryLabel = cat
+      ? (t[cat.labelKey] ?? cat.fallback)
+      : null;
 
+    checkPage(20);
+    const fc = i % 2 === 0 ? LGRAY : WHITE;
+    doc.setFillColor(...fc);
+    doc.rect(ML, y, CW, body ? 18 : 8, "F");
+
+    // Left accent bar in category color
+    if (cat) {
+      const r = parseInt(cat.color.slice(1, 3), 16);
+      const g = parseInt(cat.color.slice(3, 5), 16);
+      const b = parseInt(cat.color.slice(5, 7), 16);
+      doc.setFillColor(r, g, b);
+      doc.rect(ML, y, 1.5, body ? 18 : 8, "F");
+    }
+
+    // Title row
+    let titleX = ML + 4;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...DARK);
+    doc.text(`${i + 1}.`, titleX, y + 5);
+    titleX += 6;
+
+    // Category badge
+    if (categoryLabel && cat) {
+      const r = parseInt(cat.color.slice(1, 3), 16);
+      const g = parseInt(cat.color.slice(3, 5), 16);
+      const b = parseInt(cat.color.slice(5, 7), 16);
+      doc.setFillColor(r, g, b);
+      doc.setFontSize(6.5);
+      const badgeW = doc.getTextWidth(categoryLabel.toUpperCase()) + 4;
+      doc.roundedRect(titleX, y + 2.5, badgeW, 3.5, 0.6, 0.6, "F");
+      doc.setTextColor(...WHITE);
+      doc.text(categoryLabel.toUpperCase(), titleX + badgeW / 2, y + 5, {
+        align: "center",
+      });
+      titleX += badgeW + 3;
+    }
+
+    // Title
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...NAVY);
+    doc.text(title, titleX, y + 5);
+
+    if (body) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY);
+      const lines = doc.splitTextToSize(body, CW - 8);
+      doc.text(lines.slice(0, 3), ML + 6, y + 10);
+      y += 19;
+    } else {
+      y += 9;
+    }
+  });
+  y += 3;
+}
   // ── Full log (always starts on a new page) ──
   doc.addPage();
   y = 16;

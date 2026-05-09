@@ -755,6 +755,12 @@ const LANG_MAP = {
     'weak': 'weak',
     'compareVsPrior': 'vs prior period',
     'thisVsPriorPeriod': 'This period vs prior period',
+    'categoryMood': 'Mood',
+    'categoryRecovery': 'Recovery',
+    'categoryWellbeing': 'Wellbeing',
+    'categoryMedication': 'Medication',
+    'categorySleep': 'Sleep',
+    'categoryCravings': 'Cravings',
   },
 
   no: {
@@ -1485,6 +1491,12 @@ const LANG_MAP = {
     'weak': 'svak',
     'compareVsPrior': 'vs forrige periode',
     'thisVsPriorPeriod': 'Denne perioden mot forrige',
+    'categoryMood': 'Humør',
+    'categoryRecovery': 'Bedring',
+    'categoryWellbeing': 'Velvære',
+    'categoryMedication': 'Medisin',
+    'categorySleep': 'Søvn',
+    'categoryCravings': 'Sug',
   },
 
   sv: {
@@ -2129,6 +2141,12 @@ const LANG_MAP = {
     'weak': 'svag',
     'compareVsPrior': 'vs föregående period',
     'thisVsPriorPeriod': 'Denna period mot föregående',
+    'categoryMood': 'Humör',
+    'categoryRecovery': 'Återhämtning',
+    'categoryWellbeing': 'Välbefinnande',
+    'categoryMedication': 'Medicin',
+    'categorySleep': 'Sömn',
+    'categoryCravings': 'Sug',
   },
 
   da: {
@@ -2773,6 +2791,12 @@ const LANG_MAP = {
     'weak': 'svag',
     'compareVsPrior': 'vs forrige periode',
     'thisVsPriorPeriod': 'Denne periode mod forrige',
+    'categoryMood': 'Humør',
+    'categoryRecovery': 'Bedring',
+    'categoryWellbeing': 'Trivsel',
+    'categoryMedication': 'Medicin',
+    'categorySleep': 'Søvn',
+    'categoryCravings': 'Trang',
   },
 
   de: {
@@ -3417,6 +3441,12 @@ const LANG_MAP = {
     'weak': 'schwach',
     'compareVsPrior': 'vs vorheriger Zeitraum',
     'thisVsPriorPeriod': 'Dieser Zeitraum vs vorheriger',
+    'categoryMood': 'Stimmung',
+    'categoryRecovery': 'Genesung',
+    'categoryWellbeing': 'Wohlbefinden',
+    'categoryMedication': 'Medikation',
+    'categorySleep': 'Schlaf',
+    'categoryCravings': 'Verlangen',
   },
 
   fr: {
@@ -4061,6 +4091,12 @@ const LANG_MAP = {
     'weak': 'faible',
     'compareVsPrior': 'vs période précédente',
     'thisVsPriorPeriod': 'Cette période vs précédente',
+    'categoryMood': 'Humeur',
+    'categoryRecovery': 'Rétablissement',
+    'categoryWellbeing': 'Bien-être',
+    'categoryMedication': 'Médication',
+    'categorySleep': 'Sommeil',
+    'categoryCravings': 'Envies',
   },
 
   nl: {
@@ -4705,6 +4741,12 @@ const LANG_MAP = {
     'weak': 'zwak',
     'compareVsPrior': 'vs vorige periode',
     'thisVsPriorPeriod': 'Deze periode vs vorige',
+    'categoryMood': 'Stemming',
+    'categoryRecovery': 'Herstel',
+    'categoryWellbeing': 'Welzijn',
+    'categoryMedication': 'Medicatie',
+    'categorySleep': 'Slaap',
+    'categoryCravings': 'Trek',
   },
 
   it: {
@@ -5349,6 +5391,12 @@ const LANG_MAP = {
     'weak': 'debole',
     'compareVsPrior': 'vs periodo precedente',
     'thisVsPriorPeriod': 'Questo periodo vs precedente',
+    'categoryMood': 'Umore',
+    'categoryRecovery': 'Recupero',
+    'categoryWellbeing': 'Benessere',
+    'categoryMedication': 'Farmaci',
+    'categorySleep': 'Sonno',
+    'categoryCravings': 'Desiderio',
   },
 
   es: {
@@ -5993,6 +6041,12 @@ const LANG_MAP = {
     'weak': 'débil',
     'compareVsPrior': 'vs período anterior',
     'thisVsPriorPeriod': 'Este período vs anterior',
+    'categoryMood': 'Ánimo',
+    'categoryRecovery': 'Recuperación',
+    'categoryWellbeing': 'Bienestar',
+    'categoryMedication': 'Medicación',
+    'categorySleep': 'Sueño',
+    'categoryCravings': 'Antojos',
   },
 
   fi: {
@@ -6637,6 +6691,12 @@ const LANG_MAP = {
     'weak': 'heikko',
     'compareVsPrior': 'vs edellinen jakso',
     'thisVsPriorPeriod': 'Tämä jakso vs edellinen',
+    'categoryMood': 'Mieliala',
+    'categoryRecovery': 'Toipuminen',
+    'categoryWellbeing': 'Hyvinvointi',
+    'categoryMedication': 'Lääkitys',
+    'categorySleep': 'Uni',
+    'categoryCravings': 'Himo',
   },
 
   pt: {
@@ -7281,6 +7341,12 @@ const LANG_MAP = {
     'weak': 'fraca',
     'compareVsPrior': 'vs período anterior',
     'thisVsPriorPeriod': 'Este período vs anterior',
+    'categoryMood': 'Humor',
+    'categoryRecovery': 'Recuperação',
+    'categoryWellbeing': 'Bem-estar',
+    'categoryMedication': 'Medicação',
+    'categorySleep': 'Sono',
+    'categoryCravings': 'Fissura',
   },
 };
 
