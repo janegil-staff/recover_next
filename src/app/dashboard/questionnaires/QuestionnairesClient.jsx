@@ -222,7 +222,7 @@ export default function QuestionnairesClient() {
   const QC = makeQC(t);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, borderRadius: 14 }}>
       <div style={{ fontSize: 12, color: MU }}>
         {t.questionnaires ?? "Showing latest completed questionnaire scores."}
       </div>

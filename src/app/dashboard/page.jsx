@@ -18,6 +18,8 @@ import QuestionnaireModal from "@/components/dashboard/calendar/QuestionnaireMod
 import StreakComparison from "@/components/dashboard/StreakComparison";
 import Collapsible from "@/components/dashboard/Collapsible";
 import RelevantAdviceList from "@/components/dashboard/calendar/RelevantAdviceList";
+import YearInPixels from "@/components/dashboard/calendar/YearInPixels";
+import WellnessSparkline from "@/components/dashboard/calendar/WellnessSparkline";
 
 // ── Section wayfinding label ─────────────────────────────────────────────
 function SectionLabel({ children }) {
@@ -156,16 +158,30 @@ export default function CalendarPage() {
         <StreakComparison data={data} t={t} />
       </div>
 
-      {/* ── SELECTED MONTH — calendar (left) + all collapsibles (right) ── */}
+      {/* ── SELECTED MONTH — calendar (left, sticky) + collapsibles (right) ── */}
       <div className="dash-section">
         <SectionLabel>
           {monthLabel} {month.y}
         </SectionLabel>
 
         <div className="cal-grid">
-          {/* ── Left column: Calendar only ── */}
-          <div>
-            <div className="secondary-card">
+          {/* ── Left column: Calendar (sticky) + Year-in-pixels strip ── */}
+          <div
+            style={{
+              position: "sticky",
+              top: 12,
+              alignSelf: "start",
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              width: "100%",
+              minWidth: 0,
+            }}
+          >
+            <div
+              className="secondary-card"
+              style={{ width: "100%", minWidth: 0 }}
+            >
               <CalendarGrid
                 month={month}
                 recMap={recMap}
@@ -174,9 +190,15 @@ export default function CalendarPage() {
                 t={t}
               />
             </div>
+            <YearInPixels
+              data={data}
+              t={t}
+              currentMonth={month}
+              onMonthJump={setMonth}
+            />
           </div>
 
-          {/* ── Right column: All collapsibles in priority order ── */}
+          {/* ── Right column: All collapsibles ── */}
           <div>
             <Collapsible
               id="monthly-trends"
@@ -195,18 +217,6 @@ export default function CalendarPage() {
               title={t.questionnaires ?? "Questionnaires"}
             >
               <QuestionnairesList data={data} onOpen={setQModal} />
-            </Collapsible>
-
-            <Collapsible
-              id="relevant-advice"
-              title={t.relevantAdvice ?? "Relevant Advice"}
-              badge={
-                (data.relevantAdvice ?? []).length === 0
-                  ? (t.noneSurfaced ?? "none surfaced")
-                  : `${[...new Set(data.relevantAdvice)].length} ${t.items ?? "items"}`
-              }
-            >
-              <RelevantAdviceList data={data} t={t} />
             </Collapsible>
 
             <Collapsible
@@ -251,6 +261,20 @@ export default function CalendarPage() {
                 t={t}
               />
             </Collapsible>
+
+            <Collapsible
+              id="relevant-advice"
+              title={t.relevantAdvice ?? "Relevant Advice"}
+              badge={
+                (data.relevantAdvice ?? []).length === 0
+                  ? (t.noneSurfaced ?? "none surfaced")
+                  : `${[...new Set(data.relevantAdvice)].length} ${t.items ?? "items"}`
+              }
+            >
+              <RelevantAdviceList data={data} t={t} />
+            </Collapsible>
+
+            <WellnessSparkline data={data} t={t} currentMonth={month} />
           </div>
         </div>
       </div>

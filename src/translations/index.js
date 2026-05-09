@@ -673,6 +673,12 @@ const LANG_MAP = {
     'noneSurfaced': 'none surfaced',
     'items': 'items',
     'advice': 'Advice',
+    'yearAtAGlance': 'Year at a glance',
+    'noLog': 'No log',
+    'clickToJump': 'Click any day to jump',
+    'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    'streakContextAverage': 'At average',
+    'wellnessOverTime': 'Wellness over time',
   },
 
   no: {
@@ -1321,6 +1327,12 @@ const LANG_MAP = {
     'noneSurfaced': 'ingen vist',
     'items': 'stk',
     'advice': 'Råd',
+    'yearAtAGlance': 'Året i et øyeblikk',
+    'noLog': 'Ingen logg',
+    'clickToJump': 'Klikk på en dag for å hoppe',
+    'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Des'],
+    'streakContextAverage': 'Som vanlig',
+    'wellnessOverTime': 'Velvære over tid',
   },
 
   sv: {
@@ -1883,6 +1895,12 @@ const LANG_MAP = {
     'noneSurfaced': 'inga visade',
     'items': 'st',
     'advice': 'Råd',
+    'yearAtAGlance': 'Året på ett ögonkast',
+    'noLog': 'Ingen logg',
+    'clickToJump': 'Klicka på en dag för att hoppa',
+    'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+    'streakContextAverage': 'Som vanligt',
+    'wellnessOverTime': 'Välbefinnande över tid',
   },
 
   da: {
@@ -2445,6 +2463,12 @@ const LANG_MAP = {
     'noneSurfaced': 'ingen vist',
     'items': 'stk',
     'advice': 'Råd',
+    'yearAtAGlance': 'Året på et øjeblik',
+    'noLog': 'Ingen log',
+    'clickToJump': 'Klik på en dag for at hoppe',
+    'monthsShort': ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+    'streakContextAverage': 'Som sædvanligt',
+    'wellnessOverTime': 'Trivsel over tid',
   },
 
   de: {
@@ -3007,6 +3031,12 @@ const LANG_MAP = {
     'noneSurfaced': 'keine angezeigt',
     'items': 'Stück',
     'advice': 'Hinweis',
+    'yearAtAGlance': 'Das Jahr im Überblick',
+    'noLog': 'Kein Eintrag',
+    'clickToJump': 'Auf einen Tag klicken',
+    'monthsShort': ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+    'streakContextAverage': 'Wie üblich',
+    'wellnessOverTime': 'Wohlbefinden im Zeitverlauf',
   },
 
   fr: {
@@ -3569,6 +3599,12 @@ const LANG_MAP = {
     'noneSurfaced': 'aucun affiché',
     'items': 'éléments',
     'advice': 'Conseil',
+    'yearAtAGlance': 'L\'année en un coup d\'œil',
+    'noLog': 'Aucune entrée',
+    'clickToJump': 'Cliquez sur un jour',
+    'monthsShort': ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+    'streakContextAverage': 'Dans la moyenne',
+    'wellnessOverTime': 'Bien-être au fil du temps',
   },
 
   nl: {
@@ -4131,6 +4167,12 @@ const LANG_MAP = {
     'noneSurfaced': 'geen getoond',
     'items': 'items',
     'advice': 'Advies',
+    'yearAtAGlance': 'Het jaar in één oogopslag',
+    'noLog': 'Geen log',
+    'clickToJump': 'Klik op een dag',
+    'monthsShort': ['Jan', 'Feb', 'Mrt', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+    'streakContextAverage': 'Gemiddeld',
+    'wellnessOverTime': 'Welzijn over tijd',
   },
 
   it: {
@@ -4693,6 +4735,12 @@ const LANG_MAP = {
     'noneSurfaced': 'nessuno mostrato',
     'items': 'elementi',
     'advice': 'Consiglio',
+    'yearAtAGlance': 'L\'anno a colpo d\'occhio',
+    'noLog': 'Nessun registro',
+    'clickToJump': 'Clicca un giorno',
+    'monthsShort': ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+    'streakContextAverage': 'Nella media',
+    'wellnessOverTime': 'Benessere nel tempo',
   },
 
   es: {
@@ -5255,6 +5303,12 @@ const LANG_MAP = {
     'noneSurfaced': 'ninguno mostrado',
     'items': 'elementos',
     'advice': 'Consejo',
+    'yearAtAGlance': 'El año de un vistazo',
+    'noLog': 'Sin registro',
+    'clickToJump': 'Haz clic en un día',
+    'monthsShort': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+    'streakContextAverage': 'En el promedio',
+    'wellnessOverTime': 'Bienestar a lo largo del tiempo',
   },
 
   fi: {
@@ -5817,6 +5871,12 @@ const LANG_MAP = {
     'noneSurfaced': 'ei näytetty',
     'items': 'kpl',
     'advice': 'Neuvo',
+    'yearAtAGlance': 'Vuosi yhdellä silmäyksellä',
+    'noLog': 'Ei kirjausta',
+    'clickToJump': 'Klikkaa päivää',
+    'monthsShort': ['Tam', 'Hel', 'Maa', 'Huh', 'Tou', 'Kes', 'Hei', 'Elo', 'Syy', 'Lok', 'Mar', 'Jou'],
+    'streakContextAverage': 'Keskiarvossa',
+    'wellnessOverTime': 'Hyvinvointi ajan kuluessa',
   },
 
   pt: {
@@ -6379,6 +6439,12 @@ const LANG_MAP = {
     'noneSurfaced': 'nenhum apresentado',
     'items': 'itens',
     'advice': 'Conselho',
+    'yearAtAGlance': 'O ano de relance',
+    'noLog': 'Sem registo',
+    'clickToJump': 'Clique em um dia',
+    'monthsShort': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+    'streakContextAverage': 'Na média',
+    'wellnessOverTime': 'Bem-estar ao longo do tempo',
   },
 };
 

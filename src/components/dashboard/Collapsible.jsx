@@ -52,7 +52,7 @@ export default function Collapsible({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 16px",
+          padding: "11px 16px", 
           background: "transparent",
           border: "none",
           cursor: "pointer",

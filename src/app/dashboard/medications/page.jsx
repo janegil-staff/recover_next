@@ -95,7 +95,7 @@ export default function MedicationsPage() {
   const timesLogged = (n) => `(${n} ${t.days ?? "times"})`;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, borderRadius: 14 }}>
       {/* Prescribed medications */}
       <Card title={t.prescribedMeds ?? "Prescribed medications"}>
         {medicines.length > 0 ? (

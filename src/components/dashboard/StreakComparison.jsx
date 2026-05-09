@@ -16,16 +16,17 @@ function fmtDate(d) {
 // Walk the full record list (ascending by date) and return every sober streak
 // length. A streak ends at any use day; we capture the length and reset.
 function computeStreaks(records) {
-  if (!records || records.length === 0) return { all: [], current: 0, best: 0, avg: 0 };
+  if (!records || records.length === 0)
+    return { all: [], current: 0, best: 0, avg: 0 };
 
   const sortedAsc = [...records].sort((a, b) =>
-    String(a.date ?? a.createdAt).localeCompare(String(b.date ?? b.createdAt))
+    String(a.date ?? a.createdAt).localeCompare(String(b.date ?? b.createdAt)),
   );
 
   const all = [];
   let run = 0;
   sortedAsc.forEach((r) => {
-    const isSober = !(r.substances?.length);
+    const isSober = !r.substances?.length;
     if (isSober) {
       run++;
     } else if (run > 0) {
@@ -49,8 +50,8 @@ function computeStreaks(records) {
 function colorFor(days) {
   if (days >= 30) return "#16A34A";
   if (days >= 14) return "#22C55E";
-  if (days >= 7)  return "#7AABDB";
-  if (days >= 3)  return "#FBBF24";
+  if (days >= 7) return "#7AABDB";
+  if (days >= 3) return "#FBBF24";
   return "#FB923C";
 }
 
@@ -82,15 +83,16 @@ export default function StreakComparison({ data, t }) {
     },
   ];
 
-  // Optional contextual line — places current streak in the distribution
   let contextLine = null;
   if (current > 0 && best > 0) {
     if (current === best) {
       contextLine = t.streakContextNewBest ?? "New personal best";
     } else if (current >= best * 0.9) {
       contextLine = t.streakContextNearBest ?? "Approaching personal best";
-    } else if (current >= avg) {
+    } else if (current > avg) {
       contextLine = t.streakContextAboveAvg ?? "Above average";
+    } else if (Math.abs(current - avg) < 0.5) {
+      contextLine = t.streakContextAverage ?? "At average";
     } else {
       contextLine = t.streakContextBuildingUp ?? "Building up";
     }
@@ -104,6 +106,7 @@ export default function StreakComparison({ data, t }) {
         borderRadius: 10,
         padding: "8px 14px",
         marginBottom: 16,
+        boxShadow: "var(--shadow-card)",
         display: "flex",
         flexWrap: "wrap",
         alignItems: "center",
@@ -113,7 +116,10 @@ export default function StreakComparison({ data, t }) {
       }}
     >
       {items.map((item, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+        <div
+          key={i}
+          style={{ display: "flex", alignItems: "baseline", gap: 4 }}
+        >
           <span
             style={{
               fontSize: 9,

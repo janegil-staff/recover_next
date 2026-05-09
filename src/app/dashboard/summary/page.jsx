@@ -27,7 +27,7 @@ function categoryColor(id) {
 
 function Card({ title, children }) {
   return (
-    <div style={{ background: SU, borderRadius: 14, border: `1px solid ${BO}`, padding: 16, boxShadow: "0 2px 8px rgba(74,122,181,0.06)" }}>
+    <div style={{ background: SU, borderRadius: 14, border: `1px solid ${BO}`, padding: 16, boxShadow: "var(--shadow-card)" }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: A, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 12 }}>{title}</div>
       {children}
     </div>
@@ -54,7 +54,7 @@ function AdviceCard({ id, t, lang }) {
   const body  = t[`advice_${numericId}_body`]  ?? getAdviceItem(lang, numericId).body;
 
   return (
-    <div style={{ borderRadius: 12, border: `1px solid ${color}33`, background: color + "08", overflow: "hidden" }}>
+   <div style={{ borderRadius: 12, border: `1px solid ${color}33`, background: color + "08", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
       <button
         onClick={() => setOpen(o => !o)}
         style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "10px 14px",
