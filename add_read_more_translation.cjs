@@ -1,25 +1,21 @@
-// add_best_worst_translations.cjs
+// add_read_more_translation.cjs
 const fs = require("fs");
 const FILE = "src/translations/index.js";
 let src = fs.readFileSync(FILE, "utf8");
 
-const KEYS = {
-  best: {
-    no: "Best", en: "Best",
-    sv: "Bäst", da: "Bedst",
-    de: "Bester", fr: "Meilleur",
-    nl: "Best", it: "Migliore",
-    es: "Mejor", fi: "Paras",
-    pt: "Melhor",
-  },
-  worst: {
-    no: "Verst", en: "Worst",
-    sv: "Sämst", da: "Værst",
-    de: "Schlechtester", fr: "Pire",
-    nl: "Slechtst", it: "Peggiore",
-    es: "Peor", fi: "Huonoin",
-    pt: "Pior",
-  },
+const KEY = "readMore";
+const VALUES = {
+  no: "Les mer",
+  en: "Read more",
+  sv: "Läs mer",
+  da: "Læs mere",
+  de: "Mehr lesen",
+  fr: "Lire la suite",
+  nl: "Lees meer",
+  it: "Leggi di più",
+  es: "Leer más",
+  fi: "Lue lisää",
+  pt: "Ler mais",
 };
 
 const lines = src.split("\n");
@@ -41,25 +37,20 @@ function findBlocks(L) {
   return blocks;
 }
 
-let inserted = 0, already = 0;
+let inserted = 0;
 for (const block of [...findBlocks(lines)].reverse()) {
-  const innerIndent = block.indent + "  ";
+  const value = VALUES[block.lang];
+  if (!value) continue;
   const body = lines.slice(block.open, block.close + 1).join("\n");
-  const insertions = [];
-  for (const [key, langValues] of Object.entries(KEYS)) {
-    const value = langValues[block.lang];
-    if (!value) continue;
-    if (new RegExp(`['"]${key}['"]\\s*:`).test(body)) { already++; continue; }
-    insertions.push(`${innerIndent}'${key}': '${value.replace(/'/g, "\\'")}',`);
-    inserted++;
-  }
-  if (!insertions.length) continue;
+  if (new RegExp(`['"]${KEY}['"]\\s*:`).test(body)) continue;
+  const innerIndent = block.indent + "  ";
   const prevLine = lines[block.close - 1];
   if (prevLine && !/,\s*$/.test(prevLine.trim()) && prevLine.trim() !== "{") {
     lines[block.close - 1] = prevLine.replace(/(\S)\s*$/, "$1,");
   }
-  lines.splice(block.close, 0, ...insertions);
+  lines.splice(block.close, 0, `${innerIndent}'${KEY}': '${value.replace(/'/g, "\\'")}',`);
+  inserted++;
 }
 
 fs.writeFileSync(FILE, lines.join("\n"));
-console.log(`✅ Inserted: ${inserted}, already: ${already}`);
+console.log(`✅ Inserted ${KEY} into ${inserted} block(s)`);

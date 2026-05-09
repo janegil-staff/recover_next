@@ -682,6 +682,7 @@ const LANG_MAP = {
     'trajectory': 'Trajectory',
     'best': 'Best',
     'worst': 'Worst',
+    'readMore': 'Read more',
   },
 
   no: {
@@ -1339,6 +1340,7 @@ const LANG_MAP = {
     'trajectory': 'Utvikling',
     'best': 'Best',
     'worst': 'Verst',
+    'readMore': 'Les mer',
   },
 
   sv: {
@@ -1910,6 +1912,7 @@ const LANG_MAP = {
     'trajectory': 'Utveckling',
     'best': 'Bäst',
     'worst': 'Sämst',
+    'readMore': 'Läs mer',
   },
 
   da: {
@@ -2481,6 +2484,7 @@ const LANG_MAP = {
     'trajectory': 'Udvikling',
     'best': 'Bedst',
     'worst': 'Værst',
+    'readMore': 'Læs mere',
   },
 
   de: {
@@ -3052,6 +3056,7 @@ const LANG_MAP = {
     'trajectory': 'Verlauf',
     'best': 'Bester',
     'worst': 'Schlechtester',
+    'readMore': 'Mehr lesen',
   },
 
   fr: {
@@ -3623,6 +3628,7 @@ const LANG_MAP = {
     'trajectory': 'Trajectoire',
     'best': 'Meilleur',
     'worst': 'Pire',
+    'readMore': 'Lire la suite',
   },
 
   nl: {
@@ -4194,6 +4200,7 @@ const LANG_MAP = {
     'trajectory': 'Verloop',
     'best': 'Best',
     'worst': 'Slechtst',
+    'readMore': 'Lees meer',
   },
 
   it: {
@@ -4765,6 +4772,7 @@ const LANG_MAP = {
     'trajectory': 'Andamento',
     'best': 'Migliore',
     'worst': 'Peggiore',
+    'readMore': 'Leggi di più',
   },
 
   es: {
@@ -5336,6 +5344,7 @@ const LANG_MAP = {
     'trajectory': 'Trayectoria',
     'best': 'Mejor',
     'worst': 'Peor',
+    'readMore': 'Leer más',
   },
 
   fi: {
@@ -5907,6 +5916,7 @@ const LANG_MAP = {
     'trajectory': 'Kehityskaari',
     'best': 'Paras',
     'worst': 'Huonoin',
+    'readMore': 'Lue lisää',
   },
 
   pt: {
@@ -6478,6 +6488,7 @@ const LANG_MAP = {
     'trajectory': 'Trajetória',
     'best': 'Melhor',
     'worst': 'Pior',
+    'readMore': 'Ler mais',
   },
 };
 

@@ -6,7 +6,7 @@ import { BG, MU, TX } from "./theme";
 import { QC } from "./constants";
 import { scoreTotal } from "./helpers";
 
-export default function QuestionnairesList({ data, onOpen }) {
+export default function QuestionnairesList({ data, onOpen, t = {} }) {
   return (
     <div
       style={{
@@ -43,9 +43,7 @@ export default function QuestionnairesList({ data, onOpen }) {
                 {q.label}
               </span>
               {total != null ? (
-                <span
-                  style={{ fontSize: 11, color: q.color, fontWeight: 700 }}
-                >
+                <span style={{ fontSize: 11, color: q.color, fontWeight: 700 }}>
                   {total}/{q.max}
                 </span>
               ) : (
@@ -54,9 +52,7 @@ export default function QuestionnairesList({ data, onOpen }) {
             </div>
             {total != null && (
               <>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: 8 }}
-                >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div
                     style={{
                       flex: 1,
@@ -90,7 +86,7 @@ export default function QuestionnairesList({ data, onOpen }) {
                       hasData && onOpen(q.key);
                     }}
                   >
-                    read more
+                    {t.readMore ?? "Read more"}
                   </span>
                 </div>
                 <div

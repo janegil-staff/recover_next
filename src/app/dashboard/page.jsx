@@ -216,7 +216,7 @@ export default function CalendarPage() {
               id="questionnaires"
               title={t.questionnaires ?? "Questionnaires"}
             >
-              <QuestionnairesList data={data} onOpen={setQModal} />
+              <QuestionnairesList data={data} onOpen={setQModal} t={t} />
             </Collapsible>
 
             <Collapsible
