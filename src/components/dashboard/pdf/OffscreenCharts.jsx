@@ -1,0 +1,478 @@
+"use client";
+// Off-screen Recharts components rendered into the DOM at fixed positions
+// (off the visible viewport via -9999px) so html2canvas can capture them
+// as PNG snapshots for embedding in the PDF document.
+//
+// Each chart has a stable id ("pdf-chart-X") referenced in generatePdf.js.
+// Order of rendering: this component is mounted just before generatePDF() is
+// called, then unmounted after PDF download completes.
+import {
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  LineChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { SC_COLORS } from "./theme";
+import { shortDate } from "./helpers";
+
+export default function OffscreenCharts({
+  data,
+  recs,
+  filteredQuestionnaires,
+  t,
+}) {
+  const allRecs = data.records ?? [];
+
+  const moodData = recs.map((r) => ({
+    date: shortDate(r.date ?? r.createdAt),
+    mood: r.mood ?? null,
+    cravings: r.cravings ?? null,
+    wellbeing: r.wellbeing ?? null,
+  }));
+
+  const avg = (key) => {
+    const v = recs.map((r) => r[key]).filter((x) => x != null);
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  };
+  const avgMood = avg("mood");
+  const avgWellbeing = avg("wellbeing");
+  const avgCravings = avg("cravings");
+  const avgAmount = avg("amount");
+  const soberDays = recs.filter((r) => !r.substances?.length).length;
+  const soberPct = recs.length ? (soberDays / recs.length) * 5 : 0;
+
+  const recoveryRadarData = [
+    { subject: "Mood", value: +(avgMood ?? 0).toFixed(1), fullMark: 5 },
+    {
+      subject: "Wellbeing",
+      value: +(avgWellbeing ?? 0).toFixed(1),
+      fullMark: 5,
+    },
+    {
+      subject: "Low craving",
+      value: avgCravings != null ? +Math.max(0, 5 - avgCravings).toFixed(1) : 5,
+      fullMark: 5,
+    },
+    {
+      subject: "Low amount",
+      value:
+        avgAmount != null
+          ? +Math.max(0, 5 - (avgAmount / 10) * 5).toFixed(1)
+          : 5,
+      fullMark: 5,
+    },
+    { subject: "Sober days", value: +soberPct.toFixed(1), fullMark: 5 },
+  ];
+
+  const subMap = {};
+  recs.forEach((r) =>
+    (r.substances ?? []).forEach((s) => {
+      if (!subMap[s]) subMap[s] = { count: 0, totalAmt: 0 };
+      subMap[s].count++;
+      subMap[s].totalAmt += r.amount ?? 0;
+    }),
+  );
+  const subEntries = Object.entries(subMap);
+  const maxCount = subEntries.length
+    ? Math.max(...subEntries.map(([, v]) => v.count))
+    : 1;
+  const substanceRadarData = subEntries.map(([s, v]) => ({
+    subject: s.charAt(0).toUpperCase() + s.slice(1),
+    days: v.count,
+    avgAmount: Math.round((v.totalAmt / v.count) * 10) / 10,
+    fullMark: maxCount,
+  }));
+
+  const weightData = recs
+    .filter((r) => r.weight)
+    .map((r) => ({
+      date: shortDate(r.date ?? r.createdAt),
+      weight: r.weight,
+    }));
+
+  // Substance Mix donut data
+  const mixStats = {};
+  recs.forEach((r) => {
+    const subs = r.substances ?? [];
+    if (subs.length === 0) return;
+    subs.forEach((s) => {
+      if (!mixStats[s]) mixStats[s] = { days: 0, amount: 0 };
+      mixStats[s].days++;
+      mixStats[s].amount += Number(r.amount) || 0;
+    });
+  });
+  const mixEntries = Object.entries(mixStats)
+    .sort((a, b) => b[1].days - a[1].days)
+    .map(([name, v]) => ({ name, days: v.days, amount: v.amount }));
+  if (soberDays > 0) {
+    mixEntries.unshift({ name: "sober", days: soberDays, amount: 0 });
+  }
+  const mixTotal = recs.length;
+  const sliceColor = (name) =>
+    name === "sober" ? "#94A3B8" : (SC_COLORS[name] ?? "#bdbdbd");
+
+  const qRadarData = filteredQuestionnaires.map((q) => ({
+    subject: q.label,
+    value: q.score != null ? Math.round((q.score / q.max) * 100) : 0,
+    fullMark: 100,
+  }));
+
+  const wrap = {
+    position: "fixed",
+    left: "-9999px",
+    top: "0px",
+    zIndex: -1,
+    background: "#fff",
+  };
+
+  return (
+    <div style={wrap}>
+      <div
+        id="pdf-chart-mood"
+        style={{
+          width: Math.max(520, moodData.length * 28),
+          height: 220,
+          background: "#fff",
+          padding: "8px",
+        }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={moodData}
+            margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#e0e8f0"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="date"
+              tick={{ fontSize: 10, fill: "#7a9ab8" }}
+              tickLine={false}
+              axisLine={false}
+              interval={Math.max(0, Math.ceil(moodData.length / 10) - 1)}
+            />
+            <YAxis
+              domain={[0, 5]}
+              ticks={[1, 2, 3, 4, 5]}
+              tick={{ fontSize: 10, fill: "#7a9ab8" }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
+            <ReferenceLine y={3} stroke="#d0dcea" strokeDasharray="4 4" />
+            <Line
+              type="monotone"
+              dataKey="mood"
+              name={t.mood ?? "Mood"}
+              stroke="#4a7ab5"
+              strokeWidth={2}
+              dot={{ r: 3, fill: "#4a7ab5", strokeWidth: 0 }}
+              connectNulls
+            />
+            <Line
+              type="monotone"
+              dataKey="cravings"
+              name={t.cravings ?? "Cravings"}
+              stroke="#f4a07a"
+              strokeWidth={2}
+              dot={{ r: 3, fill: "#f4a07a", strokeWidth: 0 }}
+              connectNulls
+            />
+            <Line
+              type="monotone"
+              dataKey="wellbeing"
+              name={t.wellbeing ?? "Wellbeing"}
+              stroke="#66bb6a"
+              strokeWidth={2}
+              dot={{ r: 3, fill: "#66bb6a", strokeWidth: 0 }}
+              connectNulls
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div
+        id="pdf-chart-recovery-radar"
+        style={{ width: 320, height: 280, background: "#fff", padding: "8px" }}
+      >
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#2d4a6e",
+            textAlign: "center",
+            marginBottom: 4,
+          }}
+        >
+          {t.recoveryProfile ?? "Recovery Profile"}
+        </div>
+        <ResponsiveContainer width="100%" height="90%">
+          <RadarChart
+            data={recoveryRadarData}
+            margin={{ top: 16, right: 44, bottom: 16, left: 44 }}
+          >
+            <PolarGrid stroke="#d0dcea" />
+            <PolarAngleAxis
+              dataKey="subject"
+              tick={{ fontSize: 11, fill: "#2d4a6e", fontWeight: 600 }}
+            />
+            <PolarRadiusAxis
+              angle={90}
+              domain={[0, 5]}
+              tickCount={6}
+              tick={{ fontSize: 8, fill: "#7a9ab8" }}
+            />
+            <Radar
+              name={t.score ?? "Score"}
+              dataKey="value"
+              stroke="#66bb6a"
+              fill="#66bb6a"
+              fillOpacity={0.3}
+              strokeWidth={2}
+            />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {substanceRadarData.length >= 3 && (
+        <div
+          id="pdf-chart-substance-radar"
+          style={{
+            width: 320,
+            height: 280,
+            background: "#fff",
+            padding: "8px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#2d4a6e",
+              textAlign: "center",
+              marginBottom: 4,
+            }}
+          >
+            {t.substanceProfile ?? "Substance Profile"}
+          </div>
+          <ResponsiveContainer width="100%" height="90%">
+            <RadarChart
+              data={substanceRadarData}
+              margin={{ top: 16, right: 44, bottom: 16, left: 44 }}
+            >
+              <PolarGrid stroke="#d0dcea" />
+              <PolarAngleAxis
+                dataKey="subject"
+                tick={{ fontSize: 11, fill: "#2d4a6e", fontWeight: 600 }}
+              />
+              <PolarRadiusAxis
+                angle={90}
+                tickCount={4}
+                tick={{ fontSize: 8, fill: "#7a9ab8" }}
+              />
+              <Radar
+                name={t.daysUsed ?? "Days used"}
+                dataKey="days"
+                stroke="#4a7ab5"
+                fill="#4a7ab5"
+                fillOpacity={0.2}
+                strokeWidth={2}
+              />
+              <Radar
+                name={t.avgAmount ?? "Avg amount"}
+                dataKey="avgAmount"
+                stroke="#ec407a"
+                fill="#ec407a"
+                fillOpacity={0.2}
+                strokeWidth={1.5}
+              />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      <div
+        id="pdf-chart-q-radar"
+        style={{ width: 380, height: 300, background: "#fff", padding: "8px" }}
+      >
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#2d4a6e",
+            textAlign: "center",
+            marginBottom: 4,
+          }}
+        >
+          {t.questionnaireRadar ?? "Questionnaire Radar"}
+        </div>
+        <ResponsiveContainer width="100%" height="90%">
+          <RadarChart
+            data={qRadarData}
+            margin={{ top: 16, right: 50, bottom: 16, left: 50 }}
+          >
+            <PolarGrid stroke="#d0dcea" />
+            <PolarAngleAxis
+              dataKey="subject"
+              tick={{ fontSize: 11, fill: "#2d4a6e", fontWeight: 700 }}
+            />
+            <PolarRadiusAxis
+              angle={90}
+              domain={[0, 100]}
+              tickCount={6}
+              tick={{ fontSize: 9, fill: "#7a9ab8" }}
+              unit="%"
+            />
+            <Radar
+              name={t.scorePct ?? "Score %"}
+              dataKey="value"
+              stroke="#4a7ab5"
+              fill="#4a7ab5"
+              fillOpacity={0.25}
+              strokeWidth={2.5}
+            />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {mixEntries.length > 0 && (
+        <div
+          id="pdf-chart-substance-mix"
+          style={{
+            width: 200,
+            height: 200,
+            background: "#fff",
+            padding: "4px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ width: 190, height: 190, position: "relative" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={mixEntries}
+                  dataKey="days"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={88}
+                  startAngle={90}
+                  endAngle={-270}
+                  paddingAngle={mixEntries.length > 1 ? 2 : 0}
+                  labelLine={false}
+                  isAnimationActive={false}
+                >
+                  {mixEntries.map((e, i) => (
+                    <Cell key={`${e.name}-${i}`} fill={sliceColor(e.name)} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 800,
+                  color: "#2d4a6e",
+                  lineHeight: 1,
+                }}
+              >
+                {mixTotal}
+              </div>
+              <div
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: "#7a9ab8",
+                  letterSpacing: 0.6,
+                  textTransform: "uppercase",
+                  marginTop: 3,
+                }}
+              >
+                {t.daysLogged ?? "days"}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {weightData.length > 1 && (
+        <div
+          id="pdf-chart-weight"
+          style={{
+            width: Math.max(520, weightData.length * 28),
+            height: 180,
+            background: "#fff",
+            padding: "8px",
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={weightData}
+              margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#e0e8f0"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: "#7a9ab8" }}
+                tickLine={false}
+                axisLine={false}
+                interval={Math.max(0, Math.ceil(weightData.length / 8) - 1)}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "#7a9ab8" }}
+                tickLine={false}
+                axisLine={false}
+                domain={[(d) => Math.floor(d - 2), (d) => Math.ceil(d + 2)]}
+              />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="weight"
+                name={`${t.weight ?? "Weight"} (${t.kg ?? "kg"})`}
+                stroke="#2d4a6e"
+                strokeWidth={2.5}
+                dot={{ r: 3, fill: "#2d4a6e", strokeWidth: 0 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}

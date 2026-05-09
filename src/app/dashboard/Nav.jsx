@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useDashboardT } from "./LangContext";
-import PdfExportModal from "./PdfExportModal";
 import ThemeToggle from "@/components/ThemeToggle";
+import PdfExportModal from "@/components/dashboard/pdf/PdfExportModal";
 
 export default function Nav({ patient }) {
   const pathname = usePathname();
