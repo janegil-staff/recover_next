@@ -174,7 +174,7 @@ export default function LogRow({ rec, events, t, focusDate }) {
             minWidth: 0,
           }}
         >
-          {events.length === 0 && events._isSober && (
+          {events._isSober && (
             <span
               style={{
                 fontSize: 9,
