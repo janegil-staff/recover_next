@@ -2,9 +2,25 @@
 // 6-month trend of monthly wellness scores. Pairs with the WellnessIndex
 // card at the top of the dashboard: number now + trajectory below.
 // Pure SVG — no chart library. Theme-aware via CSS variables.
+//
+// Visual conventions:
+//   • Line color reflects direction: green = improving, red = declining,
+//     neutral = roughly flat (|delta| < FLAT_THRESHOLD).
+//   • The last dot is enlarged. If the rightmost month is still in progress
+//     (today falls inside it), the dot renders as a dashed hollow ring to
+//     signal "score will firm up as more days are logged."
 import { useMemo } from "react";
 import { BO, MU, SU } from "./theme";
 import { calculateWellness } from "./wellnessScore";
+
+// How many points difference counts as "flat" rather than improving/declining.
+// Tuned for a 0-100 score range; below this, month-to-month noise dominates
+// and the doctor shouldn't read a trend into it.
+const FLAT_THRESHOLD = 3;
+
+const COLOR_UP = "#16A34A";    // green — improving
+const COLOR_DOWN = "#DC2626";  // red   — declining
+const COLOR_FLAT = "var(--text)";
 
 export default function WellnessSparkline({ data, t, currentMonth }) {
   // Compute wellness scores for the last 6 months
@@ -74,10 +90,37 @@ export default function WellnessSparkline({ data, t, currentMonth }) {
     lastValid = i;
   });
 
-  // Color the line based on overall trajectory
-const first = validPoints[0].score;
-const last = validPoints[validPoints.length - 1].score;
-const lineColor = "var(--text)";
+  // Direction = first valid → last valid. Color the line accordingly.
+  const first = validPoints[0].score;
+  const last = validPoints[validPoints.length - 1].score;
+  const delta = last - first;
+  const direction =
+    Math.abs(delta) < FLAT_THRESHOLD ? "flat" : delta > 0 ? "up" : "down";
+  const lineColor =
+    direction === "up"
+      ? COLOR_UP
+      : direction === "down"
+        ? COLOR_DOWN
+        : COLOR_FLAT;
+
+  // Direction badge — small arrow next to the "first → last" readout
+  const directionIcon =
+    direction === "up" ? "↑" : direction === "down" ? "↓" : "→";
+  const directionLabel =
+    direction === "up"
+      ? (t.improving ?? "improving")
+      : direction === "down"
+        ? (t.declining ?? "declining")
+        : (t.stable ?? "stable");
+
+  // Is the rightmost point the current (in-progress) month? If so, render
+  // it as a hollow dashed circle so the doctor knows the score will firm up.
+  const today = new Date();
+  const lastPoint = points[points.length - 1];
+  const isLastInProgress =
+    lastPoint &&
+    today.getFullYear() === lastPoint.y &&
+    today.getMonth() === lastPoint.m;
 
   // Month labels (short — Jan, Feb, etc.)
   const monthsT = t.monthsShort ?? [
@@ -96,23 +139,24 @@ const lineColor = "var(--text)";
   ];
 
   return (
-<div
-  style={{
-    background: SU,
-    borderRadius: 12,
-    border: `1px solid ${BO}`,
-    boxShadow: "var(--shadow-card)",
-    padding: "12px 14px 10px",
-    marginTop: 18,
-    marginBottom: 10,
-  }}
->
+    <div
+      style={{
+        background: SU,
+        borderRadius: 12,
+        border: `1px solid ${BO}`,
+        boxShadow: "var(--shadow-card)",
+        padding: "12px 14px 10px",
+        marginTop: 18,
+        marginBottom: 10,
+      }}
+    >
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "baseline",
           marginBottom: 6,
+          gap: 8,
         }}
       >
         <div
@@ -128,13 +172,20 @@ const lineColor = "var(--text)";
         </div>
         <div
           style={{
+            display: "flex",
+            alignItems: "baseline",
+            gap: 6,
             fontSize: 10,
-            color: lineColor,
             fontWeight: 700,
             fontVariantNumeric: "tabular-nums",
           }}
         >
-          {first} → {last}
+          <span style={{ color: MU, fontWeight: 600 }}>
+            {first} → {last}
+          </span>
+          <span style={{ color: lineColor }}>
+            {directionIcon} {directionLabel}
+          </span>
         </div>
       </div>
 
@@ -157,24 +208,52 @@ const lineColor = "var(--text)";
           vectorEffect="non-scaling-stroke"
         />
 
-        {/* Dots at each point */}
-        {points.map((p, i) =>
-          p.score != null ? (
+        {/* Dots at each point. The rightmost dot is special:
+            - If the last month is in progress → hollow dashed circle
+            - Otherwise → solid filled circle (slightly larger) */}
+        {points.map((p, i) => {
+          if (p.score == null) return null;
+          const isLast = i === points.length - 1;
+          const cx = xFor(i);
+          const cy = yFor(p.score);
+
+          if (isLast && isLastInProgress) {
+            return (
+              <circle
+                key={i}
+                cx={cx}
+                cy={cy}
+                r={3}
+                fill="var(--card)"
+                stroke={lineColor}
+                strokeWidth={1.5}
+                strokeDasharray="2 2"
+                vectorEffect="non-scaling-stroke"
+              >
+                <title>
+                  {monthsT[p.m]} {p.y}: {p.score}/100 ·{" "}
+                  {t.inProgress ?? "in progress"}
+                </title>
+              </circle>
+            );
+          }
+
+          return (
             <circle
               key={i}
-              cx={xFor(i)}
-              cy={yFor(p.score)}
-              r={i === points.length - 1 ? 2.5 : 1.5}
+              cx={cx}
+              cy={cy}
+              r={isLast ? 2.5 : 1.5}
               fill={lineColor}
-              stroke={i === points.length - 1 ? "var(--card)" : "none"}
-              strokeWidth={i === points.length - 1 ? 1 : 0}
+              stroke={isLast ? "var(--card)" : "none"}
+              strokeWidth={isLast ? 1 : 0}
             >
               <title>
                 {monthsT[p.m]} {p.y}: {p.score}/100
               </title>
             </circle>
-          ) : null,
-        )}
+          );
+        })}
       </svg>
 
       {/* Month labels — only first, middle, last to avoid clutter */}
