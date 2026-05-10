@@ -326,7 +326,7 @@ export default function GraphsPage() {
             <DayOfWeekPattern records={records} c={c} t={t} />
           </Card>
 
-          {/* Cravings vs Mood lead-lag */}
+          {/* Cravings vs Mood lead-lag 
           <Card
             title={t.cravingsMoodLeadLag ?? "Cravings vs Mood — Lead/Lag"}
             subtitle={
@@ -336,7 +336,7 @@ export default function GraphsPage() {
           >
             <CravingsMoodLeadLag records={records} c={c} t={t} />
           </Card>
-
+*/}
           {/* ── CLINICAL ── */}
           {(hasQuestionnaireData || hasSideEffects) && (
             <>
