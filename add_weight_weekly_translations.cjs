@@ -1,14 +1,12 @@
+// add_weight_weekly_translations.cjs
 const fs = require("fs");
 const FILE = "src/translations/index.js";
 let src = fs.readFileSync(FILE, "utf8");
 
 const KEYS = {
-  categoryMood: { no: "Humør", en: "Mood", sv: "Humör", da: "Humør", de: "Stimmung", fr: "Humeur", nl: "Stemming", it: "Umore", es: "Ánimo", fi: "Mieliala", pt: "Humor" },
-  categoryRecovery: { no: "Bedring", en: "Recovery", sv: "Återhämtning", da: "Bedring", de: "Genesung", fr: "Rétablissement", nl: "Herstel", it: "Recupero", es: "Recuperación", fi: "Toipuminen", pt: "Recuperação" },
-  categoryWellbeing: { no: "Velvære", en: "Wellbeing", sv: "Välbefinnande", da: "Trivsel", de: "Wohlbefinden", fr: "Bien-être", nl: "Welzijn", it: "Benessere", es: "Bienestar", fi: "Hyvinvointi", pt: "Bem-estar" },
-  categoryMedication: { no: "Medisin", en: "Medication", sv: "Medicin", da: "Medicin", de: "Medikation", fr: "Médication", nl: "Medicatie", it: "Farmaci", es: "Medicación", fi: "Lääkitys", pt: "Medicação" },
-  categorySleep: { no: "Søvn", en: "Sleep", sv: "Sömn", da: "Søvn", de: "Schlaf", fr: "Sommeil", nl: "Slaap", it: "Sonno", es: "Sueño", fi: "Uni", pt: "Sono" },
-  categoryCravings: { no: "Sug", en: "Cravings", sv: "Sug", da: "Trang", de: "Verlangen", fr: "Envies", nl: "Trek", it: "Desiderio", es: "Antojos", fi: "Himo", pt: "Fissura" },
+  measurement: { no: "måling", en: "measurement", sv: "mätning", da: "måling", de: "Messung", fr: "mesure", nl: "meting", it: "misurazione", es: "medición", fi: "mittaus", pt: "medição" },
+  measurements: { no: "målinger", en: "measurements", sv: "mätningar", da: "målinger", de: "Messungen", fr: "mesures", nl: "metingen", it: "misurazioni", es: "mediciones", fi: "mittausta", pt: "medições" },
+  weeklyAveragesKg: { no: "Ukentlige snitt (kg)", en: "Weekly averages (kg)", sv: "Veckosnitt (kg)", da: "Ugentlige snit (kg)", de: "Wochendurchschnitt (kg)", fr: "Moyennes hebdo (kg)", nl: "Weekgemiddelden (kg)", it: "Medie settimanali (kg)", es: "Promedios semanales (kg)", fi: "Viikkokeskiarvot (kg)", pt: "Médias semanais (kg)" },
 };
 
 const lines = src.split("\n");
@@ -19,17 +17,13 @@ function findBlocks(L) {
     if (!m || m[1].length > 2) continue;
     let depth = 0, close = -1;
     for (let j = i; j < L.length; j++) {
-      for (const ch of L[j]) {
-        if (ch === "{") depth++;
-        else if (ch === "}") { depth--; if (depth === 0) { close = j; break; } }
-      }
+      for (const ch of L[j]) { if (ch === "{") depth++; else if (ch === "}") { depth--; if (depth === 0) { close = j; break; } } }
       if (close !== -1) break;
     }
     if (close !== -1) blocks.push({ lang: m[2], open: i, close, indent: m[1] });
   }
   return blocks;
 }
-
 let inserted = 0, already = 0;
 for (const block of [...findBlocks(lines)].reverse()) {
   const innerIndent = block.indent + "  ";
@@ -49,6 +43,5 @@ for (const block of [...findBlocks(lines)].reverse()) {
   }
   lines.splice(block.close, 0, ...insertions);
 }
-
 fs.writeFileSync(FILE, lines.join("\n"));
 console.log(`✅ Inserted: ${inserted}, already: ${already}`);

@@ -24,7 +24,10 @@ import {
 import StatTilesRow from "@/components/dashboard/graphs/StatTilesRow";
 import KeyFindingsPanel from "@/components/dashboard/graphs/KeyFindingsPanel";
 import ComparisonToggle from "@/components/dashboard/graphs/ComparisonToggle";
-import { buildPeriodComparison, aggregateStats } from "@/components/dashboard/graphs/comparison";
+import {
+  buildPeriodComparison,
+  aggregateStats,
+} from "@/components/dashboard/graphs/comparison";
 
 export default function GraphsPage() {
   const t = useDashboardT();
@@ -311,9 +314,9 @@ export default function GraphsPage() {
           {hasMoodData && (
             <Card
               title={t.moodCravingsWellbeing ?? "Mood, Cravings & Wellbeing"}
-              subtitle={t.scaleOneToFive ?? "Scale 1–5"}
+              subtitle={t.weeklyAverages ?? "Weekly averages (Mon–Sun)"}
             >
-              <MoodCravingsLine moodData={moodData} c={c} t={t} />
+              <MoodCravingsLine records={records} c={c} t={t} />
             </Card>
           )}
           <Card
@@ -327,7 +330,8 @@ export default function GraphsPage() {
           <Card
             title={t.cravingsMoodLeadLag ?? "Cravings vs Mood — Lead/Lag"}
             subtitle={
-              t.crossCorrelationAnalysis ?? "Cross-correlation across ±3 day lags"
+              t.crossCorrelationAnalysis ??
+              "Cross-correlation across ±3 day lags"
             }
           >
             <CravingsMoodLeadLag records={records} c={c} t={t} />
@@ -375,7 +379,6 @@ export default function GraphsPage() {
             <WellbeingRadarChart records={records} c={c} t={t} />
           </Card>
 
-          {/* ── TRENDS ── */}
           {weightData.length > 1 && (
             <>
               <SectionLabel>{t.sectionTrends ?? "Trends"}</SectionLabel>
@@ -383,7 +386,7 @@ export default function GraphsPage() {
                 title={t.weightOverTime ?? "Weight Trend"}
                 subtitle={t.kg ?? "kg"}
               >
-                <WeightChart weightData={weightData} c={c} t={t} />
+                <WeightChart records={records} c={c} t={t} />
               </Card>
             </>
           )}

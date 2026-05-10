@@ -761,6 +761,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medication',
     'categorySleep': 'Sleep',
     'categoryCravings': 'Cravings',
+    'weeklyAverages': 'Weekly averages (Mon–Sun)',
+    'weekShort': 'Wk',
+    'logged': 'logged',
   },
 
   no: {
@@ -1497,6 +1500,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medisin',
     'categorySleep': 'Søvn',
     'categoryCravings': 'Sug',
+    'weeklyAverages': 'Ukentlige snitt (man–søn)',
+    'weekShort': 'Uke',
+    'logged': 'loggført',
   },
 
   sv: {
@@ -2147,6 +2153,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medicin',
     'categorySleep': 'Sömn',
     'categoryCravings': 'Sug',
+    'weeklyAverages': 'Veckosnitt (mån–sön)',
+    'weekShort': 'V',
+    'logged': 'loggade',
   },
 
   da: {
@@ -2797,6 +2806,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medicin',
     'categorySleep': 'Søvn',
     'categoryCravings': 'Trang',
+    'weeklyAverages': 'Ugentlige snit (man–søn)',
+    'weekShort': 'Uge',
+    'logged': 'logget',
   },
 
   de: {
@@ -3447,6 +3459,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medikation',
     'categorySleep': 'Schlaf',
     'categoryCravings': 'Verlangen',
+    'weeklyAverages': 'Wochendurchschnitt (Mo–So)',
+    'weekShort': 'KW',
+    'logged': 'protokolliert',
   },
 
   fr: {
@@ -4097,6 +4112,9 @@ const LANG_MAP = {
     'categoryMedication': 'Médication',
     'categorySleep': 'Sommeil',
     'categoryCravings': 'Envies',
+    'weeklyAverages': 'Moyennes hebdo (lun–dim)',
+    'weekShort': 'Sem',
+    'logged': 'enregistrés',
   },
 
   nl: {
@@ -4747,6 +4765,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medicatie',
     'categorySleep': 'Slaap',
     'categoryCravings': 'Trek',
+    'weeklyAverages': 'Weekgemiddelden (ma–zo)',
+    'weekShort': 'Wk',
+    'logged': 'vastgelegd',
   },
 
   it: {
@@ -5397,6 +5418,9 @@ const LANG_MAP = {
     'categoryMedication': 'Farmaci',
     'categorySleep': 'Sonno',
     'categoryCravings': 'Desiderio',
+    'weeklyAverages': 'Medie settimanali (lun–dom)',
+    'weekShort': 'Sett',
+    'logged': 'registrati',
   },
 
   es: {
@@ -6047,6 +6071,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medicación',
     'categorySleep': 'Sueño',
     'categoryCravings': 'Antojos',
+    'weeklyAverages': 'Promedios semanales (lun–dom)',
+    'weekShort': 'Sem',
+    'logged': 'registrados',
   },
 
   fi: {
@@ -6697,6 +6724,9 @@ const LANG_MAP = {
     'categoryMedication': 'Lääkitys',
     'categorySleep': 'Uni',
     'categoryCravings': 'Himo',
+    'weeklyAverages': 'Viikkokeskiarvot (ma–su)',
+    'weekShort': 'Vk',
+    'logged': 'kirjattu',
   },
 
   pt: {
@@ -7347,6 +7377,9 @@ const LANG_MAP = {
     'categoryMedication': 'Medicação',
     'categorySleep': 'Sono',
     'categoryCravings': 'Fissura',
+    'weeklyAverages': 'Médias semanais (seg–dom)',
+    'weekShort': 'Sem',
+    'logged': 'registados',
   },
 };
 
