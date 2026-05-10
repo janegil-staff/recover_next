@@ -25,7 +25,8 @@ function cravingsScore(recs) {
   const vals = recs.map((r) => r.cravings).filter((v) => v != null);
   if (vals.length === 0) return null;
   const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-  // Invert: 5 = bad (0%), 1 = good (100%)
+  // Cravings: 1 = best (low), 5 = worst (high). Invert so a high value
+  // produces a low (bad) score.
   return Math.max(0, Math.min(100, ((5 - avg) / 4) * 100));
 }
 
@@ -41,11 +42,9 @@ function moodWellbeingScore(recs) {
     : null;
   const combined = [moodAvg, wellAvg].filter((v) => v != null);
   const avg = combined.reduce((a, b) => a + b, 0) / combined.length;
-  // NOTE: legacy formula — both mood and wellbeing are 1=worst..5=best,
-  // so the inversion below treats high values as worse. Preserved as-is for
-  // parity with the previous implementation; revisit if the score feels
-  // upside-down to clinicians.
-  return Math.max(0, Math.min(100, ((5 - avg) / 4) * 100));
+  // Mood and wellbeing are 1 = worst, 5 = best. Map directly so higher
+  // averages produce higher scores: 1 → 0, 3 → 50, 5 → 100.
+  return Math.max(0, Math.min(100, ((avg - 1) / 4) * 100));
 }
 
 function mentalHealthScore(data, windowEnd) {
