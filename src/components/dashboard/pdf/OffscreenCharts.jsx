@@ -6,6 +6,12 @@
 // Each chart has a stable id ("pdf-chart-X") referenced in generatePdf.js.
 // Order of rendering: this component is mounted just before generatePDF() is
 // called, then unmounted after PDF download completes.
+//
+// NOTE: the mood/cravings/wellbeing line chart and the weight line chart
+// here use WEEKLY AVERAGES rather than per-day values. The on-screen graphs
+// page shows daily points with thinned X-axis labels — that looks fine
+// interactively but reads as noise when printed. Weekly averaging gives a
+// readable trend line at PDF resolution. See `weeklyAverages` below.
 import {
   RadarChart,
   Radar,
@@ -28,6 +34,53 @@ import {
 import { SC_COLORS } from "./theme";
 import { shortDate } from "./helpers";
 
+// ── Weekly aggregation ─────────────────────────────────────────────────────
+// Bucket records by ISO week (Monday-anchored) and average each bucket.
+// Returns an array of { date, ...keys } sorted ascending by date, where
+// `date` is the short label of the Monday that starts the week.
+//
+// `keys` lists which numeric fields to average. Records without a value for
+// a given key are simply skipped for that key — so a week with 5 logs but
+// only 3 mood entries averages mood across those 3, not divides by 5.
+function weeklyAverages(records, keys) {
+  const buckets = {};
+  records.forEach((r) => {
+    const raw = r.date ?? r.createdAt;
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return;
+    // Find Monday of this record's week (Mon=0..Sun=6)
+    const dow = (d.getDay() + 6) % 7;
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - dow);
+    monday.setHours(0, 0, 0, 0);
+    const wkKey = monday.toISOString().slice(0, 10);
+
+    if (!buckets[wkKey]) {
+      buckets[wkKey] = { _monday: monday, _sums: {}, _counts: {} };
+    }
+    keys.forEach((k) => {
+      if (r[k] != null) {
+        buckets[wkKey]._sums[k] = (buckets[wkKey]._sums[k] ?? 0) + r[k];
+        buckets[wkKey]._counts[k] = (buckets[wkKey]._counts[k] ?? 0) + 1;
+      }
+    });
+  });
+
+  return Object.values(buckets)
+    .sort((a, b) => a._monday - b._monday)
+    .map((b) => {
+      const out = { date: shortDate(b._monday) };
+      keys.forEach((k) => {
+        if (b._counts[k]) {
+          out[k] = Math.round((b._sums[k] / b._counts[k]) * 10) / 10;
+        } else {
+          out[k] = null;
+        }
+      });
+      return out;
+    });
+}
+
 export default function OffscreenCharts({
   data,
   recs,
@@ -36,12 +89,8 @@ export default function OffscreenCharts({
 }) {
   const allRecs = data.records ?? [];
 
-  const moodData = recs.map((r) => ({
-    date: shortDate(r.date ?? r.createdAt),
-    mood: r.mood ?? null,
-    cravings: r.cravings ?? null,
-    wellbeing: r.wellbeing ?? null,
-  }));
+  // Weekly-averaged mood/cravings/wellbeing (replaces per-day for PDF clarity)
+  const moodData = weeklyAverages(recs, ["mood", "cravings", "wellbeing"]);
 
   const avg = (key) => {
     const v = recs.map((r) => r[key]).filter((x) => x != null);
@@ -96,12 +145,11 @@ export default function OffscreenCharts({
     fullMark: maxCount,
   }));
 
-  const weightData = recs
-    .filter((r) => r.weight)
-    .map((r) => ({
-      date: shortDate(r.date ?? r.createdAt),
-      weight: r.weight,
-    }));
+  // Weekly-averaged weight (replaces per-day for PDF clarity)
+  const weightData = weeklyAverages(
+    recs.filter((r) => r.weight),
+    ["weight"],
+  );
 
   // Substance Mix donut data
   const mixStats = {};
@@ -143,7 +191,7 @@ export default function OffscreenCharts({
       <div
         id="pdf-chart-mood"
         style={{
-          width: Math.max(520, moodData.length * 28),
+          width: Math.max(520, moodData.length * 60),
           height: 220,
           background: "#fff",
           padding: "8px",
@@ -431,7 +479,7 @@ export default function OffscreenCharts({
         <div
           id="pdf-chart-weight"
           style={{
-            width: Math.max(520, weightData.length * 28),
+            width: Math.max(520, weightData.length * 60),
             height: 180,
             background: "#fff",
             padding: "8px",
