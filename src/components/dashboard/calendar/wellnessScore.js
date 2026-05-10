@@ -81,6 +81,10 @@ function mentalHealthScore(data, windowEnd) {
 }
 
 function engagementScore(recs, windowDays) {
+  // `windowDays` is the denominator — for the current (in-progress) month
+  // the caller passes elapsed-days-so-far, not the full month length, so
+  // engagement doesn't artificially read low just because the month isn't over.
+  if (windowDays <= 0) return null;
   const pct = (recs.length / windowDays) * 100;
   return Math.max(0, Math.min(100, pct));
 }
@@ -92,9 +96,7 @@ export function calculateWellness(data, month, t) {
   if (allRecs.length === 0) return null;
 
   const sorted = [...allRecs].sort((a, b) =>
-    String(a.date ?? a.createdAt).localeCompare(
-      String(b.date ?? b.createdAt),
-    ),
+    String(a.date ?? a.createdAt).localeCompare(String(b.date ?? b.createdAt)),
   );
 
   const { y, m } = month;
@@ -102,7 +104,13 @@ export function calculateWellness(data, month, t) {
   const monthEnd = new Date(y, m + 1, 0, 23, 59, 59);
   const prevStart = new Date(y, m - 1, 1);
   const prevEnd = new Date(y, m, 0, 23, 59, 59);
-  const monthDays = monthEnd.getDate();
+
+  // For engagement, count elapsed days only when the selected month is the
+  // current month — otherwise a fully-logged in-progress month would score
+  // as if half the days were missing. Past months use their full length.
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === y && today.getMonth() === m;
+  const monthDays = isCurrentMonth ? today.getDate() : monthEnd.getDate();
   const prevDays = prevEnd.getDate();
 
   const inWindow = (r, from, to) => {
@@ -150,10 +158,7 @@ export function calculateWellness(data, month, t) {
     );
     if (present.length === 0) return null;
     const totalWeight = present.reduce((s, [, c]) => s + c.weight, 0);
-    const weighted = present.reduce(
-      (s, [, c]) => s + getter(c) * c.weight,
-      0,
-    );
+    const weighted = present.reduce((s, [, c]) => s + getter(c) * c.weight, 0);
     return weighted / totalWeight;
   }
 
@@ -174,12 +179,12 @@ export function calculateWellness(data, month, t) {
   const latestEver = sorted.length ? sorted[sorted.length - 1] : null;
   const latest = latestInMonth ?? latestEver;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
   const latestDate = latest ? new Date(latest.date ?? latest.createdAt) : null;
   if (latestDate) latestDate.setHours(0, 0, 0, 0);
   const daysSinceLog = latestDate
-    ? Math.max(0, Math.round((today - latestDate) / 86400000))
+    ? Math.max(0, Math.round((todayMidnight - latestDate) / 86400000))
     : null;
 
   // Latest log vs typical — uses the resolved `latest` above, compared to a
