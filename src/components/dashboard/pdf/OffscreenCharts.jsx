@@ -38,17 +38,12 @@ import { shortDate } from "./helpers";
 // Bucket records by ISO week (Monday-anchored) and average each bucket.
 // Returns an array of { date, ...keys } sorted ascending by date, where
 // `date` is the short label of the Monday that starts the week.
-//
-// `keys` lists which numeric fields to average. Records without a value for
-// a given key are simply skipped for that key — so a week with 5 logs but
-// only 3 mood entries averages mood across those 3, not divides by 5.
 function weeklyAverages(records, keys) {
   const buckets = {};
   records.forEach((r) => {
     const raw = r.date ?? r.createdAt;
     const d = new Date(raw);
     if (Number.isNaN(d.getTime())) return;
-    // Find Monday of this record's week (Mon=0..Sun=6)
     const dow = (d.getDay() + 6) % 7;
     const monday = new Date(d);
     monday.setDate(d.getDate() - dow);
@@ -89,7 +84,7 @@ export default function OffscreenCharts({
 }) {
   const allRecs = data.records ?? [];
 
-  // Weekly-averaged mood/cravings/wellbeing (replaces per-day for PDF clarity)
+  // Weekly-averaged mood/cravings/wellbeing
   const moodData = weeklyAverages(recs, ["mood", "cravings", "wellbeing"]);
 
   const avg = (key) => {
@@ -103,27 +98,38 @@ export default function OffscreenCharts({
   const soberDays = recs.filter((r) => !r.substances?.length).length;
   const soberPct = recs.length ? (soberDays / recs.length) * 5 : 0;
 
+  // Recovery radar — subject labels now go through translations so the PDF
+  // matches the user's selected language. Falls back to English if a key
+  // isn't defined.
   const recoveryRadarData = [
-    { subject: "Mood", value: +(avgMood ?? 0).toFixed(1), fullMark: 5 },
     {
-      subject: "Wellbeing",
+      subject: t.mood ?? "Mood",
+      value: +(avgMood ?? 0).toFixed(1),
+      fullMark: 5,
+    },
+    {
+      subject: t.wellbeing ?? "Wellbeing",
       value: +(avgWellbeing ?? 0).toFixed(1),
       fullMark: 5,
     },
     {
-      subject: "Low craving",
+      subject: t.lowCravings ?? "Low cravings",
       value: avgCravings != null ? +Math.max(0, 5 - avgCravings).toFixed(1) : 5,
       fullMark: 5,
     },
     {
-      subject: "Low amount",
+      subject: t.lowAmount ?? "Low amount",
       value:
         avgAmount != null
           ? +Math.max(0, 5 - (avgAmount / 10) * 5).toFixed(1)
           : 5,
       fullMark: 5,
     },
-    { subject: "Sober days", value: +soberPct.toFixed(1), fullMark: 5 },
+    {
+      subject: t.soberDays ?? "Sober days",
+      value: +soberPct.toFixed(1),
+      fullMark: 5,
+    },
   ];
 
   const subMap = {};
@@ -138,14 +144,16 @@ export default function OffscreenCharts({
   const maxCount = subEntries.length
     ? Math.max(...subEntries.map(([, v]) => v.count))
     : 1;
+  // Substance radar — try a translation for each substance name first,
+  // then fall back to a capitalized version of the raw value.
   const substanceRadarData = subEntries.map(([s, v]) => ({
-    subject: s.charAt(0).toUpperCase() + s.slice(1),
+    subject: t[s] ?? s.charAt(0).toUpperCase() + s.slice(1),
     days: v.count,
     avgAmount: Math.round((v.totalAmt / v.count) * 10) / 10,
     fullMark: maxCount,
   }));
 
-  // Weekly-averaged weight (replaces per-day for PDF clarity)
+  // Weekly-averaged weight
   const weightData = weeklyAverages(
     recs.filter((r) => r.weight),
     ["weight"],
