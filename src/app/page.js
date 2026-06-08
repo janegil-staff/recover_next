@@ -167,7 +167,7 @@ const LANGS = [
   { code: "da", flag: "🇩🇰", label: "Dansk" },
   { code: "fi", flag: "🇫🇮", label: "Suomi" },
   { code: "es", flag: "🇪🇸", label: "Español" },
-  { code: "pl", flag: "🇵🇱", label: "Polski" },
+ // { code: "pl", flag: "🇵🇱", label: "Polski" },
   { code: "pt", flag: "🇵🇹", label: "Português" },
 ];
 
