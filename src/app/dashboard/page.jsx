@@ -139,6 +139,7 @@ export default function CalendarPage() {
         .cal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
         @media(max-width:720px){
           .cal-grid{grid-template-columns:1fr}
+          .cal-sticky{position:static !important;top:auto !important}
         }
         .qrow:hover { background: var(--accent-soft); }
         .dash-section + .dash-section { margin-top: 28px; }
@@ -165,8 +166,9 @@ export default function CalendarPage() {
         </SectionLabel>
 
         <div className="cal-grid">
-          {/* ── Left column: Calendar (sticky) + Year-in-pixels strip ── */}
+          {/* ── Left column: Calendar (sticky on desktop) + Year-in-pixels strip ── */}
           <div
+            className="cal-sticky"
             style={{
               position: "sticky",
               top: 12,
