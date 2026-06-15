@@ -139,8 +139,8 @@ export default function CalendarGrid({
               ds={ds}
               rec={recMap[ds]}
               isToday={ds === todayStr}
-              soberLabel={soberLabel}
               onClick={onDayClick}
+              soberLabel={t.sober ?? "Sober"}
             />
           );
         })}

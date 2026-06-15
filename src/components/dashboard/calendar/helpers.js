@@ -64,10 +64,8 @@ export function qVal(rec, key, index) {
   return 0;
 }
 
-// A day counts as sober when there's a logged record with no substances.
-// (Mirrors the DayModal logic that shows the green "Sober" pill.)
 export function isSoberDay(rec) {
   if (!rec) return false;
-  const subs = rec.substances ?? [];
+  const subs = (rec.substances ?? []).filter(s => s !== "sober");
   return subs.length === 0;
 }

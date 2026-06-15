@@ -9,7 +9,8 @@ import { Section, Pill } from "./Section";
 export default function DayModal({ date, rec, onClose, t }) {
   if (!rec) return null;
 
-  const subs = rec.substances ?? [];
+ 
+const subs = (rec.substances ?? []).filter(s => s !== "sober");
   const effects = rec.sideEffects ?? [];
   const meds = rec.medicationsTaken ?? [];
 
@@ -185,8 +186,7 @@ export default function DayModal({ date, rec, onClose, t }) {
                 >
                   <div
                     style={{
-                      width:
-                        s.val != null ? `${(s.val / s.max) * 100}%` : "0%",
+                      width: s.val != null ? `${(s.val / s.max) * 100}%` : "0%",
                       height: "100%",
                       background: s.color,
                       borderRadius: 2,
@@ -235,7 +235,7 @@ export default function DayModal({ date, rec, onClose, t }) {
                       textTransform: "capitalize",
                     }}
                   >
-                    {s}
+                    {t[s] ?? s}
                   </span>
                 ))}
               </div>
@@ -244,7 +244,7 @@ export default function DayModal({ date, rec, onClose, t }) {
                 style={{
                   background: "#22C55E22",
                   color: "#16A34A",
-                  border: "1px solid #22C55E44",
+                  border: "1px solid #22C55E88",
                   borderRadius: 20,
                   padding: "5px 13px",
                   fontSize: 12,
@@ -347,9 +347,7 @@ export default function DayModal({ date, rec, onClose, t }) {
                 <span style={{ fontSize: 26, fontWeight: 800, color: AD }}>
                   {rec.weight}
                 </span>
-                <span style={{ fontSize: 13, color: MU }}>
-                  {t.kg ?? "kg"}
-                </span>
+                <span style={{ fontSize: 13, color: MU }}>{t.kg ?? "kg"}</span>
               </div>
             ) : (
               <span style={{ fontSize: 12, color: MU }}>—</span>

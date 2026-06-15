@@ -1,18 +1,19 @@
 "use client";
-// Single calendar day cell.
-// Renders: number, heat-map background, today-border, plus up to 4 corner badges:
-//   ★ top-left     — sober day (no substances logged)
-//   💊 top-right    — medication taken
-//   🔥 bottom-left  — high cravings (≥4/5)
-//   📝 bottom-right — patient wrote a note
 import { A, BO, MU } from "./theme";
 import { dayBg, dayScore, isSoberDay } from "./helpers";
 
-export default function DayCell({ day, ds, rec, isToday, soberLabel, onClick }) {
+export default function DayCell({
+  day,
+  ds,
+  rec,
+  isToday,
+  soberLabel,
+  onClick,
+}) {
   const highCravings = rec?.cravings >= 4;
   const tookMeds = (rec?.medicationsTaken?.length ?? 0) > 0;
   const hasNote = !!rec?.note?.trim();
-  const sober = isSoberDay(rec);
+  const sober = isSoberDay(rec); // single source of truth — no inline overrides
 
   return (
     <div
@@ -23,7 +24,7 @@ export default function DayCell({ day, ds, rec, isToday, soberLabel, onClick }) 
         textAlign: "center",
         cursor: rec ? "pointer" : "default",
         minHeight: 30,
-        background: dayBg(rec),
+        background: sober ? "#22C55E" : dayBg(rec),
         border: isToday
           ? `2px solid ${A}`
           : `1px solid ${rec ? "transparent" : BO}`,
@@ -35,11 +36,13 @@ export default function DayCell({ day, ds, rec, isToday, soberLabel, onClick }) 
         style={{
           fontSize: 10,
           fontWeight: isToday ? 700 : 400,
-          color: rec
-            ? dayScore(rec) >= 3.5
-              ? "#fff"
-              : "#1a2c3d"
-            : MU,
+          color: sober
+            ? "#fff"
+            : rec
+              ? dayScore(rec) >= 3.5
+                ? "#fff"
+                : "#1a2c3d"
+              : MU,
           lineHeight: 1,
         }}
       >
