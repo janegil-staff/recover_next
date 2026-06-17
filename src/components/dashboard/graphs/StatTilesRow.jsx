@@ -10,6 +10,12 @@ const POSITIVE = "#16A34A";
 const WARNING = "#D97706";
 const NEUTRAL = "var(--accent-strong)";
 
+// A day is sober if substances is empty OR every entry is the "sober" tag.
+function isSober(r) {
+  const subs = r.substances ?? [];
+  return subs.length === 0 || subs.every((s) => s === "sober");
+}
+
 export default function StatTilesRow({ data, records, t }) {
   const stats = useMemo(() => {
     if (!records.length) return null;
@@ -21,7 +27,7 @@ export default function StatTilesRow({ data, records, t }) {
     const wellnessScore =
       wellness?.scoreNow != null ? Math.round(wellness.scoreNow) : null;
 
-    // Current sober streak (count back from end)
+    // Current sober streak (count back from most recent record)
     let currentStreak = 0;
     const sortedAsc = [...records].sort((a, b) =>
       String(a.date ?? a.createdAt).localeCompare(
@@ -29,14 +35,12 @@ export default function StatTilesRow({ data, records, t }) {
       ),
     );
     for (let i = sortedAsc.length - 1; i >= 0; i--) {
-      if ((sortedAsc[i].substances ?? []).length === 0) currentStreak++;
+      if (isSober(sortedAsc[i])) currentStreak++;
       else break;
     }
 
     // Sober vs use day counts
-    const soberDays = records.filter(
-      (r) => (r.substances ?? []).length === 0,
-    ).length;
+    const soberDays = records.filter(isSober).length;
     const useDays = records.length - soberDays;
 
     // Mood trend: first half avg vs second half avg

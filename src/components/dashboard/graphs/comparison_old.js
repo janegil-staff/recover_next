@@ -1,16 +1,6 @@
 // Helper to produce a "this period" + "prior period" record split.
 // Pass the full data + range (in days) and get back two arrays of records:
 // the current period and the equivalent prior period for comparison.
-
-// Centralised sobriety check — the single source of truth used by all
-// stat helpers in this file. A day is sober if substances is empty OR
-// every entry is the literal "sober" tag (what the app stores when the
-// user taps the Sober button instead of logging a substance).
-export function isSober(r) {
-  const subs = r.substances ?? [];
-  return subs.length === 0 || subs.every((s) => s === "sober");
-}
-
 export function buildPeriodComparison(allRecords, range) {
   const cutoffNow = new Date();
   cutoffNow.setHours(0, 0, 0, 0);
@@ -47,7 +37,9 @@ export function aggregateStats(records) {
       moodAvg: null,
       cravingsAvg: null,
     };
-  const sober = records.filter(isSober).length;
+  const sober = records.filter(
+    (r) => (r.substances ?? []).length === 0,
+  ).length;
   const use = records.length - sober;
   const moods = records.map((r) => r.mood).filter((v) => v != null);
   const cravings = records.map((r) => r.cravings).filter((v) => v != null);

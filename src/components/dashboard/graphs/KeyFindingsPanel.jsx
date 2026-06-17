@@ -9,6 +9,12 @@ const POSITIVE = "#16A34A";
 const WARNING = "#D97706";
 const URGENT = "#DC2626";
 
+// A day is sober if substances is empty OR every entry is the "sober" tag.
+function isSober(r) {
+  const subs = r.substances ?? [];
+  return subs.length === 0 || subs.every((s) => s === "sober");
+}
+
 export default function KeyFindingsPanel({ records, qScores, t }) {
   const findings = useMemo(() => detectFindings(records, qScores, t), [
     records,
@@ -67,8 +73,6 @@ export default function KeyFindingsPanel({ records, qScores, t }) {
 }
 
 // ── Findings detection ────────────────────────────────────────────────────
-// Walks the records once to surface the most relevant statements.
-// Returns up to 5 findings in priority order.
 function detectFindings(records, qScores, t) {
   const findings = [];
   if (!records.length) return findings;
@@ -92,7 +96,7 @@ function detectFindings(records, qScores, t) {
     const d = new Date(r.date ?? r.createdAt);
     const idx = (d.getDay() + 6) % 7;
     dowBuckets[idx].logged++;
-    if ((r.substances ?? []).length > 0) dowBuckets[idx].used++;
+    if (!isSober(r)) dowBuckets[idx].used++;
   });
   const dowWithData = dowBuckets.filter((b) => b.logged > 0);
   if (dowWithData.length >= 3) {
@@ -144,7 +148,7 @@ function detectFindings(records, qScores, t) {
   // 3. Current sober streak
   let currentStreak = 0;
   for (let i = sortedAsc.length - 1; i >= 0; i--) {
-    if ((sortedAsc[i].substances ?? []).length === 0) currentStreak++;
+    if (isSober(sortedAsc[i])) currentStreak++;
     else break;
   }
   if (currentStreak >= 30) {
@@ -177,7 +181,7 @@ function detectFindings(records, qScores, t) {
     });
   }
 
-  // 5. PHQ-9 elevated (without q9 — that's in Risk Events)
+  // 5. PHQ-9 elevated
   const phq9Score = qScores?.find((q) => q.label === "PHQ-9");
   if (phq9Score && phq9Score.score >= 15) {
     findings.push({
@@ -190,7 +194,7 @@ function detectFindings(records, qScores, t) {
   // 6. Polysubstance pattern
   const subDayMap = {};
   records.forEach((r) => {
-    const subs = r.substances ?? [];
+    const subs = (r.substances ?? []).filter((s) => s !== "sober");
     if (subs.length >= 2) {
       const key = [...subs].sort().join("+");
       subDayMap[key] = (subDayMap[key] ?? 0) + 1;

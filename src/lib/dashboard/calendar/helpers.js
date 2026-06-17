@@ -15,6 +15,12 @@ export function fmtDate(d) {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
 }
 
+// Short display date from a Date object — used by SoberStreaks / computeStreakStats.
+// Always accepts a Date instance and returns "MMM D" e.g. "Jun 16".
+export function shortDate(d) {
+  return d.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
+}
+
 export function daysInMonth(y, m) {
   return new Date(y, m + 1, 0).getDate();
 }
@@ -64,10 +70,13 @@ export function qVal(rec, key, index) {
   return 0;
 }
 
-// A day counts as sober when there's a logged record with no substances.
+// A day counts as sober when there's a logged record with no real substances.
+// Handles two cases:
+//   1. substances is empty []  — user logged nothing
+//   2. every entry is the literal "sober" tag — user explicitly marked sober
 // (Mirrors the DayModal logic that shows the green "Sober" pill.)
 export function isSoberDay(rec) {
   if (!rec) return false;
   const subs = rec.substances ?? [];
-  return subs.length === 0;
+  return subs.length === 0 || subs.every((s) => s === "sober");
 }

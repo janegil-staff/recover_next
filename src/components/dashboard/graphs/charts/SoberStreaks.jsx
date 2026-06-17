@@ -5,50 +5,25 @@ import { useMemo } from "react";
 import { Insight } from "./Card";
 import { MU_VAR } from "../theme";
 import { shortDate } from "../helpers";
+import { computeStreakStats } from "./streakUtils";
 
 export default function SoberStreaks({ records, c, t }) {
-  const stats = useMemo(() => {
-    if (records.length === 0)
-      return { current: 0, longest: 0, totalSober: 0, streaks: [], days: [] };
-
-    const days = records.map((r) => ({
-      date: r.date ?? r.createdAt,
-      shortDate: shortDate(r.date ?? r.createdAt),
-      sober: (r.substances ?? []).length === 0,
-    }));
-
-    const streaks = [];
-    let runStart = null,
-      runLength = 0;
-    for (let i = 0; i < days.length; i++) {
-      if (days[i].sober) {
-        if (runLength === 0) runStart = days[i].shortDate;
-        runLength++;
-      } else if (runLength > 0) {
-        streaks.push({
-          start: runStart,
-          length: runLength,
-          end: days[i - 1].shortDate,
-        });
-        runLength = 0;
-        runStart = null;
-      }
-    }
-    if (runLength > 0) {
-      streaks.push({
-        start: runStart,
-        length: runLength,
-        end: days[days.length - 1].shortDate,
-        ongoing: true,
-      });
-    }
-
-    const longest = streaks.reduce((m, s) => Math.max(m, s.length), 0);
-    const totalSober = days.filter((d) => d.sober).length;
-    const last = streaks[streaks.length - 1];
-    const current = last?.ongoing ? last.length : 0;
-    return { current, longest, totalSober, streaks, days };
-  }, [records]);
+  // All the actual streak math lives in streakUtils.js (computeStreakStats),
+  // which is unit-tested separately from this component. It:
+  //   1. Sorts records by date ascending internally — so it doesn't matter
+  //      whether the parent passes oldest-first or newest-first, the
+  //      "current streak" always looks at the true most-recent day.
+  //   2. Treats a day as sober if substances is empty OR every entry is the
+  //      literal "sober" tag — not just empty arrays.
+  //
+  // FIX (2026-06-17): `shortDate` (from ../helpers) must receive a Date
+  // object. computeStreakStats now guarantees this and falls back to ISO
+  // if the formatter returns falsy. This fixed current streak showing 0
+  // when it should have been 6+.
+  const stats = useMemo(
+    () => computeStreakStats(records, shortDate),
+    [records],
+  );
 
   const topStreaks = useMemo(
     () => [...stats.streaks].sort((a, b) => b.length - a.length).slice(0, 5),
