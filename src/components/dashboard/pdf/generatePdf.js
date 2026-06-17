@@ -30,6 +30,12 @@ import { fmtDate, parseAdviceId, parseAdviceFull, ADVICE_CATEGORIES, avgOf } fro
 import { formatRangeLabel } from "./ranges";
 import { LOGO_B64 } from "./logo";
 
+// A day is sober if substances is empty OR every entry is the "sober" tag.
+function isSober(r) {
+  const subs = r.substances ?? [];
+  return subs.length === 0 || subs.every((s) => s === "sober");
+}
+
 export async function generatePDF({
   data,
   t,
@@ -256,7 +262,7 @@ export async function generatePDF({
     statY += 6;
   });
 
-  // Sober streak metrics
+  // Sober streak metrics — isSober() handles both [] and ["sober"] tag
   const sortedAsc = [...recs].sort((a, b) =>
     String(a.date ?? a.createdAt).localeCompare(String(b.date ?? b.createdAt)),
   );
@@ -266,8 +272,7 @@ export async function generatePDF({
     running = 0,
     current = 0;
   sortedAsc.forEach((r) => {
-    const isSober = (r.substances ?? []).length === 0;
-    if (isSober) {
+    if (isSober(r)) {
       soberCount++;
       running++;
       if (running > longest) longest = running;
@@ -277,7 +282,7 @@ export async function generatePDF({
     }
   });
   for (let i = sortedAsc.length - 1; i >= 0; i--) {
-    if ((sortedAsc[i].substances ?? []).length === 0) current++;
+    if (isSober(sortedAsc[i])) current++;
     else break;
   }
 
@@ -390,14 +395,17 @@ export async function generatePDF({
   y = Math.max(qStartY + 66, qy) + 4;
 
   // ── Substances list + donut ──
+  // Count real substances only — exclude the "sober" tag from the substance list.
   const subCounts = {};
   recs.forEach((r) =>
-    (r.substances ?? []).forEach((s) => {
-      subCounts[s] = (subCounts[s] ?? 0) + 1;
-    }),
+    (r.substances ?? [])
+      .filter((s) => s !== "sober")
+      .forEach((s) => {
+        subCounts[s] = (subCounts[s] ?? 0) + 1;
+      }),
   );
   const subEntries = Object.entries(subCounts).sort((a, b) => b[1] - a[1]);
-  const soberDaysCount = recs.filter((r) => !r.substances?.length).length;
+  const soberDaysCount = recs.filter(isSober).length;
   if (soberDaysCount > 0) {
     subEntries.unshift(["sober", soberDaysCount]);
   }
@@ -457,75 +465,72 @@ export async function generatePDF({
   }
   y += 3;
 
-const adviceIds = data.relevantAdvice ?? [];
-if (adviceIds.length > 0) {
-  sectionHeader(t.relevantAdvice ?? "Relevant Advice");
-  adviceIds.forEach((rawId, i) => {
-    const { prefix, nid } = parseAdviceFull(rawId);
-    const cat = ADVICE_CATEGORIES[prefix] ?? null;
-    const title = t[`advice_${nid}_title`] ?? `Advice ${nid}`;
-    const body = t[`advice_${nid}_body`] ?? "";
-    const categoryLabel = cat
-      ? (t[cat.labelKey] ?? cat.fallback)
-      : null;
+  const adviceIds = data.relevantAdvice ?? [];
+  if (adviceIds.length > 0) {
+    sectionHeader(t.relevantAdvice ?? "Relevant Advice");
+    adviceIds.forEach((rawId, i) => {
+      const { prefix, nid } = parseAdviceFull(rawId);
+      const cat = ADVICE_CATEGORIES[prefix] ?? null;
+      const title = t[`advice_${nid}_title`] ?? `Advice ${nid}`;
+      const body = t[`advice_${nid}_body`] ?? "";
+      const categoryLabel = cat
+        ? (t[cat.labelKey] ?? cat.fallback)
+        : null;
 
-    checkPage(20);
-    const fc = i % 2 === 0 ? LGRAY : WHITE;
-    doc.setFillColor(...fc);
-    doc.rect(ML, y, CW, body ? 18 : 8, "F");
+      checkPage(20);
+      const fc = i % 2 === 0 ? LGRAY : WHITE;
+      doc.setFillColor(...fc);
+      doc.rect(ML, y, CW, body ? 18 : 8, "F");
 
-    // Left accent bar in category color
-    if (cat) {
-      const r = parseInt(cat.color.slice(1, 3), 16);
-      const g = parseInt(cat.color.slice(3, 5), 16);
-      const b = parseInt(cat.color.slice(5, 7), 16);
-      doc.setFillColor(r, g, b);
-      doc.rect(ML, y, 1.5, body ? 18 : 8, "F");
-    }
+      if (cat) {
+        const r = parseInt(cat.color.slice(1, 3), 16);
+        const g = parseInt(cat.color.slice(3, 5), 16);
+        const b = parseInt(cat.color.slice(5, 7), 16);
+        doc.setFillColor(r, g, b);
+        doc.rect(ML, y, 1.5, body ? 18 : 8, "F");
+      }
 
-    // Title row
-    let titleX = ML + 4;
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...DARK);
-    doc.text(`${i + 1}.`, titleX, y + 5);
-    titleX += 6;
-
-    // Category badge
-    if (categoryLabel && cat) {
-      const r = parseInt(cat.color.slice(1, 3), 16);
-      const g = parseInt(cat.color.slice(3, 5), 16);
-      const b = parseInt(cat.color.slice(5, 7), 16);
-      doc.setFillColor(r, g, b);
-      doc.setFontSize(6.5);
-      const badgeW = doc.getTextWidth(categoryLabel.toUpperCase()) + 4;
-      doc.roundedRect(titleX, y + 2.5, badgeW, 3.5, 0.6, 0.6, "F");
-      doc.setTextColor(...WHITE);
-      doc.text(categoryLabel.toUpperCase(), titleX + badgeW / 2, y + 5, {
-        align: "center",
-      });
-      titleX += badgeW + 3;
-    }
-
-    // Title
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...NAVY);
-    doc.text(title, titleX, y + 5);
-
-    if (body) {
-      doc.setFont("helvetica", "normal");
+      let titleX = ML + 4;
       doc.setFontSize(8);
-      doc.setTextColor(...GRAY);
-      const lines = doc.splitTextToSize(body, CW - 8);
-      doc.text(lines.slice(0, 3), ML + 6, y + 10);
-      y += 19;
-    } else {
-      y += 9;
-    }
-  });
-  y += 3;
-}
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...DARK);
+      doc.text(`${i + 1}.`, titleX, y + 5);
+      titleX += 6;
+
+      if (categoryLabel && cat) {
+        const r = parseInt(cat.color.slice(1, 3), 16);
+        const g = parseInt(cat.color.slice(3, 5), 16);
+        const b = parseInt(cat.color.slice(5, 7), 16);
+        doc.setFillColor(r, g, b);
+        doc.setFontSize(6.5);
+        const badgeW = doc.getTextWidth(categoryLabel.toUpperCase()) + 4;
+        doc.roundedRect(titleX, y + 2.5, badgeW, 3.5, 0.6, 0.6, "F");
+        doc.setTextColor(...WHITE);
+        doc.text(categoryLabel.toUpperCase(), titleX + badgeW / 2, y + 5, {
+          align: "center",
+        });
+        titleX += badgeW + 3;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...NAVY);
+      doc.text(title, titleX, y + 5);
+
+      if (body) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(...GRAY);
+        const lines = doc.splitTextToSize(body, CW - 8);
+        doc.text(lines.slice(0, 3), ML + 6, y + 10);
+        y += 19;
+      } else {
+        y += 9;
+      }
+    });
+    y += 3;
+  }
+
   // ── Full log (always starts on a new page) ──
   doc.addPage();
   y = 16;
@@ -570,8 +575,10 @@ if (adviceIds.length > 0) {
       doc.text(String(r.mood ?? "-"), cols[1].x, y + 4);
       doc.text(String(r.cravings ?? "-"), cols[2].x, y + 4);
       doc.text(String(r.wellbeing ?? "-"), cols[3].x, y + 4);
+      // Show "Sober" label for sober days instead of the raw "sober" tag
+      const subsDisplay = (r.substances ?? []).filter((s) => s !== "sober");
       doc.text(
-        (r.substances ?? []).join(", ").slice(0, 24) || (t.sober ?? "Sober"),
+        subsDisplay.join(", ").slice(0, 24) || (t.sober ?? "Sober"),
         cols[4].x,
         y + 4,
       );
