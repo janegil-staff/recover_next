@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { BO, MU, SU } from "../calendar/theme";
 import { fmtDate } from "../calendar/helpers";
 import { MOOD_COLORS } from "./constants";
+import { isUseDay } from "./eventDetection";
 
 export default function TimelineScrubber({ records, ctx, onJump, t }) {
   const days = useMemo(() => {
@@ -16,7 +17,9 @@ export default function TimelineScrubber({ records, ctx, onJump, t }) {
     );
     return sortedAsc.map((r) => {
       const ds = fmtDate(r.date ?? r.createdAt);
-      const isUse = (r.substances ?? []).length > 0;
+      // SOBER_DAY_FIX_2026-06-18 — sober days store substances:["sober"], so the
+      // old `(r.substances ?? []).length > 0` painted every sober day red.
+      const isUse = isUseDay(r);
       const moodIdx =
         r.mood != null ? Math.max(0, Math.min(4, r.mood - 1)) : null;
       const color = isUse

@@ -8,10 +8,9 @@ const MILESTONE_TARGETS = [7, 14, 30, 60, 90, 180, 365];
 // SOBER_DAY_SOURCE_OF_TRUTH_2026-06-18 — a sober day is recorded with
 // substances: ["sober"] (the literal tag), NOT an empty array. Counting with a
 // raw `.length` check treats ["sober"] (length 1) as a use day, which inverted
-// sober/use everywhere on the log page (Sober-days chip 0, Use-days = total,
-// every timeline bar red, streaks never building). This helper is the single
-// source of truth for the whole log page — mirrors isSoberDay in
-// graphs/charts/streakUtils.js.
+// sober/use everywhere on the log page (sober count 0, every day red on the
+// timeline, streaks never building). This helper is the single source of truth
+// for the whole log page — mirrors isSoberDay in graphs/charts/streakUtils.js.
 //
 // A day is sober if substances is missing/empty OR every entry is "sober".
 export function isSoberDay(rec) {

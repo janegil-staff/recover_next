@@ -4,6 +4,7 @@
 import { useMemo } from "react";
 import { BO, MU, SU, TX } from "../calendar/theme";
 import { fmtDate } from "../calendar/helpers";
+import { isSoberDay, isUseDay } from "./eventDetection";
 
 function shortDate(d) {
   const dt = new Date(d);
@@ -19,15 +20,18 @@ export default function PeriodRibbon({ records, t }) {
       ),
     );
 
-    // Current streak from the most recent record backwards
+    // Current streak from the most recent record backwards.
+    // SOBER_DAY_FIX_2026-06-18 — sober days store substances:["sober"], so the
+    // old `!sortedAsc[i].substances?.length` check broke the streak on every
+    // sober day, reporting 0. Use isSoberDay.
     let current = 0;
     for (let i = sortedAsc.length - 1; i >= 0; i--) {
-      if (!sortedAsc[i].substances?.length) current++;
+      if (isSoberDay(sortedAsc[i])) current++;
       else break;
     }
 
-    // Last use day (most recent record with substances)
-    const lastUse = [...sortedAsc].reverse().find((r) => r.substances?.length);
+    // Last use day (most recent record that is a use day)
+    const lastUse = [...sortedAsc].reverse().find((r) => isUseDay(r));
 
     // Best & worst days by mood (lower = better in this scale; check)
     const withMood = sortedAsc.filter((r) => r.mood != null);
