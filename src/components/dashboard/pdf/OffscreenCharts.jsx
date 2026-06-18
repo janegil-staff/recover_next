@@ -182,12 +182,17 @@ export default function OffscreenCharts({
   const mixEntries = Object.entries(mixStats)
     .sort((a, b) => b[1].days - a[1].days)
     .map(([name, v]) => ({ name, days: v.days, amount: v.amount }));
+  // DONUT_SOBER_SLICE_2026-06-18 — append sober at the END, not unshift to the
+  // front. With startAngle=90/endAngle=-270 (full clockwise circle) + paddingAngle,
+  // Recharts can collapse the FIRST segment (pinned exactly to the start angle)
+  // to a hairline, so the grey sober slice was invisible in the captured PNG.
+  // Placing it last keeps it off the start-angle seam.
   if (soberDays > 0) {
-    mixEntries.unshift({ name: "sober", days: soberDays, amount: 0 });
+    mixEntries.push({ name: "sober", days: soberDays, amount: 0 });
   }
   const mixTotal = recs.length;
   const sliceColor = (name) =>
-    name === "sober" ? "#22C55E" : (SC_COLORS[name] ?? "#bdbdbd");
+    name === "sober" ? "#94A3B8" : (SC_COLORS[name] ?? "#bdbdbd");
 
   const qRadarData = filteredQuestionnaires.map((q) => ({
     subject: q.label,
