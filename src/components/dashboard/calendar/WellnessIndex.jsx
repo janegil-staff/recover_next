@@ -59,7 +59,7 @@ function barColorFor(pct) {
 }
 
 export default function WellnessIndex({ data, t, month }) {
-  console.log("RECS:", JSON.stringify(data?.records, null, 2));
+
   const [showDetail, setShowDetail] = useState(false);
 
   // Pure calc — keep heavy logic out of the component file
