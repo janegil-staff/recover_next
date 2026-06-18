@@ -5,16 +5,38 @@
 // Output: { scoreNow, scorePrev, change, components, weakest,
 //           daysSinceLog, latestVsTypical, latestInMonth }
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+// Sentinel values that mean "no real substance" rather than an actual drug.
+// The app stores a sober day as substances: ["sober"] (and sometimes "none"),
+// so these must NOT count toward use-day detection.
+const NON_SUBSTANCE_MARKERS = new Set(["sober", "none", "clean", "abstinent"]);
+
+// A record is sober when it has no *real* substance entries. Tolerates dirty
+// shapes ([], [""], [null], ["  "]) and the "sober"/"none" sentinel markers —
+// all count as sober, matching how the calendar/DayCell renders these days.
+function isSoberRecord(r) {
+  const subs = Array.isArray(r?.substances) ? r.substances : [];
+  const real = subs.filter((s) => {
+    if (s == null) return false;
+    const v = String(s).trim().toLowerCase();
+    if (v === "") return false;
+    return !NON_SUBSTANCE_MARKERS.has(v);
+  });
+  return real.length === 0;
+}
+
 // ── Component score functions ──────────────────────────────────────────────
 
 function sobrietyScore(recs) {
   if (recs.length === 0) return null;
-  const soberDays = recs.filter((r) => !r.substances?.length).length;
+  const soberDays = recs.filter(isSoberRecord).length;
   const pct = (soberDays / recs.length) * 100;
-  // Streak bonus — up to +10 for a sustained sober streak (caps at 14 days)
+  // Streak bonus — up to +10 for a sustained sober streak (caps at 14 days).
+  // Counts back from the most recent log; a recent use day resets it.
   let streak = 0;
   for (let i = recs.length - 1; i >= 0; i--) {
-    if (!recs[i].substances?.length) streak++;
+    if (isSoberRecord(recs[i])) streak++;
     else break;
   }
   const streakBonus = Math.min(streak / 14, 1) * 10;

@@ -18,6 +18,12 @@ function fmtDate(d) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+// A day is sober if substances is empty OR every entry is the "sober" tag.
+function isSober(rec) {
+  const subs = rec.substances ?? [];
+  return subs.length === 0 || subs.every((s) => s === "sober");
+}
+
 export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
   const days = useMemo(() => {
     const recMap = {};
@@ -35,7 +41,7 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
       const rec = recMap[ds];
       let state = "none";
       if (rec) {
-        state = (rec.substances ?? []).length > 0 ? "use" : "sober";
+        state = isSober(rec) ? "sober" : "use";
       }
       out.push({ date: d, ds, state });
     }
@@ -56,23 +62,10 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
     }
 
     const monthsT = t.monthsShort ?? [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
 
-    // Walk weeks; record each new month and the column it starts at.
-    // We then compute a "span" (how many columns it occupies) so the label
-    // can sit in a flex track of the right width.
     const raw = [];
     let lastMonth = -1;
     weeks.forEach((week, wIdx) => {
@@ -95,9 +88,7 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
   }, [days, t]);
 
   const stats = useMemo(() => {
-    let sober = 0,
-      use = 0,
-      none = 0;
+    let sober = 0, use = 0, none = 0;
     days.forEach((d) => {
       if (d.state === "sober") sober++;
       else if (d.state === "use") use++;
@@ -109,11 +100,9 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
   const colorFor = (state) => {
     if (state === "use") return "#EF4444";
     if (state === "sober") return "#22C55E";
-    return "transparent"; // no log = invisible cell, not a pink/grey question mark
+    return "transparent";
   };
 
-  // Total weeks drives the column count; each week's flex-basis is computed
-  // from this so the whole grid spans the container width exactly.
   const totalWeeks = grid.weeks.length;
 
   return (
@@ -159,7 +148,7 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
         </div>
       </div>
 
-      {/* Month labels — flex tracks aligned to the grid below */}
+      {/* Month labels */}
       <div
         style={{
           display: "flex",
@@ -187,7 +176,7 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
         ))}
       </div>
 
-      {/* Grid — responsive, no horizontal scroll */}
+      {/* Grid */}
       <div
         style={{
           display: "flex",
@@ -213,14 +202,10 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
                 return (
                   <div
                     key={dIdx}
-                    style={{
-                      flex: "1 0 0",
-                      background: "transparent",
-                    }}
+                    style={{ flex: "1 0 0", background: "transparent" }}
                   />
                 );
               }
-        
               return (
                 <button
                   key={dIdx}
@@ -275,50 +260,18 @@ export default function YearInPixels({ data, t, onMonthJump, currentMonth }) {
         }}
       >
         <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              background: "#22C55E",
-              borderRadius: 2,
-              display: "inline-block",
-            }}
-          />
+          <span style={{ width: 8, height: 8, background: "#22C55E", borderRadius: 2, display: "inline-block" }} />
           {t.sober ?? "Sober"}
         </span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              background: "#EF4444",
-              borderRadius: 2,
-              display: "inline-block",
-            }}
-          />
+          <span style={{ width: 8, height: 8, background: "#EF4444", borderRadius: 2, display: "inline-block" }} />
           {t.usedShort ?? "Used"}
         </span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              background: "var(--bg)",
-              border: `1px solid ${BO}`,
-              borderRadius: 2,
-              display: "inline-block",
-            }}
-          />
+          <span style={{ width: 8, height: 8, background: "var(--bg)", border: `1px solid ${BO}`, borderRadius: 2, display: "inline-block" }} />
           {t.noLog ?? "No log"}
         </span>
-        <span
-          style={{
-            marginLeft: "auto",
-            fontStyle: "italic",
-            color: MU,
-            fontSize: 9,
-          }}
-        >
+        <span style={{ marginLeft: "auto", fontStyle: "italic", color: MU, fontSize: 9 }}>
           {t.clickToJump ?? "Click any day to jump"}
         </span>
       </div>
