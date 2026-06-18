@@ -5,6 +5,16 @@ import { useMemo } from "react";
 import { A, BG, BO, MU, TX } from "./theme";
 import { sc } from "./helpers";
 
+// SUBSTANCE_I18N_2026-06-18 — translate the raw substance tag (e.g. "alcohol",
+// "amphetamines") via the t dictionary; fall back to a capitalized raw value
+// if no translation key exists. Previously the raw English tag was rendered
+// directly with CSS capitalize, so even tags WITH translations (alcohol →
+// Alkohol) showed in English.
+function substanceLabel(s, t) {
+  if (t && t[s]) return t[s];
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export default function MonthlySubstances({ monthRecs, monthLabel, t }) {
   const monthSubCounts = useMemo(() => {
     const c = {};
@@ -61,11 +71,10 @@ export default function MonthlySubstances({ monthRecs, monthLabel, t }) {
                     style={{
                       fontSize: 13,
                       color: TX,
-                      textTransform: "capitalize",
                       fontWeight: 500,
                     }}
                   >
-                    {s}
+                    {substanceLabel(s, t)}
                   </span>
                 </div>
                 <span style={{ fontSize: 12, fontWeight: 700, color: sc(s) }}>
