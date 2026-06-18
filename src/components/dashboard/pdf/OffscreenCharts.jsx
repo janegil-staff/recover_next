@@ -33,6 +33,9 @@ import {
 } from "recharts";
 import { SC_COLORS } from "./theme";
 import { shortDate } from "./helpers";
+// SOBER_DAY_FIX_2026-06-18 — single source of truth for sober detection and
+// substance filtering (sober days store substances:["sober"], not []).
+import { isSoberDay, realSubstances } from "@/components/dashboard/log/eventDetection";
 
 // ── Weekly aggregation ─────────────────────────────────────────────────────
 // Bucket records by ISO week (Monday-anchored) and average each bucket.
@@ -95,7 +98,9 @@ export default function OffscreenCharts({
   const avgWellbeing = avg("wellbeing");
   const avgCravings = avg("cravings");
   const avgAmount = avg("amount");
-  const soberDays = recs.filter((r) => !r.substances?.length).length;
+  // SOBER_DAY_FIX_2026-06-18 — sober days store substances:["sober"], so the
+  // old `!r.substances?.length` check counted them as use → axis collapsed to 0.
+  const soberDays = recs.filter((r) => isSoberDay(r)).length;
   const soberPct = recs.length ? (soberDays / recs.length) * 5 : 0;
 
   // Recovery radar — subject labels now go through translations so the PDF
@@ -132,9 +137,12 @@ export default function OffscreenCharts({
     },
   ];
 
+  // SOBER_DAY_FIX_2026-06-18 — exclude the "sober" tag from substance
+  // aggregation via realSubstances(); otherwise "sober" shows up as its own
+  // axis on the Substance Profile radar (and a slice in the donut below).
   const subMap = {};
   recs.forEach((r) =>
-    (r.substances ?? []).forEach((s) => {
+    realSubstances(r).forEach((s) => {
       if (!subMap[s]) subMap[s] = { count: 0, totalAmt: 0 };
       subMap[s].count++;
       subMap[s].totalAmt += r.amount ?? 0;
@@ -159,10 +167,11 @@ export default function OffscreenCharts({
     ["weight"],
   );
 
-  // Substance Mix donut data
+  // Substance Mix donut data — count only REAL substances per day (excluding
+  // the "sober" tag), then prepend a single "sober" slice for sober days.
   const mixStats = {};
   recs.forEach((r) => {
-    const subs = r.substances ?? [];
+    const subs = realSubstances(r);
     if (subs.length === 0) return;
     subs.forEach((s) => {
       if (!mixStats[s]) mixStats[s] = { days: 0, amount: 0 };
@@ -178,7 +187,7 @@ export default function OffscreenCharts({
   }
   const mixTotal = recs.length;
   const sliceColor = (name) =>
-    name === "sober" ? "#94A3B8" : (SC_COLORS[name] ?? "#bdbdbd");
+    name === "sober" ? "#22C55E" : (SC_COLORS[name] ?? "#bdbdbd");
 
   const qRadarData = filteredQuestionnaires.map((q) => ({
     subject: q.label,

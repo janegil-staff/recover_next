@@ -25,6 +25,14 @@ export function isUseDay(rec) {
   return !isSoberDay(rec);
 }
 
+// REAL_SUBSTANCES_2026-06-18 — strip the "sober" tag from a record's substance
+// list. "sober" is the absence-of-substance marker, NOT a substance, so it must
+// never appear as its own slice/axis in substance charts (donut, radar). Single
+// source of truth for "what counts as an actual substance".
+export function realSubstances(rec) {
+  return (rec?.substances ?? []).filter((s) => s !== "sober");
+}
+
 // Walk the full record list (ascending) once and pre-compute:
 //   • milestones[date] = streak length achieved that day (e.g. 7, 14, 30…)
 //   • relapses[date]   = length of streak that broke that day (only if 7+)
