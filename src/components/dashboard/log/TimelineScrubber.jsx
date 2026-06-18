@@ -5,7 +5,6 @@
 import { useMemo } from "react";
 import { BO, MU, SU } from "../calendar/theme";
 import { fmtDate } from "../calendar/helpers";
-import { MOOD_COLORS } from "./constants";
 import { isUseDay } from "./eventDetection";
 
 export default function TimelineScrubber({ records, ctx, onJump, t }) {
@@ -20,13 +19,11 @@ export default function TimelineScrubber({ records, ctx, onJump, t }) {
       // SOBER_DAY_FIX_2026-06-18 — sober days store substances:["sober"], so the
       // old `(r.substances ?? []).length > 0` painted every sober day red.
       const isUse = isUseDay(r);
-      const moodIdx =
-        r.mood != null ? Math.max(0, Math.min(4, r.mood - 1)) : null;
-      const color = isUse
-        ? "#EF4444"
-        : moodIdx != null
-          ? MOOD_COLORS[moodIdx]
-          : "#94A3B8";
+      // TIMELINE_COLOR_2026-06-18 — two-color scheme matching the legend:
+      // sober = green (#22C55E), use = red (#EF4444). Previously sober days were
+      // mood-tinted via MOOD_COLORS, so low-mood sober days rendered red/orange
+      // and were indistinguishable from use days.
+      const color = isUse ? "#EF4444" : "#22C55E";
       return {
         ds,
         color,
