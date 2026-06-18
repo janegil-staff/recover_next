@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Insight } from "./Card";
+import { isSoberDay } from "./streakUtils";
 
 export default function WellbeingRadarChart({ records, c, t }) {
   if (!records.length) return null;
@@ -26,7 +27,12 @@ export default function WellbeingRadarChart({ records, c, t }) {
   const avgWellbeing = avg("wellbeing");
   const avgCravings = avg("cravings");
   const avgAmount = avg("amount");
-  const sobrietyDays = records.filter((r) => !r.substances?.length).length;
+  // SOBER_DAY_FIX_2026-06-18 — a sober day is recorded with substances:
+  // ["sober"] (the literal tag), NOT an empty array. The old check
+  // `!r.substances?.length` treated ["sober"] (length 1) as "not sober",
+  // collapsing this axis to ~0. Route through isSoberDay (single source of
+  // truth, same helper SoberStreaks uses) so the count is correct.
+  const sobrietyDays = records.filter((r) => isSoberDay(r)).length;
   const sobrietyPct =
     Math.round((sobrietyDays / records.length) * 5 * 10) / 10;
 

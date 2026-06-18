@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { Insight } from "./Card";
 import { MU_VAR } from "../theme";
+import { isSoberDay } from "./streakUtils";
 
 export default function DayOfWeekPattern({ records, c, t }) {
   const data = useMemo(() => {
@@ -35,7 +36,12 @@ export default function DayOfWeekPattern({ records, c, t }) {
       const d = new Date(r.date ?? r.createdAt);
       const idx = (d.getDay() + 6) % 7;
       buckets[idx].logged++;
-      if ((r.substances ?? []).length > 0) buckets[idx].used++;
+      // USE_DAY_FIX_2026-06-18 — a "use" day is the inverse of a sober day.
+      // Sober days are stored as substances:["sober"] (length 1), so the old
+      // check `(r.substances ?? []).length > 0` counted EVERY sober day as a
+      // use day → 100% use rate on every weekday. Use isSoberDay (the single
+      // source of truth) and invert it.
+      if (!isSoberDay(r)) buckets[idx].used++;
     });
     buckets.forEach((b) => {
       b.pct = b.logged ? Math.round((b.used / b.logged) * 100) : 0;
