@@ -130,6 +130,13 @@ export const QC = [
 // Full questionnaire definitions used by the detail modal.
 // Each entry: max, color, severity fn, and the question list (keys map back
 // to the stored record fields; index fallback covers older numeric keys).
+//
+// ANSWER_SCALE_V2 — an entry MAY also declare `answerLabels` and
+// `answerColors` (value → string / value → hex). When present, the detail
+// modal uses them for each item's answer text + score dot. When absent, the
+// modal falls back to the shared 0–3 SCORE_LABELS frequency scale and the
+// legacy 0–3 green→red color ramp. Only Readiness to Change overrides them
+// (it's a 5-point agreement Likert, not a frequency scale).
 export const Q_DETAILS = {
   latestGad7: {
     label: "GAD-7 · Anxiety",
@@ -351,6 +358,29 @@ export const Q_DETAILS = {
     max: 30,
     color: "#0891B2",
     sev: (s) => (s <= 10 ? "Not ready" : s <= 20 ? "Considering" : "Ready"),
+
+    // READINESS_SCALE_V1 — 5-point AGREEMENT Likert, NOT the shared 0–3
+    // frequency scale. Stored values: 0 = unanswered, 1–5 = the answers.
+    // Without these, the modal indexed SCORE_LABELS (0–3) by value, so 4 and
+    // 5 rendered blank ("—") and 3 showed the wrong "Nearly every day".
+    answerLabels: {
+      0: "Not answered",
+      1: "Strongly disagree",
+      2: "Disagree",
+      3: "Neutral",
+      4: "Agree",
+      5: "Strongly agree",
+    },
+    // Neutral teal ramp — agreement isn't "good/bad", so don't reuse the
+    // green→red severity colors. 0 (unanswered) is muted grey.
+    answerColors: {
+      0: "#b0bec5",
+      1: "#0891B2",
+      2: "#26a0b8",
+      3: "#4ab3c4",
+      4: "#7cc6d1",
+      5: "#a8d8de",
+    },
     questions: [
       { key: "q1", label: "I don't think I drink too much." },
       { key: "q2", label: "I am trying to drink less than I used to." },
@@ -364,21 +394,6 @@ export const Q_DETAILS = {
       },
       { key: "q5", label: "It's a waste of time thinking about my drinking." },
       { key: "q6", label: "I have just recently changed my drinking habits." },
-      {
-        key: "q7",
-        label:
-          "Anyone can talk about wanting to do something about drinking — I am actually doing something about it.",
-      },
-      {
-        key: "q8",
-        label:
-          "I am at the stage where I should think about drinking less alcohol.",
-      },
-      { key: "q9", label: "My drinking is a problem sometimes." },
-      {
-        key: "q10",
-        label: "There is no need for me to think about changing my drinking.",
-      },
     ],
   },
 };

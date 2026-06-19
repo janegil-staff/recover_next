@@ -161,14 +161,25 @@ export default function QuestionnaireModal({ qKey, data, onClose }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {def.questions.map(({ key, label }, qi) => {
               const val = qVal(rec, key, qi);
+              // ANSWER_SCALE_V2 — each questionnaire declares how its per-item
+              // answer values map to (a) a text label and (b) a dot color, via
+              // def.answerLabels / def.answerColors. Frequency questionnaires
+              // (GAD-7/PHQ-9/AUDIT/DAST/CAGE) omit these and fall back to the
+              // shared 0–3 SCORE_LABELS + the legacy 0–3 color ramp. Readiness
+              // to Change is a 5-point agreement Likert (1–5, 0 = unanswered),
+              // so it supplies its own maps — fixing the blank "—" rows that
+              // happened when 4/5 ran past the end of SCORE_LABELS.
+              const answerText =
+                def.answerLabels?.[val] ?? SCORE_LABELS[val] ?? "—";
               const scoreColor =
-                val === 0
+                def.answerColors?.[val] ??
+                (val === 0
                   ? "#4caf50"
                   : val === 1
                     ? "#ff9800"
                     : val === 2
                       ? "#ff5722"
-                      : "#f44336";
+                      : "#f44336");
               return (
                 <div
                   key={key}
@@ -192,7 +203,7 @@ export default function QuestionnaireModal({ qKey, data, onClose }) {
                       {label}
                     </div>
                     <div style={{ fontSize: 10, color: MU, marginTop: 2 }}>
-                      {SCORE_LABELS[val] ?? "—"}
+                      {answerText}
                     </div>
                   </div>
                   <div
