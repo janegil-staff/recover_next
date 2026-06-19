@@ -13,7 +13,15 @@ export default function DayCell({
   const highCravings = rec?.cravings >= 4;
   const tookMeds = (rec?.medicationsTaken?.length ?? 0) > 0;
   const hasNote = !!rec?.note?.trim();
-  const sober = isSoberDay(rec); // single source of truth — no inline overrides
+  const sober = isSoberDay(rec); // drives the star marker only
+
+  // SOBER_COLOR_PARITY_2026-06-18 — match the mobile calendar: a sober day keeps
+  // its score-based background color (dayBg) and is marked with the gold star,
+  // rather than being forced solid green. Previously this cell overrode sober
+  // days to #22C55E, so identical entries showed a different color on web vs
+  // phone.
+  const bg = rec ? dayBg(rec) : "transparent";
+  const score = dayScore(rec);
 
   return (
     <div
@@ -24,7 +32,7 @@ export default function DayCell({
         textAlign: "center",
         cursor: rec ? "pointer" : "default",
         minHeight: 30,
-        background: sober ? "#22C55E" : dayBg(rec),
+        background: bg,
         border: isToday
           ? `2px solid ${A}`
           : `1px solid ${rec ? "transparent" : BO}`,
@@ -36,13 +44,7 @@ export default function DayCell({
         style={{
           fontSize: 10,
           fontWeight: isToday ? 700 : 400,
-          color: sober
-            ? "#fff"
-            : rec
-              ? dayScore(rec) >= 3.5
-                ? "#fff"
-                : "#1a2c3d"
-              : MU,
+          color: rec ? (score >= 3.5 ? "#fff" : "#1a2c3d") : MU,
           lineHeight: 1,
         }}
       >
