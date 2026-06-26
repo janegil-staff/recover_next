@@ -1,59 +1,37 @@
-// /app/download/page.jsx
+"use client";
 
-import Script from "next/script";
+import { useEffect } from "react";
 
-export const metadata = {
-  title: "Qup Recover – Download",
-  description: "Download Qup Recover for iOS or Android.",
-};
+// app/download/page.jsx
+const IOS_URL = "https://apps.apple.com/app/id6762452909";
+const ANDROID_URL =
+  "https://play.google.com/store/apps/details?id=com.qupda.recover";
+const DESKTOP_URL = "https://recover-online.com";
 
 export default function DownloadPage() {
+  useEffect(() => {
+    const ua = (navigator.userAgent || "").toLowerCase();
+    const isAndroid = ua.includes("android");
+    const isIOS =
+      /iphone|ipad|ipod/.test(ua) ||
+      (ua.includes("macintosh") && navigator.maxTouchPoints > 1);
+
+    if (isAndroid) window.location.replace(ANDROID_URL);
+    else if (isIOS) window.location.replace(IOS_URL);
+    else window.location.replace(DESKTOP_URL);
+  }, []);
+
   return (
-    <html>
-      <body
-        style={{
-          fontFamily: "sans-serif",
-          padding: "40px",
-          textAlign: "center",
-        }}
-      >
-        {/* TikTok MUST see these in the raw HTML */}
-        <a
-          href="https://apps.apple.com/app/id6762452909"
-          style={{ display: "none" }}
-        >
-          iOS
-        </a>
-
-        <a
-          href="https://play.google.com/store/apps/details?id=com.qup.recover"
-          style={{ display: "none" }}
-        >
-          Android
-        </a>
-
-        <h1>Sender deg videre…</h1>
-        <p>Vent litt, du blir snart sendt til riktig app‑butikk.</p>
-
-        {/* Delay redirect so TikTok can scan the HTML */}
-        <Script id="redirect-script">
-          {`
-            setTimeout(() => {
-              const ua = navigator.userAgent.toLowerCase();
-              const isAndroid = ua.includes("android");
-              const isIOS = ua.includes("iphone") || ua.includes("ipad") || ua.includes("ipod");
-
-              if (isAndroid) {
-                window.location.href = "https://play.google.com/store/apps/details?id=com.qup.recover";
-              } else if (isIOS) {
-                window.location.href = "https://apps.apple.com/app/id6762452909";
-              } else {
-                window.location.href = "https://recover-online.com";
-              }
-            }, 1200);
-          `}
-        </Script>
-      </body>
-    </html>
+    <main
+      style={{ fontFamily: "sans-serif", padding: 40, textAlign: "center" }}
+    >
+      <h1>Sender deg videre…</h1>
+      <p>Vent litt, du blir snart sendt til riktig app-butikk.</p>
+      <div style={{ marginTop: 24 }}>
+        <a href={IOS_URL}>App Store</a>
+        {"  ·  "}
+        <a href={ANDROID_URL}>Google Play</a>
+      </div>
+    </main>
   );
 }
